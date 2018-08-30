@@ -1,0 +1,12 @@
+{
+  "name": "CodeCompetitionScoring",
+  "version": "0.1.0",
+  "description": "A coding competition scoring system capable of running files and determining if they have the correct output",
+  "main": "main.ts",
+  "repository": "https://github.com/brendanfh/CodeCompetitionScoring",
+  "author": "Brendan Hansen <brendan.f.hansen@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "typescript": "^3.0.3"
+  }
+}
