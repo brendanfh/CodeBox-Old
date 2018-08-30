@@ -24,7 +24,7 @@ function runTests(child, timeLimit) {
 
 async function compileAndRunFile() {
 	//This compiles the cpp program into an output file
-	let child = spawn("g++", ["cfiles/amoeba.cpp", "-o", "bin/temp1"]);
+	let child = spawn("gcc", ["cfiles/test1.c", "-o", "bin/temp1"]);
 
 	//This waits until the g++ program exits
 	await onChildExit(child);
@@ -54,7 +54,7 @@ async function compileAndRunFile() {
 compileAndRunFile();
 
 //child.on("exit", function() {
-//	
+//
 //	let child2 = spawn("./bin/temp1");
 //
 //	let totalOutput = "";
