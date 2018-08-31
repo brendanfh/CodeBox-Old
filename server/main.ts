@@ -31,6 +31,7 @@ class WebServer {
 		app.post("/check_problem", async (req, res) => {
 			let test: shared_types.Problem = {
 				id: genUUID(),
+				problem: req.body.problem,
 				lang: req.body.lang,
 				code: req.body.code
 			};

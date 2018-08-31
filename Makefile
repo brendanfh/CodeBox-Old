@@ -13,7 +13,7 @@ build_executer:
 	popd;
 
 executer: build_executer
-	node ./executer-compiled/executer/main.js
+	node ./compiled/executer/main.js
 
 server: build_server
-	node ./server-compiled/server/main.js
+	node ./compiled/server/main.js

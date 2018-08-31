@@ -1,0 +1,25 @@
+PORT (number)
+	The port of the web server.
+	Should be 443 or 80 in production
+
+PROBLEM_DIR (string)
+	Directory where the problems are stored
+	Problem directory should look as follows
+
+	/ --problem directory
+		problem1/ -- problem names
+			description.md -- contains problem description
+			test-1.in  --- Every test case has an input and output file
+			test-1.out _/
+			test-2.in
+			test-2.out
+			...
+			test-n.in
+			test-n.out
+
+		anotherproblem/
+			...
+
+TEMP_DIR (string)
+	Directory where all temporary files the problem creates go
+	Every file in here should be disposable when the program is done
