@@ -3,6 +3,8 @@ import { CExecuter } from "./executers/c_executer";
 import { CPPExecuter } from "./executers/cpp_executer";
 import { PyExecuter } from "./executers/py_executer";
 
+import * as shared_types from "../shared/types";
+
 import * as ipc from "node-ipc";
 
 let executers: { [k: string]: IExecuter | undefined } = {
@@ -16,6 +18,10 @@ function main() {
 	ipc.config.retry = 1000;
 	
 	ipc.connectTo("ccmaster", () => {
+		ipc.of.ccmaster.on("cctester.check", (data: shared_types.Problem) => {
+			ipc.of.ccmaster.emit("cctester.result", { test: data });
+		});
+
 		ipc.of.ccmaster.emit("cctester.connect", {});
 	});
 }
