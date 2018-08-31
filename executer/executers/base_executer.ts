@@ -1,3 +1,3 @@
 export interface IExecuter {
-	execute(): Promise<void>;
+	execute(path: string, inputFile: string): Promise<string>;
 }

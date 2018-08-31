@@ -40,7 +40,7 @@ async function compileAndRunFile() {
 	child2.stdin.end("./bin/temp1 < ./testfiles/test1");
 
 	//This waits until the test completes or the time runs out
-	let result = await runTests(child2, 100);
+	let result = await runTests(child2, 1500);
 
 	//If the time ran out then we kill the process to make sure loops are closed
 	if (result.shouldKill) {
