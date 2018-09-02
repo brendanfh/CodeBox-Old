@@ -9,3 +9,15 @@ export function OK<S, F>(s: S): Result<S, F> {
 export function ERR<S, F>(f: F): Result<S, F> {
 	return { kind: "ERR", val: f };
 }
+
+export type Maybe<T> =
+	{ kind: "JUST", val: T } |
+	{ kind: "NONE" };
+
+export function JUST<T>(t: T): Maybe<T> {
+	return { kind: "JUST", val: t };
+}
+
+export function NONE<T>(): Maybe<T> {
+	return { kind: "NONE" };
+}

@@ -77,7 +77,9 @@ class IPCServer {
 		});
 
 		ipc.server.on("cctester.result", (data, socket) => {
-			this.resolve_map[data.test.id](1);
+			if (data.test != undefined && data.test.id != undefined) {
+				this.resolve_map[data.test.id](1);
+			}
 		});
 	}
 

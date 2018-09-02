@@ -6,15 +6,15 @@ const genUUID = require("uuid/v4");
 export class TempFile {
 	private file_name: string;
 
-	public constructor(contents: string | undefined) {
-		this.file_name = `temp-${ genUUID() }.tmp`;
+	public constructor(contents?: string | undefined, extension: string = "tmp") {
+		this.file_name = `temp-${ genUUID() }.${extension}`;
 		
 		if (contents != undefined) {
 			this.populateFile(contents);
 		}
 	}
 
-	protected get file_path(): string {
+	public get file_path(): string {
 		if (process.env.TEMP_DIR != undefined) {
 			return path.join(process.env.TEMP_DIR, this.file_name);
 		} else {
