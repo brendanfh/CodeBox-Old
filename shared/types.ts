@@ -1,6 +1,6 @@
-export type Problem =
-	{ id: string
-	, problem: string
-	, lang: string
-	, code: string
-	}
+export type Submission = {
+	id: string,
+	problem: string,
+	lang: string,
+	code: string
+}
