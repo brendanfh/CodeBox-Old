@@ -10,7 +10,7 @@ export class CExecuter extends BaseExecuter {
 		let output = "";
 		bash_shell.stdout.on("data", (data) => output += data.toString());
 
-		bash_shell.stdin.end(`${exec_path}`);
+		bash_shell.stdin.end(`${exec_path} < ${input_file}`);
 
 		let program_res = await this.run_timed(bash_shell, time_limit);
 

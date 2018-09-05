@@ -21,3 +21,11 @@ export function JUST<T>(t: T): Maybe<T> {
 export function NONE<T>(): Maybe<T> {
 	return { kind: "NONE" };
 }
+
+export function isJust(mt: Maybe<any>): boolean {
+	return (mt.kind == "JUST");
+}
+
+export function isNone(mt: Maybe<any>): boolean {
+	return (mt.kind == "NONE");
+}

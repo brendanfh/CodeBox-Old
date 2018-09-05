@@ -29,7 +29,7 @@ class WebServer {
 		let app = this.expressApp;
 
 		app.post("/check_problem", async (req, res) => {
-			let test: shared_types.Problem = {
+			let test: shared_types.Submission = {
 				id: genUUID(),
 				problem: req.body.problem,
 				lang: req.body.lang,
@@ -76,19 +76,19 @@ class IPCServer {
 			this.cctester_socket = socket;
 		});
 
-		ipc.server.on("cctester.result", (data, socket) => {
+		ipc.server.on("cctester.job_completed", (data, socket) => {
 			if (data.test != undefined && data.test.id != undefined) {
 				this.resolve_map[data.test.id](1);
 			}
 		});
 	}
 
-	public requestTest(test: shared_types.Problem): boolean {
+	public requestTest(test: shared_types.Submission): boolean {
 		if (this.cctester_socket == null) {
 			return false;
 		}
 
-		ipc.server.emit(this.cctester_socket, "cctester.check", test)
+		ipc.server.emit(this.cctester_socket, "cctester.create_job", test)
 		return true;
 	}
 

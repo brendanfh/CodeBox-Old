@@ -13,5 +13,5 @@ export abstract class BaseExecuter {
 		return Promise.race([ cph.onChildExit(child), promise_timer(time_limit) ]);
 	}
 
-	public abstract execute(path: string, inputFile: string, time_limit: number): Promise<Maybe<string>>;
+	public abstract execute(path: string, input_file: string, time_limit: number): Promise<Maybe<string>>;
 }

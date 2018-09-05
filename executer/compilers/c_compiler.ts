@@ -6,7 +6,7 @@ import { spawn } from "child_process";
 import * as cph from "../child_process_helpers";
 
 export class CCompiler extends BaseCompiler {
-	public async compile(code: string): Promise<Result<TempFile, CompilerError>> {
+	public async compile(code: string): Promise<TempFile> {
 		let sourceFile = new TempFile(code, "c");
 		let execFile = new TempFile();
 		
@@ -20,10 +20,11 @@ export class CCompiler extends BaseCompiler {
 		sourceFile.deleteFile();
 		if (result_code == 0) {
 			//SUCCESSFUL
-			return OK<TempFile, CompilerError>(execFile);
+			return execFile;
 		} else {
+			execFile.deleteFile();
 			//NOT SUCCESSFUL
-			return ERR<TempFile, CompilerError>(compiler_output);
+			throw compiler_output;
 		}
 	}
 }
