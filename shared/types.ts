@@ -5,12 +5,23 @@ export type Submission = {
 	code: string
 }
 
-export type JobStatus = "started" | "compiling" | "running" | "error" | "completed";
+export type JobStatus
+	= { kind: "STARTED" }
+	| { kind: "BAD_LANGUAGE" }
+	| { kind: "COMPILING" }
+	| { kind: "COMPILE_ERR", err_msg: string }
+	| { kind: "RUNNING", completed: number, total: number }
+	| { kind: "WRONG_ANSWER", completed: number, total: number }
+	| { kind: "TIME_LIMIT_EXCEEDED", completed: number, total: number }
+	| { kind: "COMPLETED", completed: number, total: number }
+
+export type Job = {
+	id: JobID,
+	status: JobStatus,
+	submission: Submission
+}
+
+export type JobID = string
 
 export type CheckerUpdate
-	= { kind: "COMPLETION_UPDATE", job_id: string, completed: number, total: number }
-	| { kind: "STATUS_UPDATE", status: JobStatus }
-	| { kind: "BAD_LANGUAGE", job_id: string }
-	| { kind: "COMPILE_ERR", job_id: string, err_msg: string }
-	| { kind: "WRONG_ANSWER", job_id: string, completed: number, total: number }
-	| { kind: "TIME_LIMIT_EXCEEDED", job_id: string, completed: number, total: number }
+	= { job_id: JobID, status: JobStatus }

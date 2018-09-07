@@ -7,8 +7,8 @@ export class TempFile {
 	private file_name: string;
 
 	public constructor(contents?: string | undefined, extension: string = "tmp") {
-		this.file_name = `temp-${ genUUID() }.${extension}`;
-		
+		this.file_name = `temp-${genUUID()}.${extension}`;
+
 		if (contents != undefined) {
 			this.populateFile(contents);
 		}
@@ -27,6 +27,9 @@ export class TempFile {
 	}
 
 	public deleteFile() {
-		fs.unlinkSync(this.file_path);
+		try {
+			fs.unlinkSync(this.file_path);
+		}
+		catch { }
 	}
 }

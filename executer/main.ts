@@ -16,16 +16,11 @@ const genUUID = require("uuid/v4");
 
 setupAsyncIterators();
 
-type Job = {
-	id: string,
-	status: shared_types.JobStatus,
-	submission: shared_types.Submission
-}
 
-function createJob(sub: shared_types.Submission): Job {
+function createJob(sub: shared_types.Submission): shared_types.Job {
 	return {
 		id: genUUID(),
-		status: "started",
+		status: { kind: "STARTED" },
 		submission: sub
 	}
 }
@@ -47,55 +42,55 @@ class Checker {
 		//Load problems up here
 	}
 
-	public async *process_job(job: Job): AsyncIterableIterator<shared_types.CheckerUpdate> {
+	public async *process_job(job: shared_types.Job): AsyncIterableIterator<shared_types.JobStatus> {
 		let sub: shared_types.Submission = job.submission;
 
 		let compiler = this.compilers[sub.lang];
 		if (compiler == undefined) {
-			yield { kind: "BAD_LANGUAGE", job_id: job.id }
+			yield { kind: "BAD_LANGUAGE" };
 			return;
 		}
 
-		yield { kind: "STATUS_UPDATE", status: "compiling" };
+		yield { kind: "COMPILING" };
 
 		try {
 			let exec_file = await compiler.compile(sub.code);
 
 			let executer = this.executers[sub.lang];
 			if (executer == undefined) {
-				yield { kind: "BAD_LANGUAGE", job_id: job.id }
+				yield { kind: "BAD_LANGUAGE" }
 				return;
 			}
 
-			yield { kind: "STATUS_UPDATE", status: "running" };
-
-			let inputs = [ "proof.js", "proof.js" ];
+			let inputs = ["proof.js", "proof.js"];
 			let total = inputs.length;
 			let completed = 0;
 
+			yield { kind: "RUNNING", completed: 0, total: total };
+
 			for (let i of inputs) {
-				let result = await executer.execute(exec_file.file_path, i, 500);
+				let result = await executer.execute(exec_file.file_path, i, 200000);
 
 				switch (result.kind) {
 					case "JUST":
 						completed++;
-						yield { kind: "COMPLETION_UPDATE", job_id: job.id, completed: completed, total: total };
+						yield { kind: "RUNNING", completed: completed, total: total };
 						break;
 
 					case "NONE":
 						exec_file.deleteFile();
 
-						yield { kind: "TIME_LIMIT_EXCEEDED", job_id: job.id, completed: completed, total: total };
+						yield { kind: "TIME_LIMIT_EXCEEDED", completed: completed, total: total };
 						return;
 				}
 			}
 
 			exec_file.deleteFile();
 
-			yield { kind: "STATUS_UPDATE", status: "completed" };
+			yield { kind: "COMPLETED", completed: completed, total: total };
 
 		} catch (compile_error) {
-			yield { kind: "COMPILE_ERR", job_id: job.id, err_msg: compile_error };
+			yield { kind: "COMPILE_ERR", err_msg: compile_error };
 			return;
 		}
 	}
@@ -110,7 +105,7 @@ function main() {
 
 	ipc.connectTo("ccmaster", () => {
 		ipc.of.ccmaster.on("cctester.create_job", async (sub: shared_types.Submission) => {
-			let job: Job = createJob(sub);
+			let job: shared_types.Job = createJob(sub);
 
 			ipc.of.ccmaster.emit("cctester.set_job_id", {
 				job_id: job.id,
@@ -118,8 +113,10 @@ function main() {
 			});
 
 			for await (let update of checker.process_job(job)) {
-				console.log("Got", update);
-				//ipc.of.ccmaster.emit("cctester.job_status_update", update);
+				ipc.of.ccmaster.emit("cctester.job_status_update", {
+					job_id: job.id,
+					status: update
+				});
 			}
 
 			ipc.of.ccmaster.emit("cctester.job_completed", { job_id: job.id });

@@ -8,6 +8,42 @@ const genUUID = require("uuid/v4");
 
 import * as shared_types from "../shared/types";
 
+class JobTracker {
+	private jobs: Map<shared_types.JobID, shared_types.Job>;
+
+	public constructor() {
+		this.jobs = new Map<shared_types.JobID, shared_types.Job>();
+	}
+
+	public add_job(id: shared_types.JobID, sub: shared_types.Submission) {
+		this.jobs.set(id, {
+			id: id,
+			submission: sub,
+			status: { kind: "STARTED" }
+		});
+	}
+
+	public update_job(id: shared_types.JobID, status: shared_types.JobStatus) {
+		let job = this.jobs.get(id);
+		if (job == null) return;
+
+		if (job.id != id) return;
+
+		job.status = status;
+		this.jobs.set(id, job);
+	}
+
+	public get_job(id: shared_types.JobID): shared_types.Job | undefined {
+		return this.jobs.get(id);
+	}
+
+	public save_to_file(file_path: string) {
+		// TODO: Save Jobs to a file
+	}
+}
+
+let job_tracker = new JobTracker();
+
 class WebServer {
 	private expressApp: express.Application;
 	private interProcessCommunicator: IPCServer;
@@ -19,6 +55,7 @@ class WebServer {
 
 		this.interProcessCommunicator = new IPCServer();
 		this.interProcessCommunicator.init();
+
 	}
 
 	protected setupMiddleware() {
@@ -28,7 +65,7 @@ class WebServer {
 	protected setupRoutes() {
 		let app = this.expressApp;
 
-		app.post("/check_problem", async (req, res) => {
+		app.post("/request_check", async (req, res) => {
 			let test: shared_types.Submission = {
 				id: genUUID(),
 				problem: req.body.problem,
@@ -36,18 +73,35 @@ class WebServer {
 				code: req.body.code
 			};
 
-			let succ = this.interProcessCommunicator.requestTest(test);
+			let succ = this.interProcessCommunicator.request_test(test);
 			if (succ) {
-				await this.interProcessCommunicator.waitForTestCompletion(test.id);
+				let job_id = await this.interProcessCommunicator.wait_for_job_id(test.id);
+
+				job_tracker.add_job(job_id, test);
 
 				res.status(200);
-				res.json({ msg: "NOT IMPLEMENTED YET" });
+				res.json({ id: job_id });
 			} else {
 				res.status(500);
-				res.json({ err: "ERROR" });
+				res.json({ err: "Executer server not connected" });
+			}
+		});
+
+		app.get("/job_status", async (req, res) => {
+			let job_id = req.query.id;
+
+			let job = job_tracker.get_job(job_id);
+
+			if (job == undefined) {
+				res.status(500);
+				res.json({ err: "Bad id" });
+			} else {
+				res.status(200);
+				res.json(job);
 			}
 		});
 	}
+
 
 	public start() {
 		const PORT = process.env.PORT || 8000;
@@ -60,9 +114,17 @@ class WebServer {
 	}
 }
 
+
 class IPCServer {
 	protected cctester_socket: net.Socket | null = null;
-	protected resolve_map: { [k: string]: (n: number) => void } = {};
+	protected resolve_map: {
+		[k: string]: {
+			[k: string]: (n: any) => void
+		}
+	} = {
+			"wait_for_job_id": {},
+			"wait_for_job_completion": {}
+		};
 
 	public init() {
 		ipc.config.id = "ccmaster";
@@ -76,25 +138,45 @@ class IPCServer {
 			this.cctester_socket = socket;
 		});
 
+		ipc.server.on("cctester.set_job_id", (data, socket) => {
+			if (data.submission_id != undefined && data.job_id != undefined) {
+				this.resolve_map["wait_for_job_id"][data.submission_id](data.job_id);
+			}
+		});
+
+		ipc.server.on("cctester.job_status_update", (data, socket) => {
+			if (data.job_id != undefined && data.status != undefined) {
+				job_tracker.update_job(data.job_id, data.status);
+			}
+		});
+
 		ipc.server.on("cctester.job_completed", (data, socket) => {
-			if (data.test != undefined && data.test.id != undefined) {
-				this.resolve_map[data.test.id](1);
+			if (data.job_id != undefined &&
+				this.resolve_map["wait_for_job_completion"][data.job_id] != undefined) {
+				this.resolve_map["wait_for_job_completion"][data.job_id](void 0);
 			}
 		});
 	}
 
-	public requestTest(test: shared_types.Submission): boolean {
+	//Returns whether or not it has a connected ipc-socket
+	public request_test(sub: shared_types.Submission): boolean {
 		if (this.cctester_socket == null) {
 			return false;
 		}
 
-		ipc.server.emit(this.cctester_socket, "cctester.create_job", test)
+		ipc.server.emit(this.cctester_socket, "cctester.create_job", sub)
 		return true;
 	}
 
-	public waitForTestCompletion(id: string): Promise<number> {
+	public wait_for_job_id(sub_id: string): Promise<shared_types.JobID> {
 		return new Promise((res, rej) => {
-			this.resolve_map[id] = res;
+			this.resolve_map["wait_for_job_id"][sub_id] = res;
+		});
+	}
+
+	public wait_for_test_completion(id: string): Promise<number> {
+		return new Promise((res, rej) => {
+			this.resolve_map["wait_for_job_completion"][id] = res;
 		});
 	}
 
