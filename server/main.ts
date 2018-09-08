@@ -1,5 +1,6 @@
 import * as ipc from "node-ipc";
 import * as net from "net";
+import path from "path";
 
 import express from "express";
 import body_parser from "body-parser";
@@ -50,22 +51,20 @@ class WebServer {
 
 	public constructor() {
 		this.expressApp = express();
-		this.setupMiddleware();
-		this.setupRoutes();
+		this.setupApiRoutes();
+		this.setupWebRoutes();
 
 		this.interProcessCommunicator = new IPCServer();
 		this.interProcessCommunicator.init();
-
 	}
 
-	protected setupMiddleware() {
-		this.expressApp.use(body_parser.json())
-	}
-
-	protected setupRoutes() {
+	protected setupApiRoutes() {
 		let app = this.expressApp;
 
-		app.post("/request_check", async (req, res) => {
+		let api = express.Router();
+		api.use(body_parser.json());
+
+		api.post("/request_check", async (req, res) => {
 			let test: shared_types.Submission = {
 				id: genUUID(),
 				problem: req.body.problem,
@@ -87,7 +86,7 @@ class WebServer {
 			}
 		});
 
-		app.get("/job_status", async (req, res) => {
+		api.get("/job_status", async (req, res) => {
 			let job_id = req.query.id;
 
 			let job = job_tracker.get_job(job_id);
@@ -100,8 +99,22 @@ class WebServer {
 				res.json(job);
 			}
 		});
+
+		app.use("/api", api);
 	}
 
+	protected setupWebRoutes() {
+		let app = this.expressApp;
+
+		app.set('views', path.resolve(process.cwd(), "web/views"));
+		app.set('view engine', 'ejs');
+
+		app.use("/static", express.static(path.resolve(process.cwd(), "web/static")));
+
+		app.get("/", (req, res) => {
+			res.render("index", { name: "Brendan" });
+		});
+	}
 
 	public start() {
 		const PORT = process.env.PORT || 8000;
@@ -174,7 +187,7 @@ class IPCServer {
 		});
 	}
 
-	public wait_for_test_completion(id: string): Promise<number> {
+	public wait_for_job_completion(id: string): Promise<number> {
 		return new Promise((res, rej) => {
 			this.resolve_map["wait_for_job_completion"][id] = res;
 		});

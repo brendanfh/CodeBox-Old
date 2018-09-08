@@ -8,7 +8,6 @@ const genUUID = require("uuid/v4");
 
 setupAsyncIterators();
 
-
 function createJob(sub: shared_types.Submission): shared_types.Job {
 	return {
 		id: genUUID(),

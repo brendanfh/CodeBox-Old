@@ -11,8 +11,6 @@ import * as fs from "fs";
 import path from "path";
 import * as shared_types from "../shared/types";
 import { TempFile } from "./file_saver";
-import { exec } from "child_process";
-
 
 type Problem = {
     test_cases: Array<{
@@ -97,7 +95,7 @@ export class SolutionChecker {
             problem.time_limit = time_limit;
 
             test_cases.sort((a, b) =>
-                (a ? a[1] : "") < (b ? b[1] : "") ? 1 : 0
+                (a ? a[1] : "") < (b ? b[1] : "") ? 0 : 1
             );
 
             let inputs = test_cases.filter(p => (p ? p[2] : "") === "in");
