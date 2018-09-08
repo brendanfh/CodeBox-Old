@@ -1,8 +1,8 @@
 import { BaseExecuter } from "./base_executer";
-import { Maybe, JUST, NONE } from "../../shared/functional_helpers";
+import { Result, OK } from "../../shared/functional_helpers";
 
 export class PyExecuter extends BaseExecuter {
-	public async execute(path: string, inputFile: string, time_limit: number): Promise<Maybe<string>> {
-		return JUST("");	
+	public async execute(path: string, inputFile: string, time_limit: number): Promise<Result<string, string>> {
+		return OK("");
 	}
 }

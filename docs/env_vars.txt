@@ -9,6 +9,7 @@ PROBLEM_DIR (string)
 	/ --problem directory
 		problem1/ -- problem names
 			description.md -- contains problem description
+			timelimit -- literally one number like 500
 			test-1.in  --- Every test case has an input and output file
 			test-1.out _/
 			test-2.in

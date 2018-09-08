@@ -8,11 +8,13 @@ export type Submission = {
 export type JobStatus
 	= { kind: "STARTED" }
 	| { kind: "BAD_LANGUAGE" }
+	| { kind: "BAD_PROBLEM" }
 	| { kind: "COMPILING" }
 	| { kind: "COMPILE_ERR", err_msg: string }
 	| { kind: "RUNNING", completed: number, total: number }
 	| { kind: "WRONG_ANSWER", completed: number, total: number }
 	| { kind: "TIME_LIMIT_EXCEEDED", completed: number, total: number }
+	| { kind: "BAD_EXECUTION", completed: number, total: number }
 	| { kind: "COMPLETED", completed: number, total: number }
 
 export type Job = {
