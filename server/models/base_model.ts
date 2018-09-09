@@ -1,7 +1,7 @@
 import sequelize from "sequelize";
 
 export abstract class BaseModel<T> {
-    protected sql_model: sequelize.Model<T, T> | null = null;
+    protected sql_model: sequelize.Model<sequelize.Instance<T> & T, T> | null = null;
 
     private __name: string;
     public get name(): string { return this.__name };

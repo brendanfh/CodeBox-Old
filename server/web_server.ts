@@ -4,23 +4,30 @@ import express from "express";
 import body_parser from "body-parser";
 import IPCServer from "./ipc_server";
 import JobTracker from "./job_tracker";
+import { Database } from "./database";
 
 const genUUID = require("uuid/v4");
+import morgan from "morgan";
+import cookieParser from "cookie-parser";
+import session from "express-session";
 
 import * as shared_types from "../shared/types";
+import { UserModel } from "./models/user_model";
 
 export default class WebServer {
     private expressApp: express.Application;
     private ipc_server: IPCServer;
     private job_tracker: JobTracker;
+    private database: Database;
 
-    public constructor(job_tracker: JobTracker, ipc_server: IPCServer) {
+    public constructor(job_tracker: JobTracker, ipc_server: IPCServer, database: Database) {
         this.expressApp = express();
         this.setupApiRoutes();
         this.setupWebRoutes();
 
         this.job_tracker = job_tracker;
         this.ipc_server = ipc_server;
+        this.database = database;
     }
 
     protected setupApiRoutes() {
@@ -71,6 +78,39 @@ export default class WebServer {
     protected setupWebRoutes() {
         let app = this.expressApp;
 
+        app.use(morgan('dev'));
+        app.use(body_parser.urlencoded({ extended: true }));
+        app.use(cookieParser());
+        app.use(session({
+            secret: "YOUSHOULDPROBABLYCHANGETHISTOBESOMETHINGBETTERSOON",
+            name: "uuid",
+            resave: false,
+            saveUninitialized: false,
+            cookie: {
+                expires: false,
+            }
+        }));
+
+        app.use((req, res, next) => {
+            if (req.cookies.uuid && !(req.session ? req.session.user : true)) {
+                res.clearCookie("uuid");
+            }
+            next();
+        });
+
+        let redirectToLeaderboard: express.Handler = (req, res, next) => {
+            if (req.session == null) {
+                next();
+                return;
+            }
+            if (req.session.user && req.cookies.uuid) {
+                res.redirect("/leaderboard");
+            } else {
+                next();
+            }
+        };
+
+        app.engine('ejs', require('express-ejs-extend'));
         app.set('views', path.resolve(process.cwd(), "web/views"));
         app.set('view engine', 'ejs');
 
@@ -79,6 +119,33 @@ export default class WebServer {
         app.get("/", (req, res) => {
             res.render("index", { name: "Brendan" });
         });
+
+        app.route("/login")
+            .get(redirectToLeaderboard, (req, res) => {
+                res.render("login");
+            })
+            .post((req, res) => {
+                let username = req.body.username,
+                    password = req.body.password;
+
+                this.database.getModel<UserModel>("User").findByUsername(username).then((user) => {
+                    if (!user) {
+                        res.redirect("/login");
+                    } else if (!validate_password(user, password)) {
+                        res.redirect("/login");
+                    } else {
+                        if (req.session) {
+                            req.session.user = {
+                                username: user.getDataValue("username"),
+                                email: user.getDataValue("email"),
+                                first_name: user.getDataValue("first_name"),
+                                last_name: user.getDataValue("last_name"),
+                            };
+                        }
+                        res.redirect("/");
+                    }
+                });
+            });
     }
 
     public start() {

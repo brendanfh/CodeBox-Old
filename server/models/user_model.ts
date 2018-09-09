@@ -2,7 +2,8 @@ import Sequelize from "sequelize";
 import { BaseModel } from "./base_model";
 
 type UserModel_T = {
-    user_id: string,
+    username: string,
+    password: string,
     first_name: string,
     last_name: string,
     email: string,
@@ -16,8 +17,14 @@ export class UserModel extends BaseModel<UserModel_T> {
 
     protected getModelAttributes(): Sequelize.DefineModelAttributes<UserModel_T> {
         return {
-            user_id: {
-                type: Sequelize.UUIDV4,
+            username: {
+                type: Sequelize.STRING,
+                unique: true,
+                allowNull: false,
+            },
+            password: {
+                type: Sequelize.STRING,
+                allowNull: false,
             },
             first_name: {
                 type: Sequelize.STRING,
@@ -27,16 +34,18 @@ export class UserModel extends BaseModel<UserModel_T> {
             },
             email: {
                 type: Sequelize.STRING,
+                unique: true,
+                allowNull: false,
             }
         }
     }
 
     //Convenience Functions
-    public async findById(id: string): Promise<UserModel_T | null> {
+    public async findByUsername(username: string): Promise<Sequelize.Instance<UserModel_T> | null> {
         if (this.sql_model == null) return Promise.resolve(null);
         return await this.sql_model.findOne({
             where: {
-                user_id: id
+                username: username
             }
         });
     }

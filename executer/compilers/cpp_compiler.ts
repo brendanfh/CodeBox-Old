@@ -9,7 +9,7 @@ export class CPPCompiler extends BaseCompiler {
 		let sourceFile = new TempFile(code, "cpp");
 		let execFile = new TempFile();
 
-		let compiler_process = spawn("g++", ["-w", sourceFile.file_path, "./executer/compilers/secure/seccomp.c", "-lseccomp", "-o", execFile.file_path]);
+		let compiler_process = spawn("g++", ["-w", "-O2", sourceFile.file_path, "./executer/compilers/secure/seccomp.c", "-lseccomp", "-o", execFile.file_path]);
 		let compiler_output = "";
 		compiler_process.stderr.on("data", (data) => compiler_output += data.toString());
 
