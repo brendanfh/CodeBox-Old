@@ -49,11 +49,11 @@ export class SolutionChecker {
     }
 
     public load_problems(): void {
-        if (process.env.PROBLEM_DIR == undefined || typeof process.env.PROBLEM_DIR != "string") {
+        if (process.env.ROOT_DIR == undefined || typeof process.env.ROOT_DIR != "string") {
             throw new Error("PROBLEM_DIR not set");
         }
 
-        let p_dir = process.env.PROBLEM_DIR;
+        let p_dir = path.join(process.env.ROOT_DIR, "/problems");
 
         let problem_dirs = fs.readdirSync(p_dir).filter(p =>
             fs.statSync(path.resolve(p_dir, p)).isDirectory()

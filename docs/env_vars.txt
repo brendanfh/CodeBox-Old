@@ -2,11 +2,11 @@ PORT (number)
 	The port of the web server.
 	Should be 443 or 80 in production
 
-PROBLEM_DIR (string)
+ROOT_DIR (string)
 	Directory where the problems are stored
 	Problem directory should look as follows
 
-	/ --problem directory
+	problems/ --problem directory
 		problem1/ -- problem names
 			description.md -- contains problem description
 			timelimit -- literally one number like 500
