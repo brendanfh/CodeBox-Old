@@ -1,9 +1,10 @@
 import Sequelize from "sequelize";
 import { BaseModel } from "./base_model";
+import bcrypt from "bcrypt";
 
 type UserModel_T = {
     username: string,
-    password: string,
+    password_hash: string,
     first_name: string,
     last_name: string,
     email: string,
@@ -22,7 +23,7 @@ export class UserModel extends BaseModel<UserModel_T> {
                 unique: true,
                 allowNull: false,
             },
-            password: {
+            password_hash: {
                 type: Sequelize.STRING,
                 allowNull: false,
             },
@@ -34,7 +35,6 @@ export class UserModel extends BaseModel<UserModel_T> {
             },
             email: {
                 type: Sequelize.STRING,
-                unique: true,
                 allowNull: false,
             }
         }
@@ -48,5 +48,13 @@ export class UserModel extends BaseModel<UserModel_T> {
                 username: username
             }
         });
+    }
+
+    public static generatePassword(password: string): Promise<string> {
+        return bcrypt.hash(password, 10);
+    }
+
+    public static validatePassword(password_hash: string, password: string): Promise<boolean> {
+        return bcrypt.compare(password, password_hash);
     }
 }

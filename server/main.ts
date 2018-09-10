@@ -19,14 +19,6 @@ async function main() {
 	let database = new Database();
 	await setupDatabase(database);
 
-	// database.getModel<UserModel>("User").create({
-	// 	username: "Brendan",
-	// 	password: "Hansen",
-	// 	first_name: "ASDF",
-	// 	last_name: "ASDF",
-	// 	email: "a@a.com",
-	// });
-
 	let web_server = new WebServer(job_tracker, ipc_server, database);
 
 	ipc_server.init();

@@ -82,7 +82,7 @@ export default class WebServer {
         app.use(body_parser.urlencoded({ extended: true }));
         app.use(cookieParser());
         app.use(session({
-            secret: "YOUSHOULDPROBABLYCHANGETHISTOBESOMETHINGBETTERSOON",
+            secret: genUUID(),
             name: "uuid",
             resave: false,
             saveUninitialized: false,
@@ -91,6 +91,7 @@ export default class WebServer {
             }
         }));
 
+        //THIS WILL HAVE TO CHANGE
         app.use((req, res, next) => {
             if (req.cookies.uuid && !(req.session ? req.session.user : true)) {
                 res.clearCookie("uuid");
@@ -117,35 +118,75 @@ export default class WebServer {
         app.use("/static", express.static(path.resolve(process.cwd(), "web/static")));
 
         app.get("/", (req, res) => {
-            res.render("index", { name: "Brendan" });
+            if (req.session && req.session.user)
+                res.render("index", { name: req.session.user.first_name });
+            else
+                res.render("index", { name: "" });
         });
 
         app.route("/login")
             .get(redirectToLeaderboard, (req, res) => {
                 res.render("login");
             })
-            .post((req, res) => {
+            .post(async (req, res) => {
                 let username = req.body.username,
                     password = req.body.password;
 
-                this.database.getModel<UserModel>("User").findByUsername(username).then((user) => {
-                    if (!user) {
-                        res.redirect("/login");
-                    } else if (!validate_password(user, password)) {
-                        res.redirect("/login");
-                    } else {
-                        if (req.session) {
-                            req.session.user = {
-                                username: user.getDataValue("username"),
-                                email: user.getDataValue("email"),
-                                first_name: user.getDataValue("first_name"),
-                                last_name: user.getDataValue("last_name"),
-                            };
-                        }
-                        res.redirect("/");
+                let user = await this.database.getModel<UserModel>("User").findByUsername(username);
+                if (!user) {
+                    res.redirect("/login");
+                } else if (!(await UserModel.validatePassword(user.getDataValue("password_hash"), password))) {
+                    res.redirect("/login");
+                } else {
+                    if (req.session) {
+                        req.session.user = {
+                            username: user.getDataValue("username"),
+                            email: user.getDataValue("email"),
+                            first_name: user.getDataValue("first_name"),
+                            last_name: user.getDataValue("last_name"),
+                        };
                     }
-                });
+                    res.redirect("/");
+                }
             });
+
+        app.get("/logout", (req, res) => {
+            if (req.session)
+                req.session.user = null;
+
+            res.redirect("/login");
+        });
+
+        app.route("/signup")
+            .get(redirectToLeaderboard, (req, res) => {
+                res.render("signup");
+            })
+            .post(async (req, res) => {
+                try {
+                    let user = await this.database.getModel<UserModel>("User").create({
+                        username: req.body.username,
+                        email: "",
+                        password_hash: await UserModel.generatePassword(req.body.password),
+                        first_name: "UNKNOWN",
+                        last_name: "UNKNOWN"
+                    });
+
+                    if (req.session && user != null) {
+                        req.session.user = {
+                            username: user.getDataValue("username"),
+                            email: user.getDataValue("email"),
+                            first_name: user.getDataValue("first_name"),
+                            last_name: user.getDataValue("last_name"),
+                        };
+                    }
+
+                    res.redirect("/");
+                }
+                catch (err) {
+                    console.log(err);
+                    res.redirect("/signup");
+                }
+            })
     }
 
     public start() {

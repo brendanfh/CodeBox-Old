@@ -17,7 +17,9 @@ export class Database {
     public async initConnection(): Promise<void> {
         if (process.env.ROOT_DIR == undefined) throw new Error("ROOT_DIR NOT SET");
 
-        const sqlz = new Sequelize(`sqlite:${path.join(process.env.ROOT_DIR, "/ccdb.sqlite")}`);
+        const sqlz = new Sequelize(`sqlite:${path.join(process.env.ROOT_DIR, "/ccdb.sqlite")}`, {
+            logging: false
+        });
 
         try {
             await sqlz.authenticate();
