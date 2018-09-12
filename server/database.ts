@@ -2,9 +2,6 @@ import path from "path";
 import Sequelize, { SequelizeLoDash } from "sequelize";
 import { BaseModel } from "./models/base_model";
 
-//If true, forces all tables to be dropped and recreated on reconnect
-let FORCE_UPDATE: boolean = false;
-
 export class Database {
     protected models: Map<string, BaseModel<any>>;
 
@@ -44,7 +41,7 @@ export class Database {
             let updateFunc = async () => {
                 if (this.sqlz == null) throw new Error("DB NOT CONNECTED");
 
-                await model[1].define(this.sqlz, FORCE_UPDATE);
+                await model[1].define(this.sqlz);
             }
 
             proms.push(updateFunc());

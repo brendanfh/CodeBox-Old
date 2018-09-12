@@ -1,0 +1,31 @@
+.navbar {
+    width: 100%;
+    background: $primary-dark;
+    height: 50px;
+
+    @include elevate(2px);
+
+    display: flex;
+    justify-content: space-around;
+
+    ul {
+        display: flex;
+
+        li {
+            cursor: pointer;
+
+            font-size: 32px;
+
+            list-style: none;
+            line-height: 50px;
+            flex-grow: 1;
+            padding-left: 30px;
+            padding-right: 30px;
+
+            &.selected, &:hover {
+                transition: 200ms background-color;
+                background: $primary;
+            }
+        }
+    }
+}

@@ -11,16 +11,20 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 
+import showdown from "showdown";
+
 import * as shared_types from "../shared/types";
 import { UserModel } from "./models/user_model";
+import ScoringSystem from "./scoring_system";
 
 export default class WebServer {
     private expressApp: express.Application;
     private ipc_server: IPCServer;
     private job_tracker: JobTracker;
     private database: Database;
+    private scoringSystem: ScoringSystem;
 
-    public constructor(job_tracker: JobTracker, ipc_server: IPCServer, database: Database) {
+    public constructor(job_tracker: JobTracker, ipc_server: IPCServer, database: Database, scoringSystem: ScoringSystem) {
         this.expressApp = express();
         this.setupApiRoutes();
         this.setupWebRoutes();
@@ -28,6 +32,7 @@ export default class WebServer {
         this.job_tracker = job_tracker;
         this.ipc_server = ipc_server;
         this.database = database;
+        this.scoringSystem = scoringSystem;
     }
 
     protected setupApiRoutes() {
@@ -37,22 +42,19 @@ export default class WebServer {
         api.use(body_parser.json());
 
         api.post("/request_check", async (req, res) => {
-            let test: shared_types.Submission = {
-                id: genUUID(),
+            let test: shared_types.IPCJobSubmission = {
                 problem: req.body.problem,
                 lang: req.body.lang,
                 code: req.body.code
             };
 
-            let succ = this.ipc_server.request_test(test);
-            if (succ) {
-                let job_id = await this.ipc_server.wait_for_job_id(test.id);
-
-                this.job_tracker.add_job(job_id, test);
+            try {
+                let job_id = await this.ipc_server.request_test(test);
+                this.job_tracker.add_job(job_id, "", test);
 
                 res.status(200);
                 res.json({ id: job_id });
-            } else {
+            } catch (_) {
                 res.status(500);
                 res.json({ err: "Executer server not connected" });
             }
@@ -119,36 +121,46 @@ export default class WebServer {
 
         app.get("/", (req, res) => {
             if (req.session && req.session.user)
-                res.render("index", { name: req.session.user.first_name });
+                res.render("index", {
+                    navbar: { selected_tab: 0 },
+                    name: req.session.user.first_name
+                });
             else
-                res.render("index", { name: "" });
+                res.render("index", {
+                    navbar: { selected_tab: 0 },
+                    name: ""
+                });
         });
 
-        app.route("/login")
-            .get(redirectToLeaderboard, (req, res) => {
-                res.render("login");
-            })
-            .post(async (req, res) => {
-                let username = req.body.username,
-                    password = req.body.password;
+        login: {
+            app.route("/login")
+                .get(redirectToLeaderboard, (req, res) => {
+                    res.render("login", {
+                        navbar: { selected_tab: 0 },
+                    });
+                })
+                .post(async (req, res) => {
+                    let username = req.body.username,
+                        password = req.body.password;
 
-                let user = await this.database.getModel<UserModel>("User").findByUsername(username);
-                if (!user) {
-                    res.redirect("/login");
-                } else if (!(await UserModel.validatePassword(user.getDataValue("password_hash"), password))) {
-                    res.redirect("/login");
-                } else {
-                    if (req.session) {
-                        req.session.user = {
-                            username: user.getDataValue("username"),
-                            email: user.getDataValue("email"),
-                            first_name: user.getDataValue("first_name"),
-                            last_name: user.getDataValue("last_name"),
-                        };
+                    let user = await this.database.getModel<UserModel>("User").findByUsername(username);
+                    if (!user) {
+                        res.redirect("/login");
+                    } else if (!(await UserModel.validatePassword(user.getDataValue("password_hash"), password))) {
+                        res.redirect("/login");
+                    } else {
+                        if (req.session) {
+                            req.session.user = {
+                                username: user.getDataValue("username"),
+                                email: user.getDataValue("email"),
+                                first_name: user.getDataValue("first_name"),
+                                last_name: user.getDataValue("last_name"),
+                            };
+                        }
+                        res.redirect("/");
                     }
-                    res.redirect("/");
-                }
-            });
+                });
+        }
 
         app.get("/logout", (req, res) => {
             if (req.session)
@@ -157,36 +169,58 @@ export default class WebServer {
             res.redirect("/login");
         });
 
-        app.route("/signup")
-            .get(redirectToLeaderboard, (req, res) => {
-                res.render("signup");
-            })
-            .post(async (req, res) => {
-                try {
-                    let user = await this.database.getModel<UserModel>("User").create({
-                        username: req.body.username,
-                        email: "",
-                        password_hash: await UserModel.generatePassword(req.body.password),
-                        first_name: "UNKNOWN",
-                        last_name: "UNKNOWN"
-                    });
+        signup: {
+            app.route("/signup")
+                .get(redirectToLeaderboard, (req, res) => {
+                    res.render("signup");
+                })
+                .post(async (req, res) => {
+                    try {
+                        let user = await this.database.getModel<UserModel>("User").create({
+                            username: req.body.username,
+                            email: "",
+                            password_hash: await UserModel.generatePassword(req.body.password),
+                            first_name: "UNKNOWN",
+                            last_name: "UNKNOWN"
+                        });
 
-                    if (req.session && user != null) {
-                        req.session.user = {
-                            username: user.getDataValue("username"),
-                            email: user.getDataValue("email"),
-                            first_name: user.getDataValue("first_name"),
-                            last_name: user.getDataValue("last_name"),
-                        };
+                        if (req.session && user != null) {
+                            req.session.user = {
+                                username: user.getDataValue("username"),
+                                email: user.getDataValue("email"),
+                                first_name: user.getDataValue("first_name"),
+                                last_name: user.getDataValue("last_name"),
+                            };
+                        }
+
+                        res.redirect("/");
                     }
+                    catch (err) {
+                        console.log(err);
+                        res.redirect("/signup");
+                    }
+                })
+        }
 
-                    res.redirect("/");
-                }
-                catch (err) {
-                    console.log(err);
-                    res.redirect("/signup");
-                }
-            })
+        app.get("/problem/:problem_name", (req, res) => {
+            let problem = this.scoringSystem.getPromblem(req.params.problem_name);
+
+            if (problem == undefined) {
+                res.render("problem_description", {
+                    navbar: { selected_tab: 1 },
+                    problem_description: `<span>Problem "${req.params.problem_name}" not found.</span>`
+                });
+                return;
+            }
+
+            let showdown_conv = new showdown.Converter();
+            let html = showdown_conv.makeHtml(problem.description);
+
+            res.render("problem_description", {
+                navbar: { selected_tab: 1 },
+                problem_description: html
+            });
+        });
     }
 
     public start() {

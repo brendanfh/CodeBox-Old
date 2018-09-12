@@ -1,4 +1,17 @@
+@import "./elevate";
+@import "./vars";
+@import "./navbar";
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
-    background: black;
-    color: white;
+    font-family: sans-serif;
+}
+
+main {
+    margin: 15px;
 }

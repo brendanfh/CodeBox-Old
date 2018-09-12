@@ -7,11 +7,14 @@ export default class JobTracker {
         this.jobs = new Map<shared_types.JobID, shared_types.Job>();
     }
 
-    public add_job(id: shared_types.JobID, sub: shared_types.Submission) {
+    public add_job(id: shared_types.JobID, username: string, sub: shared_types.IPCJobSubmission) {
         this.jobs.set(id, {
             id: id,
-            submission: sub,
-            status: { kind: "STARTED" }
+            username: username,
+            status: { kind: "STARTED" },
+            problem: sub.problem,
+            lang: sub.lang,
+            code: sub.code
         });
     }
 

@@ -8,11 +8,14 @@ const genUUID = require("uuid/v4");
 
 setupAsyncIterators();
 
-function createJob(sub: shared_types.Submission): shared_types.Job {
+function createJob(sub: shared_types.IPCJobSubmission): shared_types.Job {
 	return {
 		id: genUUID(),
 		status: { kind: "STARTED" },
-		submission: sub
+		username: "JOBS DO NOT NEED USERNAMES",
+		problem: sub.problem,
+		lang: sub.lang,
+		code: sub.code
 	}
 }
 
@@ -24,12 +27,16 @@ function main() {
 	ipc.config.retry = 1000;
 
 	ipc.connectTo("ccmaster", () => {
-		ipc.of.ccmaster.on("cctester.create_job", async (sub: shared_types.Submission) => {
-			let job: shared_types.Job = createJob(sub);
+		ipc.of.ccmaster.on("connect", () => {
+			ipc.of.ccmaster.emit("cctester.connect", {});
+		});
+
+		ipc.of.ccmaster.on("cctester.create_job", async (vals: { ret_id: string, sub: shared_types.IPCJobSubmission }) => {
+			let job: shared_types.Job = createJob(vals.sub);
 
 			ipc.of.ccmaster.emit("cctester.set_job_id", {
 				job_id: job.id,
-				submission_id: sub.id
+				ret_id: vals.ret_id
 			});
 
 			for await (let update of checker.process_job(job)) {
@@ -41,8 +48,6 @@ function main() {
 
 			ipc.of.ccmaster.emit("cctester.job_completed", { job_id: job.id });
 		});
-
-		ipc.of.ccmaster.emit("cctester.connect", {});
 	});
 }
 

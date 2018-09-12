@@ -50,7 +50,7 @@ export class SolutionChecker {
 
     public load_problems(): void {
         if (process.env.ROOT_DIR == undefined || typeof process.env.ROOT_DIR != "string") {
-            throw new Error("PROBLEM_DIR not set");
+            throw new Error("ROOT_DIR not set");
         }
 
         let p_dir = path.join(process.env.ROOT_DIR, "/problems");
@@ -69,13 +69,10 @@ export class SolutionChecker {
                 .map(p => /test-([0-9]+)\.([a-z]+)/g.exec(p))
                 .filter(p => p != null);
 
-            let description = problem_files
-                .filter(p => /[a-zA-Z0-9]+\.md/g.exec(p) != null)[0];
-
             let time_limit_file = problem_files
                 .filter(p => /time_limit/g.exec(p))[0];
 
-            if (time_limit_file == null || description == null || test_cases.length == 0) {
+            if (time_limit_file == null || test_cases.length == 0) {
                 throw new Error("Insufficient files for problem: " + prob);
             }
 
@@ -126,9 +123,7 @@ export class SolutionChecker {
     }
 
     public async *process_job(job: shared_types.Job): AsyncIterableIterator<shared_types.JobStatus> {
-        let sub: shared_types.Submission = job.submission;
-
-        let compiler = this.compilers[sub.lang];
+        let compiler = this.compilers[job.lang];
         if (compiler == undefined) {
             yield { kind: "BAD_LANGUAGE" };
             return;
@@ -138,13 +133,13 @@ export class SolutionChecker {
 
         let exec_file: TempFile;
         try {
-            exec_file = await compiler.compile(sub.code);
+            exec_file = await compiler.compile(job.code);
         } catch (compile_error) {
             yield { kind: "COMPILE_ERR", err_msg: compile_error };
             return;
         }
 
-        let executer = this.executers[sub.lang];
+        let executer = this.executers[job.lang];
         if (executer == undefined) {
             yield { kind: "BAD_LANGUAGE" };
 
@@ -152,7 +147,7 @@ export class SolutionChecker {
             return;
         }
 
-        let problem = this.problems.get(job.submission.problem);
+        let problem = this.problems.get(job.problem);
         if (problem == undefined) {
             yield { kind: "BAD_PROBLEM" };
 

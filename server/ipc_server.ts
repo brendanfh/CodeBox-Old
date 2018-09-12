@@ -2,6 +2,8 @@ import * as ipc from "node-ipc";
 import * as net from "net";
 import path from "path";
 
+const genUUID = require("uuid/v4");
+
 import * as shared_types from "../shared/types";
 import JobTracker from "./job_tracker";
 
@@ -35,8 +37,8 @@ export default class IPCServer {
         });
 
         ipc.server.on("cctester.set_job_id", (data, socket) => {
-            if (data.submission_id != undefined && data.job_id != undefined) {
-                this.resolve_map["wait_for_job_id"][data.submission_id](data.job_id);
+            if (data.ret_id != undefined && data.job_id != undefined) {
+                this.resolve_map["wait_for_job_id"][data.ret_id](data.job_id);
             }
         });
 
@@ -55,18 +57,21 @@ export default class IPCServer {
     }
 
     //Returns whether or not it has a connected ipc-socket
-    public request_test(sub: shared_types.Submission): boolean {
+    public async request_test(sub: shared_types.IPCJobSubmission): Promise<shared_types.JobID> {
         if (this.cctester_socket == null) {
-            return false;
+            throw "Socket not connected";
         }
 
-        ipc.server.emit(this.cctester_socket, "cctester.create_job", sub)
-        return true;
+        let ret_id: string = genUUID();
+
+        ipc.server.emit(this.cctester_socket, "cctester.create_job", sub);
+        let job_id = await this.wait_for_job_id(ret_id);
+        return job_id;
     }
 
-    public wait_for_job_id(sub_id: string): Promise<shared_types.JobID> {
+    public wait_for_job_id(ret_id: string): Promise<shared_types.JobID> {
         return new Promise((res, rej) => {
-            this.resolve_map["wait_for_job_id"][sub_id] = res;
+            this.resolve_map["wait_for_job_id"][ret_id] = res;
         });
     }
 

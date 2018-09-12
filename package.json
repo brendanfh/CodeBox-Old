@@ -14,6 +14,7 @@
     "@types/morgan": "^1.7.35",
     "@types/node-ipc": "^9.1.1",
     "@types/sequelize": "^4.27.25",
+    "@types/showdown": "^1.7.5",
     "bcrypt": "^3.0.0",
     "body-parser": "^1.18.3",
     "cookie-parser": "^1.4.3",
@@ -25,6 +26,7 @@
     "node-ipc": "^9.1.1",
     "sass": "^1.13.2",
     "sequelize": "^4.38.0",
+    "showdown": "^1.8.6",
     "sqlite3": "^4.0.2",
     "typescript": "^3.0.3",
     "uuid": "^3.3.2"

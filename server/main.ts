@@ -3,12 +3,15 @@ import WebServer from "./web_server";
 import IPCServer from "./ipc_server";
 import { Database } from "./database";
 import { UserModel } from "./models/user_model";
+import ScoringSystem from "./scoring_system";
+import { ProblemModel } from "./models/problem_model";
 
 
 async function setupDatabase(database: Database) {
 	await database.initConnection();
 
 	database.addModel(new UserModel());
+	database.addModel(new ProblemModel());
 	await database.setupModels();
 }
 
@@ -19,7 +22,10 @@ async function main() {
 	let database = new Database();
 	await setupDatabase(database);
 
-	let web_server = new WebServer(job_tracker, ipc_server, database);
+	let scoring = new ScoringSystem(database);
+	await scoring.load_problems();
+
+	let web_server = new WebServer(job_tracker, ipc_server, database, scoring);
 
 	ipc_server.init();
 
