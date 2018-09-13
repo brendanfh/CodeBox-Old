@@ -11,6 +11,7 @@ import * as fs from "fs";
 import path from "path";
 import * as shared_types from "../shared/types";
 import { TempFile } from "./file_saver";
+import { TestCaseStatus } from "../shared/types";
 
 type Problem = {
     test_cases: Array<{
@@ -69,10 +70,10 @@ export class SolutionChecker {
                 .map(p => /test-([0-9]+)\.([a-z]+)/g.exec(p))
                 .filter(p => p != null);
 
-            let time_limit_file = problem_files
-                .filter(p => /time_limit/g.exec(p))[0];
+            let info_file = problem_files
+                .filter(p => /problem\.json/g.exec(p))[0];
 
-            if (time_limit_file == null || test_cases.length == 0) {
+            if (info_file == null || test_cases.length == 0) {
                 throw new Error("Insufficient files for problem: " + prob);
             }
 
@@ -81,12 +82,17 @@ export class SolutionChecker {
                 time_limit: -1,
             };
 
-            let time_limit_contents = fs.readFileSync(path.resolve(p_dir, prob, time_limit_file), { encoding: "utf8" });
+            let info_contents = fs.readFileSync(path.resolve(p_dir, prob, info_file), { encoding: "utf8" });
             let time_limit: number = 0.0;
             try {
-                time_limit = parseInt(time_limit_contents);
+                let problem_info = JSON.parse(info_contents);
+                if (problem_info.time_limit) {
+                    time_limit = parseInt(problem_info.time_limit);
+                } else {
+                    throw new Error();
+                }
             } catch (err) {
-                throw new Error("Failed parsing time limit file for problem: " + prob);
+                throw new Error("Failed parsing time limit for problem: " + prob);
             }
 
             problem.time_limit = time_limit;
@@ -155,42 +161,55 @@ export class SolutionChecker {
             return;
         }
 
-        let total = problem.test_cases.length;
-        let completed = 0;
+        let test_case_statuses: Array<TestCaseStatus> = [];
+        for (let i = 0; i < problem.test_cases.length; i++) {
+            test_case_statuses.push({
+                status: "RUNNING",
+                run_time: -1,
+            });
+        }
 
-        yield { kind: "RUNNING", completed: 0, total: total };
+        yield { kind: "RUNNING", test_number: 1, test_cases: test_case_statuses };
 
-        for (let test_case of problem.test_cases) {
+        test_for: for (let i = 0; i < problem.test_cases.length; i++) {
+            let test_case = problem.test_cases[i];
             let result = await executer.execute(exec_file.file_path, test_case.input_file, problem.time_limit);
 
             switch (result.kind) {
-                case "OK":
-                    //Check output here
-                    let output = clean_output(result.val);
+                case "OK": {
+                    let output = clean_output(result.val.output);
 
-                    if (output === test_case.output) {
-                        completed++;
-                        yield { kind: "RUNNING", completed: completed, total: total };
-                        break;
+                    if (output == test_case.output) {
+                        test_case_statuses[i].status = "COMPLTETED";
                     } else {
-                        yield { kind: "WRONG_ANSWER", completed: completed, total: total };
+                        test_case_statuses[i].status = "WRONG_ANSWER";
+                    }
+
+                    test_case_statuses[i].run_time = result.val.run_time;
+
+                    if (i + 1 == problem.test_cases.length) {
+                        break test_for;
+                    }
+
+                    yield { kind: "RUNNING", test_number: i + 2, test_cases: test_case_statuses };
+                    break;
+                }
+
+                case "ERR": {
+                    if (result.val.includes("system")) {
+                        yield { kind: "BAD_EXECUTION" };
 
                         exec_file.deleteFile();
                         return;
-                    }
-
-                case "ERR":
-                    exec_file.deleteFile();
-                    if (result.val.includes("system")) {
-                        yield { kind: "BAD_EXECUTION", completed: completed, total: total };
                     } else {
-                        yield { kind: "TIME_LIMIT_EXCEEDED", completed: completed, total: total };
+                        test_case_statuses[i].status = "TIME_LIMIT_EXECEEDED";
+                        yield { kind: "RUNNING", test_number: i + 2, test_cases: test_case_statuses };
                     }
-                    return;
+                }
             }
         }
 
         exec_file.deleteFile();
-        yield { kind: "COMPLETED", completed: completed, total: total };
+        yield { kind: "COMPLETED", test_cases: test_case_statuses };
     }
 }

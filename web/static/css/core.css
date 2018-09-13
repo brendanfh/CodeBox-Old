@@ -1,8 +1,8 @@
 .navbar {
+  z-index: 100;
   width: 100%;
   background: #0077c2;
-  height: 50px;
-  box-shadow: 0px 0px 8px 2px;
+  height: 40px;
   display: flex;
   justify-content: space-around;
 }
@@ -11,16 +11,21 @@
 }
 .navbar ul li {
   cursor: pointer;
-  font-size: 32px;
+  font-size: 24px;
   list-style: none;
-  line-height: 50px;
+  line-height: 40px;
   flex-grow: 1;
   padding-left: 30px;
   padding-right: 30px;
+  padding-top: 4px;
+  color: #fff;
+  border-top-color: #0077c2;
 }
 .navbar ul li.selected, .navbar ul li:hover {
-  transition: 200ms background-color;
+  transition: 200ms all;
   background: #42a5f5;
+  border-top: 4px solid #ffff8b;
+  padding-top: 0px;
 }
 
 * {
@@ -31,10 +36,92 @@
 
 body {
   font-family: sans-serif;
+  background: #00385c;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
 }
 
 main {
-  margin: 15px;
+  margin: 0 15%;
+  margin-top: 0.5rem;
+  background: #fff;
+  min-height: 100vh;
+}
+
+.content {
+  width: 100%;
+  padding: 10px 10%;
+}
+
+.problem-name {
+  font-size: 3em;
+  text-align: center;
+}
+
+.problem-stats-container {
+  width: 100%;
+  min-height: 50px;
+  float: left;
+  font-size: 0;
+}
+.problem-stats-container .problem-stats {
+  position: relative;
+  font-size: 0;
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+  min-height: 50px;
+}
+.problem-stats-container .problem-stats.correct-color {
+  background: #12b312;
+}
+.problem-stats-container .problem-stats.wrong-color {
+  background: #b31212;
+}
+.problem-stats-container .problem-stats.timed-out-color {
+  background: #b3b312;
+}
+.problem-stats-container .problem-stats.other-color {
+  background: #595959;
+}
+.problem-stats-container .problem-stats .problem-stats-tooltip {
+  max-width: 90px;
+  width: 100%;
+  text-align: center;
+  cursor: default;
+  font-size: 14px;
+  padding: 5px 0;
+  border-top-right-radius: 6px;
+  background-color: inherit;
+  color: #fff;
+  position: absolute;
+  top: -15px;
+  left: 0;
+}
+
+.problem-top-bar {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 9fr 1fr;
+  grid-template-rows: 50px;
+}
+.problem-top-bar .submit-btn {
+  width: 100%;
+  max-height: 100%;
+  background: #42a5f5;
+  color: #fff;
+  text-align: center;
+  border-radius: 0.25rem;
+  font-size: 28px;
+  line-height: 50px;
+}
+.problem-top-bar .submit-btn:hover {
+  cursor: pointer;
+  transition: 200ms all;
+  background: #80d6ff;
 }
 
 /*# sourceMappingURL=core.css.map */

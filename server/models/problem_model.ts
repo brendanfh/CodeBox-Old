@@ -2,25 +2,37 @@ import { BaseModel } from "./base_model";
 import Sequelize from "sequelize";
 
 export type ProblemModel_T = {
-    name: string,
+    dir_name: string, //Name as stored on the file system
+    name: string, //Name from problem.json
     description: string, // Markdown string of problem description
     time_limit: number,
     attempts: number,
-    correct_attempts: number
+    correct_attempts: number,
+    timed_out_attempts: number,
+    wrong_answer_attempts: number,
+    other_bad_attempts: number,
 }
 
 export class ProblemModel extends BaseModel<ProblemModel_T> {
 
     constructor() {
-        super("Problem");
+        super();
         this.force_sync = true;
+    }
+
+    public getName(): string {
+        return "Problem";
     }
 
     protected getModelAttributes(): Sequelize.DefineModelAttributes<ProblemModel_T> {
         return {
-            name: {
+            dir_name: {
                 type: Sequelize.STRING,
                 unique: true,
+                allowNull: false
+            },
+            name: {
+                type: Sequelize.STRING,
                 allowNull: false
             },
             description: {
@@ -38,6 +50,18 @@ export class ProblemModel extends BaseModel<ProblemModel_T> {
                 allowNull: false,
             },
             correct_attempts: {
+                type: Sequelize.INTEGER,
+                allowNull: false,
+            },
+            timed_out_attempts: {
+                type: Sequelize.INTEGER,
+                allowNull: false,
+            },
+            wrong_answer_attempts: {
+                type: Sequelize.INTEGER,
+                allowNull: false,
+            },
+            other_bad_attempts: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
             }

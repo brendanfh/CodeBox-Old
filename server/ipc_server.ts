@@ -64,7 +64,7 @@ export default class IPCServer {
 
         let ret_id: string = genUUID();
 
-        ipc.server.emit(this.cctester_socket, "cctester.create_job", sub);
+        ipc.server.emit(this.cctester_socket, "cctester.create_job", { ret_id, sub });
         let job_id = await this.wait_for_job_id(ret_id);
         return job_id;
     }

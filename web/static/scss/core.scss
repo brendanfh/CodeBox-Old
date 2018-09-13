@@ -10,8 +10,106 @@
 
 body {
     font-family: sans-serif;
+    background: darken($primary-dark, 20);
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
 }
 
 main {
-    margin: 15px;
+    margin: 0 15%;
+    margin-top: .5rem;
+    background: $white;
+    min-height: 100vh;
+}
+
+.content {
+    width: 100%;
+    padding: 10px 10%;
+}
+
+.problem-name {
+    font-size: 3em;
+    text-align: center; 
+}
+
+.problem-stats-container {
+    width: 100%;
+    min-height: 50px;
+    float: left;
+    font-size: 0;
+
+    .problem-stats {
+        position: relative;
+
+        font-size: 0;
+        display: inline-block;
+        padding: 0;
+        margin: 0;
+        min-height: 50px;
+       
+        &.correct-color {
+            background: lighten(#10a010, 4);
+        }
+
+        &.wrong-color {
+            background: lighten(#a01010, 4);
+        }
+
+        &.timed-out-color {
+            background: lighten(#a0a010, 4);
+        }
+
+        &.other-color {
+            background: lighten(#4f4f4f, 4);
+        }
+
+        .problem-stats-tooltip {
+            max-width: 90px;
+            width: 100%;
+            text-align: center;
+            cursor: default;
+
+            font-size: 14px;
+
+            padding: 5px 0;
+            border-top-right-radius: 6px;
+
+            background-color: inherit;
+            color: $white;
+
+            position: absolute;
+            top: -15px;
+            left: 0;
+        }
+    }
+}
+
+.problem-top-bar {
+    margin-top: 20px;
+
+    display: grid;
+    grid-template-columns: 9fr 1fr;
+    grid-template-rows: 50px;
+
+    .submit-btn {
+        width: 100%;
+        max-height: 100%;
+
+        background: $primary;
+        color: $white;
+        text-align: center;
+        border-radius: .25rem;
+
+        font-size: 28px;
+        line-height: 50px;
+
+        &:hover {
+            cursor: pointer;
+            transition: 200ms all;
+            background: $primary-light;
+        }
+    }
 }

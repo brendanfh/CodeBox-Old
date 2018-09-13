@@ -13,7 +13,11 @@ type UserModel_T = {
 export class UserModel extends BaseModel<UserModel_T> {
 
     constructor() {
-        super("User");
+        super();
+    }
+
+    public getName(): string {
+        return "User";
     }
 
     protected getModelAttributes(): Sequelize.DefineModelAttributes<UserModel_T> {

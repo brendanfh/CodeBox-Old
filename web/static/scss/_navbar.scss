@@ -1,9 +1,10 @@
 .navbar {
+    z-index: 100;
     width: 100%;
     background: $primary-dark;
-    height: 50px;
+    height: 40px;
 
-    @include elevate(2px);
+    //@include elevate(2px);
 
     display: flex;
     justify-content: space-around;
@@ -14,17 +15,24 @@
         li {
             cursor: pointer;
 
-            font-size: 32px;
+            font-size: 24px;
 
             list-style: none;
-            line-height: 50px;
+            line-height: 40px;
             flex-grow: 1;
             padding-left: 30px;
             padding-right: 30px;
+            padding-top: 4px;
+
+            color: $white;
+            border-top-color: $primary-dark;
 
             &.selected, &:hover {
-                transition: 200ms background-color;
+                transition: 200ms all;
+
                 background: $primary;
+                border-top: 4px solid $secondary-light;
+                padding-top: 0px;
             }
         }
     }

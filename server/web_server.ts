@@ -10,12 +10,17 @@ const genUUID = require("uuid/v4");
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import session from "express-session";
+import fileUpload from "express-fileupload";
 
 import showdown from "showdown";
 
 import * as shared_types from "../shared/types";
 import { UserModel } from "./models/user_model";
 import ScoringSystem from "./scoring_system";
+
+interface BusboyRequest extends express.Request {
+    busboy: any
+}
 
 export default class WebServer {
     private expressApp: express.Application;
@@ -84,7 +89,7 @@ export default class WebServer {
         app.use(body_parser.urlencoded({ extended: true }));
         app.use(cookieParser());
         app.use(session({
-            secret: genUUID(),
+            secret: "THISSHOULDBESOMEBIGSECRETFORSECURITY",
             name: "uuid",
             resave: false,
             saveUninitialized: false,
@@ -92,6 +97,7 @@ export default class WebServer {
                 expires: false,
             }
         }));
+        app.use(fileUpload());
 
         //THIS WILL HAVE TO CHANGE
         app.use((req, res, next) => {
@@ -112,6 +118,18 @@ export default class WebServer {
                 next();
             }
         };
+
+        let requireLogin: express.Handler = (req, res, next) => {
+            if (req.session == null) {
+                res.redirect("/login");
+                return;
+            }
+            if (req.session.user == null) {
+                res.redirect("/login");
+                return;
+            }
+            next();
+        }
 
         app.engine('ejs', require('express-ejs-extend'));
         app.set('views', path.resolve(process.cwd(), "web/views"));
@@ -143,7 +161,7 @@ export default class WebServer {
                     let username = req.body.username,
                         password = req.body.password;
 
-                    let user = await this.database.getModel<UserModel>("User").findByUsername(username);
+                    let user = await this.database.getModel(UserModel).findByUsername(username);
                     if (!user) {
                         res.redirect("/login");
                     } else if (!(await UserModel.validatePassword(user.getDataValue("password_hash"), password))) {
@@ -176,7 +194,7 @@ export default class WebServer {
                 })
                 .post(async (req, res) => {
                     try {
-                        let user = await this.database.getModel<UserModel>("User").create({
+                        let user = await this.database.getModel(UserModel).create({
                             username: req.body.username,
                             email: "",
                             password_hash: await UserModel.generatePassword(req.body.password),
@@ -202,11 +220,11 @@ export default class WebServer {
                 })
         }
 
-        app.get("/problem/:problem_name", (req, res) => {
+        app.get("/problems/:problem_name", requireLogin, (req, res) => {
             let problem = this.scoringSystem.getPromblem(req.params.problem_name);
 
             if (problem == undefined) {
-                res.render("problem_description", {
+                res.render("problem/description", {
                     navbar: { selected_tab: 1 },
                     problem_description: `<span>Problem "${req.params.problem_name}" not found.</span>`
                 });
@@ -214,13 +232,59 @@ export default class WebServer {
             }
 
             let showdown_conv = new showdown.Converter();
-            let html = showdown_conv.makeHtml(problem.description);
+            let desc_html = showdown_conv.makeHtml(problem.description);
 
-            res.render("problem_description", {
+            res.render("problem/description", {
                 navbar: { selected_tab: 1 },
-                problem_description: html
+                problem: {
+                    description: desc_html,
+                    dir_name: problem.dir_name,
+                    name: problem.name,
+                    wrong_answer_attempts: problem.wrong_answer_attempts,
+                    other_bad_attempts: problem.other_bad_attempts,
+                    timed_out_attempts: problem.timed_out_attempts,
+                    correct_attempts: problem.correct_attempts,
+                    attempts: problem.attempts,
+                }
             });
         });
+
+        app.route("/problems/:problem_name/submit")
+            .get(requireLogin, (req, res) => {
+                let problem = this.scoringSystem.getPromblem(req.params.problem_name);
+
+                if (problem == undefined) {
+                    res.render("problem/description", {
+                        navbar: { selected_tab: 1 },
+                        problem_description: `<span>Problem "${req.params.problem_name}" not found.</span>`
+                    });
+                    return;
+                }
+
+                res.render("problem/submit", {
+                    navbar: { selected_tab: 1 },
+                    problem: {
+                        dir_name: problem.dir_name,
+                        name: problem.name,
+                    }
+                });
+            })
+            .post(requireLogin, (req, res) => {
+                if (req.files != null) {
+                    if (req.files.code_file != null) {
+                        let code = (req.files.code_file as fileUpload.UploadedFile).data.toString();
+                        let lang = req.body.lang;
+                        let problem = req.params.problem_name;
+                        let test = {
+                            code, lang, problem
+                        };
+
+                        let job_id = this.ipc_server.request_test(test);
+                    }
+                }
+
+                res.redirect("/");
+            });
     }
 
     public start() {

@@ -27,10 +27,13 @@ export class Database {
     }
 
     public addModel(mdl: BaseModel<any>): void {
-        this.models.set(mdl.name, mdl);
+        this.models.set(mdl.getName(), mdl);
     }
 
-    public getModel<T extends BaseModel<any>>(name: string): T {
+    public getModel<T extends BaseModel<any>>(con: new () => T): T {
+        let t: T = new con();
+        let name = t.getName();
+
         return (this.models.get(name)) as T;
     }
 

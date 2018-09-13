@@ -4,17 +4,27 @@ export type IPCJobSubmission = {
 	code: string
 }
 
+export type TestCaseStatus = {
+	status: "RUNNING" | "COMPLTETED" | "WRONG_ANSWER" | "TIME_LIMIT_EXECEEDED",
+	run_time: number
+}
+
 export type JobStatus
 	= { kind: "STARTED" }
 	| { kind: "BAD_LANGUAGE" }
 	| { kind: "BAD_PROBLEM" }
 	| { kind: "COMPILING" }
 	| { kind: "COMPILE_ERR", err_msg: string }
-	| { kind: "RUNNING", completed: number, total: number }
-	| { kind: "WRONG_ANSWER", completed: number, total: number }
-	| { kind: "TIME_LIMIT_EXCEEDED", completed: number, total: number }
-	| { kind: "BAD_EXECUTION", completed: number, total: number }
-	| { kind: "COMPLETED", completed: number, total: number }
+	| { kind: "BAD_EXECUTION" }
+	| {
+		kind: "RUNNING",
+		test_number: number,
+		test_cases: Array<TestCaseStatus>
+	}
+	| {
+		kind: "COMPLETED",
+		test_cases: Array<TestCaseStatus>
+	}
 
 export type Job = {
 	id: JobID,          //Random UUID of the job
