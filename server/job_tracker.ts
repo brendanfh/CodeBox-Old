@@ -36,6 +36,11 @@ export default class JobTracker {
         job.status = status;
         this.jobs.set(id, job);
 
+        if (status.kind != "RUNNING") {
+            // Force save if the problem hit an end state
+            this.last_save_time = 0;
+        }
+
         this.check_for_save();
     }
 

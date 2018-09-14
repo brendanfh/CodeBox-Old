@@ -134,6 +134,10 @@ export class SolutionChecker {
             return;
         }
 
+        await new Promise((res, rej) => {
+            setTimeout(res, 1000);
+        });
+
         yield { kind: "COMPILING" };
 
         let exec_file: TempFile;

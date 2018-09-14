@@ -7,6 +7,11 @@ const genUUID = require("uuid/v4");
 import * as shared_types from "../shared/types";
 import JobTracker from "./job_tracker";
 
+type IPCServerEvent
+    = "cctester.set_job_id"
+    | "cctester.job_status_update"
+    | "cctester.job_completed";
+
 export default class IPCServer {
     protected cctester_socket: net.Socket | null = null;
     protected resolve_map: {
@@ -18,10 +23,13 @@ export default class IPCServer {
             "wait_for_job_completion": {}
         };
 
-    protected job_tracker: JobTracker;
+    protected event_listeners: Map<IPCServerEvent, ((data: any, socket: any) => void)[]>;
 
-    public constructor(job_tracker: JobTracker) {
-        this.job_tracker = job_tracker;
+    public constructor() {
+        this.event_listeners = new Map();
+        this.event_listeners.set("cctester.set_job_id", []);
+        this.event_listeners.set("cctester.job_status_update", []);
+        this.event_listeners.set("cctester.job_completed", []);
     }
 
     public init() {
@@ -37,23 +45,47 @@ export default class IPCServer {
         });
 
         ipc.server.on("cctester.set_job_id", (data, socket) => {
+            let events = this.event_listeners.get("cctester.set_job_id");
+            if (events != null) {
+                for (let func of events) {
+                    func(data, socket);
+                }
+            }
+
             if (data.ret_id != undefined && data.job_id != undefined) {
                 this.resolve_map["wait_for_job_id"][data.ret_id](data.job_id);
             }
         });
 
         ipc.server.on("cctester.job_status_update", (data, socket) => {
-            if (data.job_id != undefined && data.status != undefined) {
-                this.job_tracker.update_job(data.job_id, data.status);
+            let events = this.event_listeners.get("cctester.job_status_update");
+            if (events != null) {
+                for (let func of events) {
+                    func(data, socket);
+                }
             }
         });
 
         ipc.server.on("cctester.job_completed", (data, socket) => {
+            let events = this.event_listeners.get("cctester.job_completed");
+            if (events != null) {
+                for (let func of events) {
+                    func(data, socket);
+                }
+            }
+
             if (data.job_id != undefined &&
                 this.resolve_map["wait_for_job_completion"][data.job_id] != undefined) {
                 this.resolve_map["wait_for_job_completion"][data.job_id](void 0);
             }
         });
+    }
+
+    public add_event_listener(event: IPCServerEvent, func: (data: any, socket: any) => void) {
+        let event_arr = this.event_listeners.get(event);
+        if (event_arr != null) {
+            event_arr.push(func);
+        }
     }
 
     //Returns whether or not it has a connected ipc-socket

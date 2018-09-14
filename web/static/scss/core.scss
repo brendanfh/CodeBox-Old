@@ -160,9 +160,15 @@ main {
     }
 
     .sidebar-problem[selected], .sidebar-problem:hover {
-        background-color: $primary;
-
         width: calc(100% + 24px);
+    }
+
+    .sidebar-problem[selected] {
+        background-color: $primary !important;
+    }
+
+    .sidebar-problem:hover {
+        background-color: darken($primary, 10);
     }
 
     .sidebar-problem-name {

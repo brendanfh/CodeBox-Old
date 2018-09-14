@@ -1,6 +1,7 @@
 import path from "path";
 
 import express from "express";
+import http from "http";
 import body_parser from "body-parser";
 import IPCServer from "./ipc_server";
 import JobTracker from "./job_tracker";
@@ -234,17 +235,7 @@ export default class WebServer {
                 let showdown_conv = new showdown.Converter();
                 let desc_html = showdown_conv.makeHtml(problem.description);
 
-                let sidebar_problems = [];
-
-                let all_problems = this.scoringSystem.getProblems();
-                for (let prob of all_problems) {
-                    sidebar_problems.push({
-                        name: prob.name,
-                        dir_name: prob.dir_name,
-                        completed: true,
-                        wrong_attempt: true,
-                    });
-                }
+                let sidebar_problems = await this.get_sidebar_problems(req.params.problem_name, req.session.user.username);
 
                 let has_submissions: boolean = false;
                 for await (let j of this.job_tracker.get_jobs_by_username_and_problem(req.session.user.username, req.params.problem_name)) {
@@ -271,7 +262,9 @@ export default class WebServer {
             });
 
             app.route("/problems/:problem_name/submit")
-                .get(requireLogin, (req, res) => {
+                .get(requireLogin, async (req, res) => {
+                    if (req.session == null) return;
+
                     let problem = this.scoringSystem.getProblem(req.params.problem_name);
 
                     if (problem == undefined) {
@@ -282,16 +275,7 @@ export default class WebServer {
                         return;
                     }
 
-                    let sidebar_problems = [];
-                    let all_problems = this.scoringSystem.getProblems();
-                    for (let prob of all_problems) {
-                        sidebar_problems.push({
-                            name: prob.name,
-                            dir_name: prob.dir_name,
-                            completed: true,
-                            wrong_attempt: true,
-                        });
-                    }
+                    let sidebar_problems = await this.get_sidebar_problems(req.params.problem_name, req.session.user.username);
 
                     res.render("problem/submit", {
                         navbar: { selected_tab: 1 },
@@ -323,17 +307,60 @@ export default class WebServer {
                     res.redirect("/submit_error");
                 });
 
-            app.get("/submission_results", requireLogin, (req, res) => {
-                res.json({});
+            app.get("/submission_results", requireLogin, async (req, res) => {
+                if (req.session == null) return;
+
+                let sidebar_problems = await this.get_sidebar_problems('test1', req.session.user.username);
+
+                res.render("submission_result", {
+                    navbar: { selected_tab: 1 },
+                    problem: {
+                        dir_name: 'test1',
+                        name: 'ASDF'
+                    },
+                    sidebar_problems
+                });
             });
         }
     }
 
-    public start() {
+    public start(): http.Server {
         const PORT = process.env.PORT || 8000;
 
-        this.expressApp.listen(PORT, () => {
+        return this.expressApp.listen(PORT, () => {
             console.log("Server started and listening on port:", PORT)
         });
+    }
+
+
+    //Helper Functions used in routes
+    private async get_sidebar_problems(problem_name: string, username: string) {
+        let sidebar_problems = [];
+
+        let all_problems = this.scoringSystem.getProblems();
+        for (let prob of all_problems) {
+            let hasCompleted = false;
+            let hasWrong = false;
+
+            for await (let j of this.job_tracker.get_jobs_by_username(username)) {
+                if (j.problem != prob.dir_name) continue;
+
+                if (j.status.kind == "COMPLETED") {
+                    hasCompleted = true;
+                    break;
+                } else {
+                    hasWrong = true;
+                }
+            }
+
+            sidebar_problems.push({
+                name: prob.name,
+                dir_name: prob.dir_name,
+                completed: hasCompleted,
+                wrong_attempt: hasWrong,
+            });
+        }
+
+        return sidebar_problems;
     }
 }
