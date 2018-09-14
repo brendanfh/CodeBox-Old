@@ -2,9 +2,10 @@
     z-index: 100;
     width: 100%;
     background: $primary-dark;
-    height: 40px;
+    height: $navbar-height;
 
     //@include elevate(2px);
+    box-shadow: 0px 0px 4.9px .7px inset $black;
 
     display: flex;
     justify-content: space-around;
@@ -24,15 +25,16 @@
             padding-right: 30px;
             padding-top: 4px;
 
-            color: $white;
+            color: darken($white, 5);
             border-top-color: $primary-dark;
 
-            &.selected, &:hover {
-                transition: 200ms all;
+            transition: 200ms all;
 
-                background: $primary;
-                border-top: 4px solid $secondary-light;
-                padding-top: 0px;
+            &.selected, &:hover {
+                //background: $primary;
+                border-bottom: 2px solid $secondary-light;
+                color: white;
+                //padding-top: 0px;
             }
         }
     }

@@ -1,24 +1,30 @@
-<% extend("../partials/master") %>
+<% layout("partials/problem") %>
 
-<h1 class="content problem-name">
-    <%= problem.name %>
-</h1>
+<div class="submission-submit-form">
+    <form action="/problems/<%=problem.dir_name%>/submit" method="POST" enctype="multipart/form-data">
+        <div>
+            <label for="lang">Language</label><br>
+            <select name="lang">
+                <option value="c" selected>C</option>
+                <option value="cpp">C++11</option>
+                <option value="py3">Python 3</option>
+                <option value="py2">Python 2</option>
+            </select>
+        </div>
 
-<form action="/problems/<%=problem.dir_name%>/submit" method="POST" enctype="multipart/form-data">
-    <div>
-        <label for="lang">Language: </label>
-        <select name="lang">
-            <option value="c" selected>C</option>
-            <option value="cpp">C++11</option>
-            <option value="py3">Python 3</option>
-            <option value="py2">Python 2</option>
-        </select>
-    </div>
+        <div>
+            <label for="code_file">Source file</label><br>
 
-    <div>
-        <label for="code_file">Source file: </label>
-        <input type="file" name="code_file" accept=".c, .cpp, .py" />
-    </div>
+            <div class="file-upload-wrapper">
+                <span>Upload a file</span>
+                <input type="file" name="code_file" accept=".c, .cpp, .py" />
+            </div>
+        </div>
+        
+        <div>
+            <input type="submit" value="Submit!" />
+        </div>
+    </form>
 
-    <input type="submit" value="Submit file" />
-</form>
+
+</div>

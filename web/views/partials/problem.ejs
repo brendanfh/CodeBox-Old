@@ -1,0 +1,60 @@
+<% layout("partials/master") %>
+
+<div class="problem-page-container">
+    <div class="problem-list">
+        <% for(let prob of sidebar_problems) {%>
+            <a href="/problems/<%=prob.dir_name%>/">
+                <div class=<%= prob.dir_name == problem.dir_name ? "sidebar-problem selected" : "sidebar-problem"%>
+                    style=<%= prob.completed ? "border-left-color:#50ff50" : (prob.wrong_attempt ? "border-left-color:#ff5050" : "border-left-color:#b0b0ff") %> >
+                    <div class="sidebar-problem-name">
+                        <%= prob.name %>
+                    </div>
+                </div>
+            </a>
+        <% }%>
+
+    </div>
+
+    <div class="problem-container">
+        <h1 class="content problem-name">
+            <%= problem.name %>
+        </h1>
+<!--
+        <div class="problem-top-bar">
+            <div class="problem-stats-container">
+                <div class="problem-stats correct-color"
+                    style="
+                        width: <%= Math.floor(problem.correct_attempts / problem.attempts * 100)%>%;
+                        visibility: <%= (problem.correct_attempts == 0 ? 'hidden' : 'visible') %>;
+                    ">
+                    <span class="problem-stats-tooltip">Correct</span>
+                </div>
+                <div class="problem-stats wrong-color"
+                    style="
+                        width: <%= Math.floor(problem.wrong_answer_attempts / problem.attempts * 100)%>%;
+                        visibility: <%= (problem.wrong_answer_attempts == 0 ? 'hidden' : 'visible') %>;
+                    ">
+                    <span class="problem-stats-tooltip">Wrong</span>
+                </div>
+                <div class="problem-stats timed-out-color"
+                    style="
+                        width: <%= Math.floor(problem.timed_out_attempts / problem.attempts * 100)%>%;
+                        visibility: <%= (problem.timed_out_attempts == 0 ? 'hidden' : 'visible') %>;
+                    ">
+                    <span class="problem-stats-tooltip">Timed Out</span>
+                </div>
+                <div class="problem-stats other-color"
+                    style="
+                        width: <%= Math.floor(problem.other_bad_attempts / problem.attempts * 100)%>%;
+                        visibility: <%= (problem.other_bad_attempts == 0 ? 'hidden' : 'visible') %>
+                    ">
+                    <span class="problem-stats-tooltip">Other</span>
+                </div>
+            </div>
+        </div>
+-->
+
+
+        <%- body %>
+    </div>
+</div>

@@ -6,6 +6,9 @@ import { UserModel } from "./models/user_model";
 import ScoringSystem from "./scoring_system";
 import { ProblemModel } from "./models/problem_model";
 
+import { setupAsyncIterators } from "../shared/utils";
+setupAsyncIterators();
+
 
 async function setupDatabase(database: Database) {
 	await database.initConnection();

@@ -11,7 +11,6 @@ import * as fs from "fs";
 import path from "path";
 import * as shared_types from "../shared/types";
 import { TempFile } from "./file_saver";
-import { TestCaseStatus } from "../shared/types";
 
 type Problem = {
     test_cases: Array<{
@@ -161,55 +160,48 @@ export class SolutionChecker {
             return;
         }
 
-        let test_case_statuses: Array<TestCaseStatus> = [];
-        for (let i = 0; i < problem.test_cases.length; i++) {
-            test_case_statuses.push({
-                status: "RUNNING",
-                run_time: -1,
-            });
-        }
 
-        yield { kind: "RUNNING", test_number: 1, test_cases: test_case_statuses };
+        let total = problem.test_cases.length;
+        let run_time = 0;
+        let completed = 0;
 
-        test_for: for (let i = 0; i < problem.test_cases.length; i++) {
-            let test_case = problem.test_cases[i];
+        yield { kind: "RUNNING", completed: 0, total: total, total_run_time: run_time };
+
+        for (let test_case of problem.test_cases) {
             let result = await executer.execute(exec_file.file_path, test_case.input_file, problem.time_limit);
 
             switch (result.kind) {
-                case "OK": {
+                case "OK":
+                    //Check output here
                     let output = clean_output(result.val.output);
 
-                    if (output == test_case.output) {
-                        test_case_statuses[i].status = "COMPLTETED";
+                    if (output === test_case.output) {
+                        completed++;
+                        run_time += result.val.run_time;
+
+                        if (completed != total)
+                            yield { kind: "RUNNING", completed: completed, total: total, total_run_time: run_time };
+
+                        break;
                     } else {
-                        test_case_statuses[i].status = "WRONG_ANSWER";
-                    }
-
-                    test_case_statuses[i].run_time = result.val.run_time;
-
-                    if (i + 1 == problem.test_cases.length) {
-                        break test_for;
-                    }
-
-                    yield { kind: "RUNNING", test_number: i + 2, test_cases: test_case_statuses };
-                    break;
-                }
-
-                case "ERR": {
-                    if (result.val.includes("system")) {
-                        yield { kind: "BAD_EXECUTION" };
+                        yield { kind: "WRONG_ANSWER", completed: completed, total: total };
 
                         exec_file.deleteFile();
                         return;
-                    } else {
-                        test_case_statuses[i].status = "TIME_LIMIT_EXECEEDED";
-                        yield { kind: "RUNNING", test_number: i + 2, test_cases: test_case_statuses };
                     }
-                }
+
+                case "ERR":
+                    exec_file.deleteFile();
+                    if (result.val.includes("system")) {
+                        yield { kind: "BAD_EXECUTION", completed: completed, total: total };
+                    } else {
+                        yield { kind: "TIME_LIMIT_EXCEEDED", completed: completed, total: total };
+                    }
+                    return;
             }
         }
 
         exec_file.deleteFile();
-        yield { kind: "COMPLETED", test_cases: test_case_statuses };
+        yield { kind: "COMPLETED", completed: completed, total: total, total_run_time: run_time };
     }
 }

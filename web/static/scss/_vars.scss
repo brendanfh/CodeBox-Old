@@ -1,13 +1,17 @@
 $white: #fff;
 $black: #000;
 
+$content-background: #232323;
+
 $primary: #42a5f5;
 $primary-light: #80d6ff;
 $primary-dark: #0077c2;
 
-$secondary: #ffee58;
-$secondary-light: #ffff8b;
-$secondary-dark: #c9bcff;
+$secondary: #FFD700;
+$secondary-light: lighten(#FFD700, 20);
+$secondary-dark: darken(#FFD700, 20);
 
-$primary-text: $black;
+$primary-text: $white;
 $secondary-text: $black;
+
+$navbar-height: 40px;

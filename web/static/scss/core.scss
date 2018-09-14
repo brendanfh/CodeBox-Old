@@ -10,7 +10,11 @@
 
 body {
     font-family: sans-serif;
-    background: darken($primary-dark, 20);
+    color: $white;
+    //background: darken($primary-dark, 20);
+    background-image: url(/static/imgs/grain_background.png);
+    background-color: black;
+    background-repeat: repeat;
 }
 
 a {
@@ -19,27 +23,45 @@ a {
 }
 
 main {
-    margin: 0 15%;
-    margin-top: .5rem;
-    background: $white;
-    min-height: 100vh;
+    //margin: 0 15%;
+    min-height: calc(100vh - #{$navbar-height});
 }
 
 .content {
     width: 100%;
-    padding: 10px 10%;
+    padding: 10px 5%;
+}
+
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
 }
 
 .problem-name {
+    width: 92%;
+
+    margin-top: 1rem;
+    margin-left: 4%;
+    margin-right: 4%;
+
     font-size: 3em;
     text-align: center; 
+
+    border-bottom: 2px solid #444444;
 }
 
 .problem-stats-container {
-    width: 100%;
-    min-height: 50px;
+    margin-top: .75rem;
+    margin-left: 13%;
+    margin-right: 13%;
+    width: 74%;
+    min-height: 10px;
     float: left;
     font-size: 0;
+    display: flex;
 
     .problem-stats {
         position: relative;
@@ -48,7 +70,8 @@ main {
         display: inline-block;
         padding: 0;
         margin: 0;
-        min-height: 50px;
+        min-height: 10px;
+        flex-grow: 1;
        
         &.correct-color {
             background: lighten(#10a010, 4);
@@ -59,7 +82,7 @@ main {
         }
 
         &.timed-out-color {
-            background: lighten(#a0a010, 4);
+            background: lighten(#1010a0, 4);
         }
 
         &.other-color {
@@ -90,18 +113,88 @@ main {
 .problem-top-bar {
     margin-top: 20px;
 
+    //grid-template-columns: 9fr 1fr;
+    //grid-template-rows: 50px;
+    width: 100%;
+}
+
+
+.problem-description {
+    margin-top: 15px;
+    font-size: 1.5em;
+
+    p {
+        margin-bottom: 20px;
+    }
+}
+
+.problem-container {
+    background-image: url(/static/imgs/grain_background.png);
+    background-color: white;
+    background-repeat: repeat;
+    min-height: calc(100vh - #{$navbar-height});
+}
+
+.problem-page-container {
     display: grid;
-    grid-template-columns: 9fr 1fr;
-    grid-template-rows: 50px;
+    grid-template-columns: minmax(250px, 1fr) 5fr;
+}
+
+.problem-list {
+    z-index: 50;
+    box-shadow: 0 10px 0 0 transparent, 0 10px 0 0 transparent, 10px 0 0 0 transparent, 0 8px 8px 2px black;
+    background: darken($primary-dark, 22);
+    position: relative;
+
+    .sidebar-problem {
+        width: 100%;
+
+        border-left-width: 24px;
+        border-left-style: solid;
+
+        transition: background-color 200ms ease-in-out;
+        transition: width 200ms ease-in-out;
+        background-color: inherit;
+
+        cursor: pointer;
+    }
+
+    .sidebar-problem[selected], .sidebar-problem:hover {
+        background-color: $primary;
+
+        width: calc(100% + 24px);
+    }
+
+    .sidebar-problem-name {
+        font-size: 1.2rem;
+        text-align: left;
+        padding-left: 5px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+}
+
+.problem-info {
+    float: right;
+    min-width: 350px;
+    width: 25%;
+    margin: 0 20px 20px 20px;
+
+    position: relative;
+
+    @include elevate(1px, #000000);
+    background: lighten($content-background, 10);
 
     .submit-btn {
         width: 100%;
         max-height: 100%;
 
-        background: $primary;
-        color: $white;
+        background: $secondary;
+        color: $black;
         text-align: center;
-        border-radius: .25rem;
 
         font-size: 28px;
         line-height: 50px;
@@ -109,7 +202,113 @@ main {
         &:hover {
             cursor: pointer;
             transition: 200ms all;
+            background: $secondary-light;
+        }
+    }
+
+    .submissions-btn {
+        width: 100%;
+        max-height: 100%;
+
+        color: $black;
+        background: $primary;
+        text-align: center;
+
+        font-size: 28px;
+        line-height: 50px;
+
+        &:hover {
+            transition: 200ms all;
             background: $primary-light;
+            cursor: pointer;
+        }
+    }
+
+    .problem-info-row {
+        width: calc(100% - 16px);
+        height: 32px;
+        text-align: center;
+        margin: 8px;
+        border-bottom: 1px solid #444444;
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+}
+
+.submission-submit-form {
+    width: 100%;
+    text-align: center;
+
+    form {
+        font-size: 2em;
+        padding: 20px;
+
+        div {
+            margin-bottom: 30px;
+        }
+
+        select {
+            text-align: center;
+            font-size: 1.1rem;
+
+            width: 25%;
+            padding: 10px;
+            border: none;
+            border-radius: 0px;
+            background-color: $primary-dark;
+
+            @include elevate(1px, black);
+
+            option {
+                border: none;
+            }
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 25%;
+
+            span {
+                background-color: $primary-dark;
+                font-size: 1.4rem;
+                padding: 10px;
+                border-radius: 4px;
+                width: 100%;
+                display: block;
+                @include elevate(1px, black);
+            }
+
+            input[type=file] {
+                font-size: 100px;
+                position: absolute;
+                left: 0;
+                top: 0;
+                opacity: 0;
+            }
+        }
+
+        input[type=submit] {
+            background-color: $primary-dark;
+            color: white;
+
+            width: 25%;
+            font-size: 1.4rem;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            display: inline-block;
+            cursor: pointer;
+            @include elevate(1px, black);
+            transition: 400ms all;
+
+            &:hover {
+                background-color: $primary;
+                @include elevate(3px, black);
+            }
         }
     }
 }

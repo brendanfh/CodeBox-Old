@@ -11,16 +11,13 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import fileUpload from "express-fileupload";
+import querystring from "querystring";
 
 import showdown from "showdown";
 
 import * as shared_types from "../shared/types";
 import { UserModel } from "./models/user_model";
 import ScoringSystem from "./scoring_system";
-
-interface BusboyRequest extends express.Request {
-    busboy: any
-}
 
 export default class WebServer {
     private expressApp: express.Application;
@@ -55,7 +52,6 @@ export default class WebServer {
 
             try {
                 let job_id = await this.ipc_server.request_test(test);
-                this.job_tracker.add_job(job_id, "", test);
 
                 res.status(200);
                 res.json({ id: job_id });
@@ -131,7 +127,7 @@ export default class WebServer {
             next();
         }
 
-        app.engine('ejs', require('express-ejs-extend'));
+        app.engine('ejs', require('ejs-mate'));
         app.set('views', path.resolve(process.cwd(), "web/views"));
         app.set('view engine', 'ejs');
 
@@ -220,38 +216,12 @@ export default class WebServer {
                 })
         }
 
-        app.get("/problems/:problem_name", requireLogin, (req, res) => {
-            let problem = this.scoringSystem.getPromblem(req.params.problem_name);
+        problems: {
 
-            if (problem == undefined) {
-                res.render("problem/description", {
-                    navbar: { selected_tab: 1 },
-                    problem_description: `<span>Problem "${req.params.problem_name}" not found.</span>`
-                });
-                return;
-            }
+            app.get("/problems/:problem_name", requireLogin, async (req, res) => {
+                if (req.session == null) return;
 
-            let showdown_conv = new showdown.Converter();
-            let desc_html = showdown_conv.makeHtml(problem.description);
-
-            res.render("problem/description", {
-                navbar: { selected_tab: 1 },
-                problem: {
-                    description: desc_html,
-                    dir_name: problem.dir_name,
-                    name: problem.name,
-                    wrong_answer_attempts: problem.wrong_answer_attempts,
-                    other_bad_attempts: problem.other_bad_attempts,
-                    timed_out_attempts: problem.timed_out_attempts,
-                    correct_attempts: problem.correct_attempts,
-                    attempts: problem.attempts,
-                }
-            });
-        });
-
-        app.route("/problems/:problem_name/submit")
-            .get(requireLogin, (req, res) => {
-                let problem = this.scoringSystem.getPromblem(req.params.problem_name);
+                let problem = this.scoringSystem.getProblem(req.params.problem_name);
 
                 if (problem == undefined) {
                     res.render("problem/description", {
@@ -261,30 +231,102 @@ export default class WebServer {
                     return;
                 }
 
-                res.render("problem/submit", {
-                    navbar: { selected_tab: 1 },
-                    problem: {
-                        dir_name: problem.dir_name,
-                        name: problem.name,
-                    }
-                });
-            })
-            .post(requireLogin, (req, res) => {
-                if (req.files != null) {
-                    if (req.files.code_file != null) {
-                        let code = (req.files.code_file as fileUpload.UploadedFile).data.toString();
-                        let lang = req.body.lang;
-                        let problem = req.params.problem_name;
-                        let test = {
-                            code, lang, problem
-                        };
+                let showdown_conv = new showdown.Converter();
+                let desc_html = showdown_conv.makeHtml(problem.description);
 
-                        let job_id = this.ipc_server.request_test(test);
-                    }
+                let sidebar_problems = [];
+
+                let all_problems = this.scoringSystem.getProblems();
+                for (let prob of all_problems) {
+                    sidebar_problems.push({
+                        name: prob.name,
+                        dir_name: prob.dir_name,
+                        completed: true,
+                        wrong_attempt: true,
+                    });
                 }
 
-                res.redirect("/");
+                let has_submissions: boolean = false;
+                for await (let j of this.job_tracker.get_jobs_by_username_and_problem(req.session.user.username, req.params.problem_name)) {
+                    has_submissions = true;
+                    break;
+                }
+
+                res.render("problem/description", {
+                    navbar: { selected_tab: 1 },
+                    problem: {
+                        description: desc_html,
+                        dir_name: problem.dir_name,
+                        name: problem.name,
+                        wrong_answer_attempts: problem.wrong_answer_attempts,
+                        other_bad_attempts: problem.other_bad_attempts,
+                        timed_out_attempts: problem.timed_out_attempts,
+                        correct_attempts: problem.correct_attempts,
+                        attempts: problem.attempts,
+                        time_limit: (problem.time_limit / 1000).toString() + " seconds",
+                        has_submissions
+                    },
+                    sidebar_problems
+                });
             });
+
+            app.route("/problems/:problem_name/submit")
+                .get(requireLogin, (req, res) => {
+                    let problem = this.scoringSystem.getProblem(req.params.problem_name);
+
+                    if (problem == undefined) {
+                        res.render("problem/description", {
+                            navbar: { selected_tab: 1 },
+                            problem_description: `<span>Problem "${req.params.problem_name}" not found.</span>`
+                        })
+                        return;
+                    }
+
+                    let sidebar_problems = [];
+                    let all_problems = this.scoringSystem.getProblems();
+                    for (let prob of all_problems) {
+                        sidebar_problems.push({
+                            name: prob.name,
+                            dir_name: prob.dir_name,
+                            completed: true,
+                            wrong_attempt: true,
+                        });
+                    }
+
+                    res.render("problem/submit", {
+                        navbar: { selected_tab: 1 },
+                        problem: {
+                            dir_name: problem.dir_name,
+                            name: problem.name,
+                        },
+                        sidebar_problems
+                    });
+                })
+                .post(requireLogin, async (req, res) => {
+                    if (req.files != null && req.session) {
+                        if (req.files.code_file != null) {
+                            let code = (req.files.code_file as fileUpload.UploadedFile).data.toString();
+                            let lang = req.body.lang;
+                            let problem = req.params.problem_name;
+                            let test = {
+                                code, lang, problem
+                            };
+
+                            let job_id = await this.ipc_server.request_test(test);
+                            this.job_tracker.add_job(job_id, req.session.user.username, test);
+
+                            res.redirect("/submission_results?" + querystring.stringify({ id: job_id }));
+                            return;
+                        }
+                    }
+
+                    res.redirect("/submit_error");
+                });
+
+            app.get("/submission_results", requireLogin, (req, res) => {
+                res.json({});
+            });
+        }
     }
 
     public start() {

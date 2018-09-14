@@ -3,6 +3,7 @@
   width: 100%;
   background: #0077c2;
   height: 40px;
+  box-shadow: 0px 0px 4.9px 0.7px inset #000;
   display: flex;
   justify-content: space-around;
 }
@@ -18,14 +19,13 @@
   padding-left: 30px;
   padding-right: 30px;
   padding-top: 4px;
-  color: #fff;
+  color: #f2f2f2;
   border-top-color: #0077c2;
+  transition: 200ms all;
 }
 .navbar ul li.selected, .navbar ul li:hover {
-  transition: 200ms all;
-  background: #42a5f5;
-  border-top: 4px solid #ffff8b;
-  padding-top: 0px;
+  border-bottom: 2px solid #ffe766;
+  color: white;
 }
 
 * {
@@ -36,7 +36,10 @@
 
 body {
   font-family: sans-serif;
-  background: #00385c;
+  color: #fff;
+  background-image: url(/static/imgs/grain_background.png);
+  background-color: black;
+  background-repeat: repeat;
 }
 
 a {
@@ -45,27 +48,41 @@ a {
 }
 
 main {
-  margin: 0 15%;
-  margin-top: 0.5rem;
-  background: #fff;
-  min-height: 100vh;
+  min-height: calc(100vh - 40px);
 }
 
 .content {
   width: 100%;
-  padding: 10px 10%;
+  padding: 10px 5%;
+}
+
+.left {
+  float: left;
+}
+
+.right {
+  float: right;
 }
 
 .problem-name {
+  width: 92%;
+  margin-top: 1rem;
+  margin-left: 4%;
+  margin-right: 4%;
   font-size: 3em;
   text-align: center;
+  border-bottom: 2px solid #444444;
 }
 
 .problem-stats-container {
-  width: 100%;
-  min-height: 50px;
+  margin-top: 0.75rem;
+  margin-left: 13%;
+  margin-right: 13%;
+  width: 74%;
+  min-height: 10px;
   float: left;
   font-size: 0;
+  display: flex;
 }
 .problem-stats-container .problem-stats {
   position: relative;
@@ -73,7 +90,8 @@ main {
   display: inline-block;
   padding: 0;
   margin: 0;
-  min-height: 50px;
+  min-height: 10px;
+  flex-grow: 1;
 }
 .problem-stats-container .problem-stats.correct-color {
   background: #12b312;
@@ -82,7 +100,7 @@ main {
   background: #b31212;
 }
 .problem-stats-container .problem-stats.timed-out-color {
-  background: #b3b312;
+  background: #1212b3;
 }
 .problem-stats-container .problem-stats.other-color {
   background: #595959;
@@ -104,24 +122,168 @@ main {
 
 .problem-top-bar {
   margin-top: 20px;
-  display: grid;
-  grid-template-columns: 9fr 1fr;
-  grid-template-rows: 50px;
+  width: 100%;
 }
-.problem-top-bar .submit-btn {
+
+.problem-description {
+  margin-top: 15px;
+  font-size: 1.5em;
+}
+.problem-description p {
+  margin-bottom: 20px;
+}
+
+.problem-container {
+  background-image: url(/static/imgs/grain_background.png);
+  background-color: white;
+  background-repeat: repeat;
+  min-height: calc(100vh - 40px);
+}
+
+.problem-page-container {
+  display: grid;
+  grid-template-columns: minmax(250px, 1fr) 5fr;
+}
+
+.problem-list {
+  z-index: 50;
+  box-shadow: 0 10px 0 0 transparent, 0 10px 0 0 transparent, 10px 0 0 0 transparent, 0 8px 8px 2px black;
+  background: #003252;
+  position: relative;
+}
+.problem-list .sidebar-problem {
+  width: 100%;
+  border-left-width: 24px;
+  border-left-style: solid;
+  transition: background-color 200ms ease-in-out;
+  transition: width 200ms ease-in-out;
+  background-color: inherit;
+  cursor: pointer;
+}
+.problem-list .sidebar-problem[selected], .problem-list .sidebar-problem:hover {
+  background-color: #42a5f5;
+  width: calc(100% + 24px);
+}
+.problem-list .sidebar-problem-name {
+  font-size: 1.2rem;
+  text-align: left;
+  padding-left: 5px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.problem-info {
+  float: right;
+  min-width: 350px;
+  width: 25%;
+  margin: 0 20px 20px 20px;
+  position: relative;
+  box-shadow: 0px 1px 3px 0.25px #000000;
+  background: #3d3d3d;
+}
+.problem-info .submit-btn {
   width: 100%;
   max-height: 100%;
-  background: #42a5f5;
-  color: #fff;
+  background: #FFD700;
+  color: #000;
   text-align: center;
-  border-radius: 0.25rem;
   font-size: 28px;
   line-height: 50px;
 }
-.problem-top-bar .submit-btn:hover {
+.problem-info .submit-btn:hover {
   cursor: pointer;
   transition: 200ms all;
+  background: #ffe766;
+}
+.problem-info .submissions-btn {
+  width: 100%;
+  max-height: 100%;
+  color: #000;
+  background: #42a5f5;
+  text-align: center;
+  font-size: 28px;
+  line-height: 50px;
+}
+.problem-info .submissions-btn:hover {
+  transition: 200ms all;
   background: #80d6ff;
+  cursor: pointer;
+}
+.problem-info .problem-info-row {
+  width: calc(100% - 16px);
+  height: 32px;
+  text-align: center;
+  margin: 8px;
+  border-bottom: 1px solid #444444;
+}
+.problem-info .problem-info-row:last-child {
+  border-bottom: none;
+}
+
+.submission-submit-form {
+  width: 100%;
+  text-align: center;
+}
+.submission-submit-form form {
+  font-size: 2em;
+  padding: 20px;
+}
+.submission-submit-form form div {
+  margin-bottom: 30px;
+}
+.submission-submit-form form select {
+  text-align: center;
+  font-size: 1.1rem;
+  width: 25%;
+  padding: 10px;
+  border: none;
+  border-radius: 0px;
+  background-color: #0077c2;
+  box-shadow: 0px 1px 3px 0.25px black;
+}
+.submission-submit-form form select option {
+  border: none;
+}
+.submission-submit-form form .file-upload-wrapper {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  width: 25%;
+}
+.submission-submit-form form .file-upload-wrapper span {
+  background-color: #0077c2;
+  font-size: 1.4rem;
+  padding: 10px;
+  border-radius: 4px;
+  width: 100%;
+  display: block;
+  box-shadow: 0px 1px 3px 0.25px black;
+}
+.submission-submit-form form .file-upload-wrapper input[type=file] {
+  font-size: 100px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+}
+.submission-submit-form form input[type=submit] {
+  background-color: #0077c2;
+  color: white;
+  width: 25%;
+  font-size: 1.4rem;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  display: inline-block;
+  cursor: pointer;
+  box-shadow: 0px 1px 3px 0.25px black;
+  transition: 400ms all;
+}
+.submission-submit-form form input[type=submit]:hover {
+  background-color: #42a5f5;
+  box-shadow: 0px 3px 9px 0.75px black;
 }
 
 /*# sourceMappingURL=core.css.map */

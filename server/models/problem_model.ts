@@ -33,17 +33,12 @@ export class ProblemModel extends BaseModel<ProblemModel_T> {
             },
             name: {
                 type: Sequelize.STRING,
-                allowNull: false
             },
             description: {
                 type: Sequelize.STRING,
-                unique: false,
-                allowNull: false,
             },
             time_limit: {
                 type: Sequelize.SMALLINT,
-                unique: false,
-                allowNull: false
             },
             attempts: {
                 type: Sequelize.INTEGER,
@@ -68,12 +63,12 @@ export class ProblemModel extends BaseModel<ProblemModel_T> {
         }
     }
 
-    public async findOrCreate(name: string, defaults: () => ProblemModel_T): Promise<Sequelize.Instance<ProblemModel_T> | null> {
+    public async findOrCreate(dir_name: string, defaults: () => ProblemModel_T): Promise<Sequelize.Instance<ProblemModel_T> | null> {
         if (this.sql_model == null) return null;
 
         let res = await this.sql_model.findOne({
             where: {
-                name: name,
+                dir_name: dir_name,
             },
         });
 
@@ -81,6 +76,17 @@ export class ProblemModel extends BaseModel<ProblemModel_T> {
             return this.sql_model.create(defaults());
         } else {
             return res;
+        }
+    }
+
+    public async update(values: ProblemModel_T): Promise<boolean> {
+        if (this.sql_model == null) return false;
+
+        try {
+            await this.sql_model.update(values, { where: { dir_name: values.dir_name } });
+            return true;
+        } catch (err) {
+            return false;
         }
     }
 }

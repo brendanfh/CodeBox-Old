@@ -2,6 +2,11 @@ import sequelize from "sequelize";
 
 export abstract class BaseModel<T> {
     protected sql_model: sequelize.Model<sequelize.Instance<T> & T, T> | null = null;
+
+    public getSqlModel(): sequelize.Model<sequelize.Instance<T> & T, T> | null {
+        return this.sql_model;
+    }
+
     protected force_sync: boolean;
 
     constructor() {

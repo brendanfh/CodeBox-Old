@@ -1,44 +1,37 @@
-<% extend("../partials/master") %>
+<% layout("partials/problem") %>
 
-<h1 class="content problem-name">
-    <%= problem.name %>
-</h1>
+<div class="content problem-description">
+    <div class="problem-info">
+        <a href="/problems/<%=problem.dir_name%>/submit">
+            <div class="submit-btn">Submit</div>
+        </a>
 
-<div class="problem-top-bar">
-    <div class="problem-stats-container">
-        <div class="problem-stats correct-color"
-            style="
-                width: <%= Math.floor(problem.correct_attempts / problem.attempts * 100)%>%;
-                visibility: <%= (problem.correct_attempts == 0 ? 'hidden' : 'visible') %>;
-            ">
-            <span class="problem-stats-tooltip">Correct</span>
+        <% if (problem.has_submissions) { %>
+            <a href="/problems/<%=problem.dir_name%>/submissions">
+                <div class="submissions-btn">My Submissions</div>
+            </a>
+        <% } %>
+
+        <div class="problem-info-row">
+            <div class="left">Problem ID:</div> <div class="right"><%= problem.dir_name %></div>
         </div>
-        <div class="problem-stats wrong-color"
-            style="
-                width: <%= Math.floor(problem.wrong_answer_attempts / problem.attempts * 100)%>%;
-                visibility: <%= (problem.wrong_answer_attempts == 0 ? 'hidden' : 'visible') %>;
-            ">
-            <span class="problem-stats-tooltip">Wrong</span>
+
+        <div class="problem-info-row">
+            <div class="left">Time Limit:</div> <div class="right"><%= problem.time_limit %></div>
         </div>
-        <div class="problem-stats timed-out-color"
-            style="
-                width: <%= Math.floor(problem.timed_out_attempts / problem.attempts * 100)%>%;
-                visibility: <%= (problem.timed_out_attempts == 0 ? 'hidden' : 'visible') %>;
-            ">
-            <span class="problem-stats-tooltip">Timed Out</span>
+
+        <div class="problem-info-row" style="color: #aaffaa">
+            <div class="left">Correct:</div> <div class="right"><%= problem.correct_attempts %></div>
         </div>
-        <div class="problem-stats other-color"
-            style="
-                width: <%= Math.floor(problem.other_bad_attempts / problem.attempts * 100)%>%;
-                visibility: <%= (problem.other_bad_attempts == 0 ? 'hidden' : 'visible') %>
-            ">
-            <span class="problem-stats-tooltip">Other</span>
+        <div class="problem-info-row" style="color: #ffaaaa">
+            <div class="left">Wrong answer:</div> <div class="right"><%= problem.wrong_answer_attempts %></div>
+        </div>
+        <div class="problem-info-row" style="color: #aaaaff">
+            <div class="left">Timed out:</div> <div class="right"><%= problem.timed_out_attempts %></div>
+        </div>
+        <div class="problem-info-row" style="color: #aaaaaa">
+            <div class="left">Other:</div> <div class="right"><%= problem.other_bad_attempts %></div>
         </div>
     </div>
-
-    <a class="submit-btn" href="/problems/<%=problem.dir_name%>/submit">Submit</a>
-
+    <%- problem.description %>
 </div>
-
-<div style="margin: 20px"></div>
-<%- problem.description %>

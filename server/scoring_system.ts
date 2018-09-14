@@ -25,56 +25,75 @@ export default class ScoringSystem {
         )
 
         for (let dir_name of problem_names) {
+            //We ensure that there is a problem in the database with the dir_name
             let problem = await this.database.getModel(ProblemModel).findOrCreate(
                 dir_name,
                 () => {
-                    let problem_files = fs.readdirSync(path.join(problem_dir, dir_name));
-
-                    let description_file = problem_files
-                        .filter(p => /[a-zA-Z0-9]+\.md/g.exec(p) != null)[0];
-
-                    let description = fs.readFileSync(path.join(problem_dir, dir_name, description_file), { encoding: "utf8" });
-
-                    let info_file = problem_files
-                        .filter(p => /problem\.json/g.exec(p))[0];
-
-                    let info_contents = fs.readFileSync(path.resolve(problem_dir, dir_name, info_file), { encoding: "utf8" });
-                    let time_limit: number = 0.0;
-                    let name: string = "";
-
-                    try {
-                        let problem_info = JSON.parse(info_contents);
-
-                        if (problem_info.time_limit && problem_info.name) {
-                            time_limit = parseInt(problem_info.time_limit);
-                            name = problem_info.name;
-                        } else {
-                            throw new Error();
-                        }
-                    } catch (err) {
-                        throw new Error("Failed parsing time limit or name for problem: " + dir_name);
-                    }
-
                     return {
                         dir_name: dir_name,
-                        name: name,
-                        description: description,
-                        time_limit: time_limit,
-                        correct_attempts: 8,
-                        timed_out_attempts: 4,
-                        wrong_answer_attempts: 5,
-                        other_bad_attempts: 2,
-                        attempts: 19,
+                        name: "",
+                        description: "",
+                        time_limit: 0,
+                        correct_attempts: 0,
+                        timed_out_attempts: 0,
+                        wrong_answer_attempts: 0,
+                        other_bad_attempts: 0,
+                        attempts: 0,
                     }
                 }
             )
 
             if (problem == null) continue;
-            this.problems.set(dir_name, problem.get());
+
+            //We load the data about the problem that should be be entirely dependent on the database (i.e. desciption)
+            let problem_files = fs.readdirSync(path.join(problem_dir, dir_name));
+
+            let info_file = problem_files
+                .filter(p => /problem\.json/g.exec(p))[0];
+
+            let info_contents = fs.readFileSync(path.resolve(problem_dir, dir_name, info_file), { encoding: "utf8" });
+            let time_limit: number = 0.0;
+            let name: string = "";
+
+            try {
+                let problem_info = JSON.parse(info_contents);
+
+                if (problem_info.time_limit && problem_info.name) {
+                    time_limit = parseInt(problem_info.time_limit);
+                    name = problem_info.name;
+                } else {
+                    throw new Error();
+                }
+            } catch (err) {
+                throw new Error("Failed parsing time limit or name for problem: " + dir_name);
+            }
+
+            let description_file = problem_files
+                .filter(p => /[a-zA-Z0-9]+\.md/g.exec(p) != null)[0];
+
+            let description = fs.readFileSync(path.join(problem_dir, dir_name, description_file), { encoding: "utf8" });
+
+            let p = problem.get();
+            p.description = description;
+            p.name = name;
+            p.time_limit = time_limit;
+
+            this.problems.set(dir_name, p);
         }
     }
 
-    public getPromblem(name: string): ProblemModel_T | undefined {
+    public async save_problems(): Promise<void> {
+        let prob_model: ProblemModel = this.database.getModel(ProblemModel);
+
+        for (let prob of this.problems.values())
+            prob_model.update(prob);
+    }
+
+    public getProblem(name: string): ProblemModel_T | undefined {
         return this.problems.get(name);
+    }
+
+    public getProblems(): IterableIterator<ProblemModel_T> {
+        return this.problems.values();
     }
 }
