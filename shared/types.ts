@@ -10,11 +10,11 @@ export type JobStatus
 	| { kind: "BAD_PROBLEM" }
 	| { kind: "COMPILING" }
 	| { kind: "COMPILE_ERR", err_msg: string }
-	| { kind: "RUNNING", completed: number, total: number, total_run_time: number }
-	| { kind: "COMPLETED", completed: number, total: number, total_run_time: number }
-	| { kind: "WRONG_ANSWER", completed: number, total: number }
-	| { kind: "TIME_LIMIT_EXCEEDED", completed: number, total: number }
-	| { kind: "BAD_EXECUTION", completed: number, total: number }
+	| { kind: "RUNNING", completed: number, total: number, run_times: Array<number> }
+	| { kind: "COMPLETED", completed: number, total: number, run_times: Array<number> }
+	| { kind: "WRONG_ANSWER", completed: number, total: number, run_times: Array<number> }
+	| { kind: "TIME_LIMIT_EXCEEDED", completed: number, total: number, run_times: Array<number> }
+	| { kind: "BAD_EXECUTION", completed: number, total: number, run_times: Array<number> }
 
 export type Job = {
 	id: JobID,          //Random UUID of the job

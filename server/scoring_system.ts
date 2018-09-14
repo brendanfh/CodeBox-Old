@@ -2,6 +2,9 @@ import { ProblemModel, ProblemModel_T } from "./models/problem_model";
 import path from "path";
 import fs from "fs";
 import { Database } from "./database";
+import JobTracker from "./job_tracker";
+
+import * as shared_types from "../shared/types";
 
 
 export default class ScoringSystem {
@@ -77,6 +80,7 @@ export default class ScoringSystem {
             p.description = description;
             p.name = name;
             p.time_limit = time_limit;
+            this.database.getModel(ProblemModel).update(p);
 
             this.problems.set(dir_name, p);
         }
@@ -95,5 +99,38 @@ export default class ScoringSystem {
 
     public getProblems(): IterableIterator<ProblemModel_T> {
         return this.problems.values();
+    }
+
+    public update_problem_stats(job_id: shared_types.JobID, job_tracker: JobTracker) {
+        let job = job_tracker.get_job(job_id);
+        if (job == null) return;
+
+        let problem = this.problems.get(job.problem);
+        if (problem == null) return;
+
+        switch (job.status.kind) {
+            case "COMPLETED":
+                problem.correct_attempts++;
+                problem.attempts++;
+                break;
+
+            case "WRONG_ANSWER":
+                problem.wrong_answer_attempts++;
+                problem.attempts++;
+                break;
+
+            case "TIME_LIMIT_EXCEEDED":
+                problem.timed_out_attempts++;
+                problem.attempts++;
+                break;
+
+            case "COMPILE_ERR":
+            case "BAD_EXECUTION":
+                problem.other_bad_attempts++;
+                problem.attempts++;
+        }
+
+
+        this.database.getModel(ProblemModel).update(problem);
     }
 }

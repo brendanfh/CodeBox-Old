@@ -20,19 +20,25 @@ async function setupDatabase(database: Database) {
 }
 
 async function main() {
+	let database = new Database();
+	await setupDatabase(database);
+
+	let scoring = new ScoringSystem(database);
+
 	let job_tracker = new JobTracker();
 	let ipc_server = new IPCServer();
 
 	ipc_server.add_event_listener("cctester.job_status_update", (data, socket) => {
 		if (data.job_id != undefined && data.status != undefined) {
 			job_tracker.update_job(data.job_id, data.status);
+
+			if (data.status.kind != "STARTED"
+				|| data.status.kind != "COMPILING"
+				|| data.status.kind != "RUNNING")
+				scoring.update_problem_stats(data.job_id, job_tracker);
 		}
-	})
+	});
 
-	let database = new Database();
-	await setupDatabase(database);
-
-	let scoring = new ScoringSystem(database);
 	await scoring.load_problems();
 
 	let socket_io_server = new SocketIOServer(job_tracker);

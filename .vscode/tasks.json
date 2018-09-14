@@ -14,15 +14,15 @@
             "options": {
                 "cwd": "${workspaceFolder}/web/static"
             }
-        },
-        {
-            "label": "Web Typescript Compile",
-            "type": "shell",
-            "command": "cd ${workspaceFolder}/web/static/ts && tsc",
-            "group": "build",
-            "problemMatcher": [
-                "$tsc"
-            ]
         }
+        // {
+        //     "label": "Web Typescript Compile",
+        //     "type": "shell",
+        //     "command": "cd ${workspaceFolder}/web/static/ts && tsc",
+        //     "group": "build",
+        //     "problemMatcher": [
+        //         "$tsc"
+        //     ]
+        // }
     ]
 }

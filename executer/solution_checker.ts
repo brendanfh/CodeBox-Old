@@ -166,10 +166,10 @@ export class SolutionChecker {
 
 
         let total = problem.test_cases.length;
-        let run_time = 0;
+        let run_times = new Array<number>(total);
         let completed = 0;
 
-        yield { kind: "RUNNING", completed: 0, total: total, total_run_time: run_time };
+        yield { kind: "RUNNING", completed: 0, total: total, run_times }
 
         for (let test_case of problem.test_cases) {
             let result = await executer.execute(exec_file.file_path, test_case.input_file, problem.time_limit);
@@ -180,15 +180,17 @@ export class SolutionChecker {
                     let output = clean_output(result.val.output);
 
                     if (output === test_case.output) {
+                        run_times[completed] = result.val.run_time;
                         completed++;
-                        run_time += result.val.run_time;
 
                         if (completed != total)
-                            yield { kind: "RUNNING", completed: completed, total: total, total_run_time: run_time };
+                            yield { kind: "RUNNING", completed: completed, total: total, run_times };
 
                         break;
                     } else {
-                        yield { kind: "WRONG_ANSWER", completed: completed, total: total };
+                        run_times[completed] = result.val.run_time;
+
+                        yield { kind: "WRONG_ANSWER", completed: completed, total: total, run_times };
 
                         exec_file.deleteFile();
                         return;
@@ -197,15 +199,15 @@ export class SolutionChecker {
                 case "ERR":
                     exec_file.deleteFile();
                     if (result.val.includes("system")) {
-                        yield { kind: "BAD_EXECUTION", completed: completed, total: total };
+                        yield { kind: "BAD_EXECUTION", completed: completed, total: total, run_times };
                     } else {
-                        yield { kind: "TIME_LIMIT_EXCEEDED", completed: completed, total: total };
+                        yield { kind: "TIME_LIMIT_EXCEEDED", completed: completed, total: total, run_times };
                     }
                     return;
             }
         }
 
         exec_file.deleteFile();
-        yield { kind: "COMPLETED", completed: completed, total: total, total_run_time: run_time };
+        yield { kind: "COMPLETED", completed: completed, total: total, run_times };
     }
 }

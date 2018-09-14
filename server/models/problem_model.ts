@@ -82,8 +82,20 @@ export class ProblemModel extends BaseModel<ProblemModel_T> {
     public async update(values: ProblemModel_T): Promise<boolean> {
         if (this.sql_model == null) return false;
 
+        let db_values: ProblemModel_T = {
+            dir_name: values.dir_name,
+            name: values.name,
+            description: "",
+            time_limit: values.time_limit,
+            correct_attempts: values.correct_attempts,
+            wrong_answer_attempts: values.wrong_answer_attempts,
+            timed_out_attempts: values.timed_out_attempts,
+            other_bad_attempts: values.other_bad_attempts,
+            attempts: values.attempts
+        };
+
         try {
-            await this.sql_model.update(values, { where: { dir_name: values.dir_name } });
+            await this.sql_model.update(db_values, { where: { dir_name: values.dir_name } });
             return true;
         } catch (err) {
             return false;

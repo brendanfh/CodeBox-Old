@@ -3,6 +3,9 @@ import fs from "fs";
 import path from "path";
 
 export default class JobTracker {
+    //TODO: store jobs in jobs folder with each user name being a different file to easily get jobs for a given user
+
+
     private static JOB_FILE_LOCATION: string = "/job_backup.dat";
 
     private jobs: Map<shared_types.JobID, shared_types.Job>;
@@ -36,12 +39,16 @@ export default class JobTracker {
         job.status = status;
         this.jobs.set(id, job);
 
-        if (status.kind != "RUNNING") {
+        if (status.kind != "RUNNING" && status.kind != "COMPILING" && status.kind != "STARTED") {
             // Force save if the problem hit an end state
             this.last_save_time = 0;
         }
 
         this.check_for_save();
+    }
+
+    public get_jobs(): Map<shared_types.JobID, shared_types.Job> {
+        return this.jobs;
     }
 
     public get_job(id: shared_types.JobID): shared_types.Job | undefined {
@@ -51,6 +58,13 @@ export default class JobTracker {
     public async *get_jobs_by_username(username: string): AsyncIterableIterator<shared_types.Job> {
         for (let job of this.jobs.values()) {
             if (job.username == username)
+                yield job;
+        }
+    }
+
+    public async *get_jobs_by_problem(problem: string): AsyncIterableIterator<shared_types.Job> {
+        for (let job of this.jobs.values()) {
+            if (job.problem == problem)
                 yield job;
         }
     }

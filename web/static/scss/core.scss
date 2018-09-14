@@ -40,6 +40,10 @@ main {
     float: right;
 }
 
+.hidden {
+    visibility: hidden;
+}
+
 .problem-name {
     width: 92%;
 
@@ -142,7 +146,7 @@ main {
 
 .problem-list {
     z-index: 50;
-    box-shadow: 0 10px 0 0 transparent, 0 10px 0 0 transparent, 10px 0 0 0 transparent, 0 8px 8px 2px black;
+    box-shadow: 0 10px 0 0 transparent, 0 10px 0 0 transparent, 10px 0 0 0 transparent, 0 8px 8px 2px rgba(0, 0, 0, 0.5);
     background: darken($primary-dark, 22);
     position: relative;
 
@@ -191,7 +195,7 @@ main {
 
     position: relative;
 
-    @include elevate(1px, #000000);
+    @include elevate(1px, rgba(0, 0, 0, 0.7));
     background: lighten($content-background, 10);
 
     .submit-btn {
@@ -316,5 +320,109 @@ main {
                 @include elevate(3px, black);
             }
         }
+    }
+}
+
+.result-status {
+    margin-top:20px;
+    width: 100%;
+    text-align: center;
+    font-size: 40px;
+    font-weight: 400;
+}
+
+.result-progress-bar-outline {
+    //position: relative;
+    width: 70%;
+    min-width: 650px;
+    height: 40px;
+    margin: 20px auto 0px auto;
+    background: darken($primary-dark, 10);
+    box-shadow: 0px 2px 5px 2px #151515;
+
+    .result-progress-bar {
+        min-height: 100%;
+        background: $primary;
+    }
+
+    &.completed {
+        background: darken(#50ff50, 20);
+
+        .result-progress-bar {
+            background: #50ff50;
+        }
+    }
+
+    &.error {
+        background: darken(#ff5050, 20);
+
+        .result-progress-bar {
+            background: #ff5050;
+        }
+    }
+}
+
+.result-test-case-list {
+    margin: 0 auto;
+    box-shadow: 0px 4px 4px 1px #151515;
+
+    width: 70%;
+    min-width: 650px;
+
+    .result-test-case {
+        display: grid;
+        grid-template-columns: 20px 1fr 1fr 1fr;
+
+        margin: 0;
+        width: 100%;
+        height: 60px;
+        background: darken($primary-dark, 15);
+
+        &.alternate-color {
+            background: darken($primary-dark, 10);
+        }
+
+        .test-case-good {
+            background: #50ff50; 
+        }
+
+        .test-case-bad {
+            background: #ff5050; 
+        }
+
+        .test-case-pending {
+            background: #5050ff; 
+        }
+
+        // &:last-child {
+        //     border-bottom-left-radius: 1rem;
+        //     border-bottom-right-radius: 1rem;
+
+        //     .result-test-case-state {
+        //         border-bottom-right-radius: 1rem;
+        //     }
+        // }
+
+        & * {
+            font-size: 1.5rem;
+            line-height: 60px;
+            text-align: center;
+        }
+    }
+}
+
+.result-compile-error {
+    margin-top: 30px;
+    margin-left: 15%;
+    margin-right: 15%;
+    width: 70%;
+    padding: 20px;
+
+    background: #333;
+
+    box-shadow: 0px 4px 4px 1px #151515;
+
+    pre {
+        white-space: pre-line;
     }
 }

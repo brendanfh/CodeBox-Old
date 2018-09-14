@@ -309,14 +309,29 @@ export default class WebServer {
 
             app.get("/submission_results", requireLogin, async (req, res) => {
                 if (req.session == null) return;
+                if (req.query.id == null) {
+                    res.write("No id supplied");
+                    res.end();
+                    return;
+                }
 
                 let sidebar_problems = await this.get_sidebar_problems('test1', req.session.user.username);
+
+                let job = this.job_tracker.get_job(req.query.id);
+                if (job == undefined) {
+                    res.write("No submission with id'" + req.query.id + "' found.");
+                    res.end();
+                    return;
+                }
+
+                let problem = this.scoringSystem.getProblem(job.problem);
+                if (problem == null) return;
 
                 res.render("submission_result", {
                     navbar: { selected_tab: 1 },
                     problem: {
-                        dir_name: 'test1',
-                        name: 'ASDF'
+                        dir_name: problem.dir_name,
+                        name: problem.name
                     },
                     sidebar_problems
                 });
