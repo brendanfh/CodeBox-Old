@@ -56,7 +56,7 @@ export class SolutionChecker {
         let p_dir = path.join(process.env.ROOT_DIR, "/problems");
 
         let problem_dirs = fs.readdirSync(p_dir).filter(p =>
-            fs.statSync(path.resolve(p_dir, p)).isDirectory()
+            fs.statSync(path.join(p_dir, p)).isDirectory()
         );
 
         for (let prob of problem_dirs) {

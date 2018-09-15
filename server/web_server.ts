@@ -187,7 +187,7 @@ export default class WebServer {
         signup: {
             app.route("/signup")
                 .get(redirectToLeaderboard, (req, res) => {
-                    res.render("signup");
+                    res.render("signup", { navbar: { selected_tab : -1 }});
                 })
                 .post(async (req, res) => {
                     try {
@@ -324,16 +324,31 @@ export default class WebServer {
                     return;
                 }
 
+                if (job.username != req.session.user.username) {
+                    res.write(`The job with id '${req.query.id}' does not belong to '${req.session.user.username}'`);
+                    res.end();
+                    return;
+                }
+
                 let problem = this.scoringSystem.getProblem(job.problem);
                 if (problem == null) return;
+
+                let language_name = "";
+                switch (job.lang) {
+                    case "c": language_name = "C"; break;
+                    case "cpp": language_name = "C++"; break;
+                    case "py": language_name = "Python"; break;
+                }
 
                 res.render("submission_result", {
                     navbar: { selected_tab: 1 },
                     problem: {
                         dir_name: problem.dir_name,
-                        name: problem.name
+                        name: problem.name,
                     },
-                    sidebar_problems
+                    sidebar_problems,
+                    job,
+                    language_name
                 });
             });
         }

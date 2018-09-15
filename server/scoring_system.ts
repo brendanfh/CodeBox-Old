@@ -48,7 +48,7 @@ export default class ScoringSystem {
 
             if (problem == null) continue;
 
-            //We load the data about the problem that should be be entirely dependent on the database (i.e. desciption)
+            //We load the data about the problem that should be be entirely independent of the database (i.e. desciption)
             let problem_files = fs.readdirSync(path.join(problem_dir, dir_name));
 
             let info_file = problem_files

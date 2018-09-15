@@ -30,7 +30,7 @@ async function main() {
 
 	ipc_server.add_event_listener("cctester.job_status_update", (data, socket) => {
 		if (data.job_id != undefined && data.status != undefined) {
-			job_tracker.update_job(data.job_id, data.status);
+			job_tracker.update_job_by_id(data.job_id, data.status);
 
 			if (data.status.kind != "STARTED"
 				|| data.status.kind != "COMPILING"

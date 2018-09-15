@@ -142,6 +142,7 @@ main {
   background-color: white;
   background-repeat: repeat;
   min-height: calc(100vh - 40px);
+  width: 100%;
 }
 
 .problem-page-container {
@@ -297,6 +298,8 @@ main {
 
 .result-status {
   margin-top: 20px;
+  margin-left: 0;
+  margin-right: 0;
   width: 100%;
   text-align: center;
   font-size: 40px;
@@ -304,7 +307,7 @@ main {
 }
 
 .result-progress-bar-outline {
-  width: 70%;
+  width: 80%;
   min-width: 650px;
   height: 40px;
   margin: 20px auto 0px auto;
@@ -331,7 +334,7 @@ main {
 .result-test-case-list {
   margin: 0 auto;
   box-shadow: 0px 4px 4px 1px #151515;
-  width: 70%;
+  width: 80%;
   min-width: 650px;
 }
 .result-test-case-list .result-test-case {
@@ -360,17 +363,46 @@ main {
   text-align: center;
 }
 
-.result-compile-error {
+.result-language-name {
+  width: 80%;
+  min-width: 650px;
   margin-top: 30px;
-  margin-left: 15%;
-  margin-right: 15%;
-  width: 70%;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 2rem;
+}
+
+.result-compile-error {
+  margin-top: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 80%;
+  min-width: 650px;
   padding: 20px;
   background: #333;
   box-shadow: 0px 4px 4px 1px #151515;
 }
 .result-compile-error pre {
   white-space: pre-line;
+}
+
+.result-source-code {
+  margin-left: auto;
+  margin-right: auto;
+  width: 80%;
+  min-width: 650px;
+  max-width: 80%;
+  display: block;
+  box-shadow: 0px 4px 4px 1px #151515;
+}
+.result-source-code pre {
+  font-size: 12pt;
+}
+.result-source-code pre .hljs-ln td {
+  padding-right: 8px;
+}
+.result-source-code pre .hljs-ln-line {
+  max-width: 200px !important;
 }
 
 /*# sourceMappingURL=core.css.map */

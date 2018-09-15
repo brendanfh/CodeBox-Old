@@ -1,24 +1,43 @@
 import * as shared_types from "../shared/types";
 import fs from "fs";
 import path from "path";
+import { runInThisContext } from "vm";
+
+export type UsersJobs = Map<string, Map<string, shared_types.Job[]>>;
+export type JobIDMap = Map<string, [string, string]>;
 
 export default class JobTracker {
     //TODO: store jobs in jobs folder with each user name being a different file to easily get jobs for a given user
 
 
-    private static JOB_FILE_LOCATION: string = "/job_backup.dat";
+    private static JOB_FOLDER_LOCATION: string = "/jobs";
 
-    private jobs: Map<shared_types.JobID, shared_types.Job>;
-    private last_save_time: number = 0;
+    private jobs: UsersJobs;
+    private job_ids: JobIDMap;
 
     public constructor() {
-        this.jobs = new Map<shared_types.JobID, shared_types.Job>();
+        this.jobs = new Map();
+        this.job_ids = new Map();
 
-        this.load_from_file();
+        this.load_all_from_file();
     }
 
     public add_job(id: shared_types.JobID, username: string, sub: shared_types.IPCJobSubmission) {
-        this.jobs.set(id, {
+        let user_jobs = this.jobs.get(username);
+        if (user_jobs == null) {
+            let new_map = new Map();
+            this.jobs.set(username, new_map);
+            user_jobs = new_map;
+        }
+
+        let problem_jobs = user_jobs.get(sub.problem);
+        if (problem_jobs == null) {
+            let new_arr = new Array();
+            user_jobs.set(sub.problem, new_arr);
+            problem_jobs = new_arr;
+        }
+
+        problem_jobs.push({
             id: id,
             username: username,
             status: { kind: "STARTED" },
@@ -27,107 +46,160 @@ export default class JobTracker {
             code: sub.code
         });
 
-        this.check_for_save();
+        this.job_ids.set(id, [username, sub.problem]);
+
+        this.save_user_to_file(username);
     }
 
-    public update_job(id: shared_types.JobID, status: shared_types.JobStatus) {
-        let job = this.jobs.get(id);
+    public update_job(username: string, problem: string, id: string, status: shared_types.JobStatus) {
+        let user_jobs = this.jobs.get(username);
+        if (user_jobs == null) return;
+        
+        let problem_jobs = user_jobs.get(problem);
+        if (problem_jobs == null) return;
+
+        let job = problem_jobs.find(j => j.id == id);
         if (job == null) return;
 
-        if (job.id != id) return;
-
         job.status = status;
-        this.jobs.set(id, job);
 
-        if (status.kind != "RUNNING" && status.kind != "COMPILING" && status.kind != "STARTED") {
-            // Force save if the problem hit an end state
-            this.last_save_time = 0;
-        }
-
-        this.check_for_save();
+        this.save_user_to_file(username);
     }
 
-    public get_jobs(): Map<shared_types.JobID, shared_types.Job> {
-        return this.jobs;
+    public update_job_by_id(id: string, status: shared_types.JobStatus) {
+        let user_and_prob = this.job_ids.get(id);
+        if (user_and_prob == null) return;
+
+        this.update_job(user_and_prob[0], user_and_prob[1], id, status);
     }
 
     public get_job(id: shared_types.JobID): shared_types.Job | undefined {
-        return this.jobs.get(id);
+        let user_and_prob = this.job_ids.get(id);
+        if (user_and_prob == null) return;
+
+        let user_jobs = this.jobs.get(user_and_prob[0]);
+        if (user_jobs == null) return;
+        
+        let problem_jobs = user_jobs.get(user_and_prob[1]);
+        if (problem_jobs == null) return;
+
+        let job = problem_jobs.find(j => j.id == id);
+        if (job == null) return;
+        
+        return job;
     }
 
-    public async *get_jobs_by_username(username: string): AsyncIterableIterator<shared_types.Job> {
-        for (let job of this.jobs.values()) {
-            if (job.username == username)
-                yield job;
+    public *get_jobs_by_username(username: string): IterableIterator<shared_types.Job> {
+        let user_jobs = this.jobs.get(username);
+        if (user_jobs == null) return; 
+        
+        for (let prob of user_jobs.values()) {
+            yield* prob;
         }
     }
 
-    public async *get_jobs_by_problem(problem: string): AsyncIterableIterator<shared_types.Job> {
-        for (let job of this.jobs.values()) {
-            if (job.problem == problem)
-                yield job;
+    public *get_jobs_by_problem(problem: string): IterableIterator<shared_types.Job> {
+        for (let users of this.jobs.values()) {
+            let prob = users.get(problem);
+            if (prob == null) continue;
+
+            yield* prob;
         }
     }
 
-    public async *get_jobs_by_username_and_problem(username: string, problem: string): AsyncIterableIterator<shared_types.Job> {
-        for (let job of this.jobs.values()) {
-            if (job.username == username && job.problem == problem)
-                yield job;
-        }
+    public *get_jobs_by_username_and_problem(username: string, problem: string): IterableIterator<shared_types.Job> {
+        let user_jobs = this.jobs.get(username);
+        if (user_jobs == null) return;
+        
+        let problem_jobs = user_jobs.get(problem);
+        if (problem_jobs == null) return;
+
+        yield* problem_jobs;
     }
 
-    private check_for_save() {
-        if (this.last_save_time + 60 * 1000 < Date.now()) {
-            this.save_to_file();
-            this.last_save_time = Date.now();
-        }
-    }
-
-    private async load_from_file() {
+    private async load_all_from_file() {
         if (process.env.ROOT_DIR == undefined) {
             throw new Error("ROOT_DIR NOT SET");
         }
 
-        fs.readFile(path.join(process.env.ROOT_DIR, JobTracker.JOB_FILE_LOCATION), { encoding: 'utf8' }, (err, data) => {
-            if (err) {
-                console.log("[WARNING] Failed to load job backup file")
+        let job_dir = path.join(process.env.ROOT_DIR, JobTracker.JOB_FOLDER_LOCATION);
+
+        let users = fs.readdirSync(job_dir).map(u => {
+            let uReg = /(.+)\.dat/g.exec(u);
+            if (uReg == null) return null;
+
+            return uReg[1];
+        });
+
+        for (let user of users) {
+            if (user == null) continue;
+            fs.readFile(path.join(job_dir, `${user}.dat`), { encoding: 'utf8'}, (err, data) => {
+                if (err) {
+                    console.log(`[WARNING] Failed to load jobs for user: ${user}`);
+                    return;
+                }
+                if (user == null) return;
+
+                let job_obj = JSON.parse(data);
+
+                for (let job of job_obj) {
+                    let user_jobs = this.jobs.get(user);
+                    if (user_jobs == null) {
+                        let new_map = new Map();
+                        this.jobs.set(user, new_map);
+                        user_jobs = new_map;
+                    }
+
+                    let problem_jobs = user_jobs.get(job.problem);
+                    if (problem_jobs == null) {
+                        let new_arr = new Array();
+                        user_jobs.set(job.problem, new_arr);
+                        problem_jobs = new_arr;
+                    }
+
+                    problem_jobs.push({
+                        id: job.id,
+                        username: user,
+                        status: job.status,
+                        problem: job.problem,
+                        lang: job.lang,
+                        code: job.code
+                    });
+
+                    this.job_ids.set(job.id, [user, job.problem]);
+                }
+            });
+        }
+    }
+
+    private async save_user_to_file(username: string): Promise<void> {
+        let jobs = this.get_jobs_by_username(username);
+
+        let all_jobs = [];
+        for (let j of jobs) {
+            all_jobs.push(j);
+        }
+
+        let str = JSON.stringify(all_jobs);
+
+        await new Promise((res, rej) => {
+            if (process.env.ROOT_DIR == null) {
+                rej("ROOT_DIR NOT SET");
                 return;
             }
 
-            let job_obj = JSON.parse(data);
-            for (let j of job_obj) {
-                this.jobs.set(j.id, {
-                    id: j.id,
-                    username: j.username,
-                    status: j.status,
-                    problem: j.problem,
-                    lang: j.lang,
-                    code: ""
-                });
-            }
-        });
-    }
-
-    private async save_to_file() {
-        let all_jobs = [];
-        for (let job of this.jobs.values()) {
-            all_jobs.push(job);
-        }
-
-        all_jobs.forEach(j => delete j.code);
-
-        let str = JSON.stringify(all_jobs);
-        return new Promise((res, rej) => {
-            if (process.env.ROOT_DIR == undefined) {
-                throw new Error("ROOT_DIR NOT SET");
-            }
-
-            fs.writeFile(path.join(process.env.ROOT_DIR, JobTracker.JOB_FILE_LOCATION), str, { encoding: 'utf8' }, (err) => {
+            fs.writeFile(path.join(process.env.ROOT_DIR, JobTracker.JOB_FOLDER_LOCATION, `${username}.dat`), str, { encoding: 'utf8' }, (err) => {
                 if (err) {
-                    console.log("[WARNING] Failed to write job backup file")
+                    console.log("[WARNING] Failed to write user file");
                 }
                 res();
             });
         });
+    }
+
+    private async save_all_to_file() {
+        for (let user of this.jobs.keys()) {
+            await this.save_user_to_file(user);
+        }
     }
 }

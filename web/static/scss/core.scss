@@ -137,6 +137,7 @@ main {
     background-color: white;
     background-repeat: repeat;
     min-height: calc(100vh - #{$navbar-height});
+    width: 100%;
 }
 
 .problem-page-container {
@@ -325,6 +326,8 @@ main {
 
 .result-status {
     margin-top:20px;
+    margin-left: 0;
+    margin-right: 0;
     width: 100%;
     text-align: center;
     font-size: 40px;
@@ -333,7 +336,7 @@ main {
 
 .result-progress-bar-outline {
     //position: relative;
-    width: 70%;
+    width: 80%;
     min-width: 650px;
     height: 40px;
     margin: 20px auto 0px auto;
@@ -366,7 +369,7 @@ main {
     margin: 0 auto;
     box-shadow: 0px 4px 4px 1px #151515;
 
-    width: 70%;
+    width: 80%;
     min-width: 650px;
 
     .result-test-case {
@@ -411,11 +414,23 @@ main {
     }
 }
 
-.result-compile-error {
+.result-language-name {
+    width: 80%;
+    min-width: 650px;
+
     margin-top: 30px;
-    margin-left: 15%;
-    margin-right: 15%;
-    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+
+    font-size: 2rem;
+}
+
+.result-compile-error {
+    margin-top: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+    min-width: 650px;
     padding: 20px;
 
     background: #333;
@@ -424,5 +439,35 @@ main {
 
     pre {
         white-space: pre-line;
+    }
+}
+
+.result-source-code {
+    margin-left: auto;
+    margin-right: auto;
+
+    width: 80%;
+    min-width: 650px;
+    max-width: 80%;
+
+    display: block;
+
+    box-shadow: 0px 4px 4px 1px #151515;
+
+    pre {
+        font-size: 12pt;
+
+        .hljs-ln {
+            td {
+                //Bit of space between line numbers and code
+                padding-right: 8px;
+            }
+        }
+
+        .hljs-ln-line {
+            //THIS SHOULD BE PUT IN A PULL REQUEST TO THE HLJS REPO
+            //This prevents the line from bleeding out of the container
+            max-width: 200px !important;
+        }
     }
 }
