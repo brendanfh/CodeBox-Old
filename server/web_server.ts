@@ -24,6 +24,7 @@ import { ProblemDescriptionRenderer } from "./renderers/problem_description_rend
 import { ProblemSubmitRenderer } from "./renderers/problem_submit_renderer";
 import { SubmissionResultRenderer } from "./renderers/submission_result_renderer";
 import { SubmissionListRenderer } from "./renderers/submission_list_renderer";
+import { ProblemListRenderer } from "./renderers/problem_list_renderer";
 
 interface IRenderer {
     RENDERER_NAME: string;
@@ -55,6 +56,7 @@ export default class WebServer {
         this.add_renderer(ProblemSubmitRenderer);
         this.add_renderer(SubmissionResultRenderer);
         this.add_renderer(SubmissionListRenderer);
+        this.add_renderer(ProblemListRenderer);
     }
 
     private add_renderer(renderer: IRenderer) {
@@ -248,6 +250,15 @@ export default class WebServer {
         }
 
         problems: {
+            app.get("/problems", requireLogin, async (req, res) => {
+                if (req.session == null) return;
+
+                let renderer = this.get_renderer(ProblemListRenderer);
+                if (renderer == null) return;
+
+                renderer.render(res, req.session.user.username);
+            });
+
             app.get("/problems/:problem_name", requireLogin, async (req, res) => {
                 if (req.session == null) return;
 

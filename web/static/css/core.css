@@ -39,7 +39,7 @@ body {
   font-family: sans-serif;
   color: #fff;
   background-image: url(/static/imgs/grain_background.png);
-  background-color: black;
+  background-color: #111;
   background-repeat: repeat;
 }
 
@@ -80,52 +80,6 @@ main {
   border-bottom: 2px solid #444444;
 }
 
-.problem-stats-container {
-  margin-top: 0.75rem;
-  margin-left: 13%;
-  margin-right: 13%;
-  width: 74%;
-  min-height: 10px;
-  float: left;
-  font-size: 0;
-  display: flex;
-}
-.problem-stats-container .problem-stats {
-  position: relative;
-  font-size: 0;
-  display: inline-block;
-  padding: 0;
-  margin: 0;
-  min-height: 10px;
-  flex-grow: 1;
-}
-.problem-stats-container .problem-stats.correct-color {
-  background: #12b312;
-}
-.problem-stats-container .problem-stats.wrong-color {
-  background: #b31212;
-}
-.problem-stats-container .problem-stats.timed-out-color {
-  background: #1212b3;
-}
-.problem-stats-container .problem-stats.other-color {
-  background: #595959;
-}
-.problem-stats-container .problem-stats .problem-stats-tooltip {
-  max-width: 90px;
-  width: 100%;
-  text-align: center;
-  cursor: default;
-  font-size: 14px;
-  padding: 5px 0;
-  border-top-right-radius: 6px;
-  background-color: inherit;
-  color: #fff;
-  position: absolute;
-  top: -15px;
-  left: 0;
-}
-
 .problem-top-bar {
   margin-top: 20px;
   width: 100%;
@@ -141,7 +95,7 @@ main {
 
 .problem-container {
   background-image: url(/static/imgs/grain_background.png);
-  background-color: white;
+  background-color: #111;
   background-repeat: repeat;
   min-height: calc(100vh - 47px);
   width: 100%;
@@ -152,13 +106,13 @@ main {
   grid-template-columns: minmax(250px, 1fr) 5fr;
 }
 
-.problem-list {
+.sidebar-problem-list {
   z-index: 50;
   box-shadow: 0 10px 0 0 transparent, 0 10px 0 0 transparent, 10px 0 0 0 transparent, 0 8px 8px 2px rgba(0, 0, 0, 0.5);
   background: #003252;
   position: relative;
 }
-.problem-list .sidebar-problem {
+.sidebar-problem-list .sidebar-problem {
   width: 100%;
   border-left-width: 24px;
   border-left-style: solid;
@@ -167,16 +121,16 @@ main {
   background-color: inherit;
   cursor: pointer;
 }
-.problem-list .sidebar-problem[selected], .problem-list .sidebar-problem:hover {
+.sidebar-problem-list .sidebar-problem[selected], .sidebar-problem-list .sidebar-problem:hover {
   width: calc(100% + 24px);
 }
-.problem-list .sidebar-problem[selected] {
+.sidebar-problem-list .sidebar-problem[selected] {
   background-color: #42a5f5 !important;
 }
-.problem-list .sidebar-problem:hover {
+.sidebar-problem-list .sidebar-problem:hover {
   background-color: #128ef2;
 }
-.problem-list .sidebar-problem-name {
+.sidebar-problem-list .sidebar-problem-name {
   font-size: 1.2rem;
   text-align: left;
   padding-left: 5px;
@@ -350,15 +304,6 @@ main {
 .result-test-case-list .result-test-case.alternate-color {
   background: #00588f;
 }
-.result-test-case-list .result-test-case .test-case-good {
-  background: #50ff50;
-}
-.result-test-case-list .result-test-case .test-case-bad {
-  background: #e90000;
-}
-.result-test-case-list .result-test-case .test-case-pending {
-  background: #5050ff;
-}
 .result-test-case-list .result-test-case * {
   font-size: 1.5rem;
   line-height: 60px;
@@ -407,6 +352,19 @@ main {
   max-width: 200px !important;
 }
 
+.side-status {
+  min-height: 100%;
+}
+.side-status.good-status {
+  background-color: #50ff50;
+}
+.side-status.bad-status {
+  background-color: #e90000;
+}
+.side-status.pending-status {
+  background-color: #5050ff;
+}
+
 .submission-list {
   width: 80%;
   min-width: 400px;
@@ -430,18 +388,6 @@ main {
 }
 .submission-list .submission:hover.alternate-color {
   background-color: #0077c2;
-}
-.submission-list .submission .submission-status {
-  min-height: 100%;
-}
-.submission-list .submission .submission-status.good-status {
-  background-color: #50ff50;
-}
-.submission-list .submission .submission-status.bad-status {
-  background-color: #ff5050;
-}
-.submission-list .submission .submission-status.pending-status {
-  background-color: #5050ff;
 }
 .submission-list .submission div {
   text-align: center;
@@ -507,6 +453,100 @@ main {
   font-size: 1.5em;
   box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);
   border-radius: 4px;
+}
+
+.problem-list {
+  min-width: 40%;
+  max-width: 1200px;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.problem-list .listed-problem {
+  display: grid;
+  grid-template-columns: 32px minmax(200px, 3fr) minmax(200px, 1fr) minmax(100px, 1fr);
+  grid-template-rows: 60px 20px;
+  line-height: 60px;
+  font-size: 2rem;
+  cursor: pointer;
+  background-color: #00588f;
+  transition: background-color 150ms;
+  margin-bottom: 40px;
+  box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.5);
+}
+.problem-list .listed-problem .side-status {
+  grid-row: 1/-1;
+  grid-column: 1/1;
+}
+.problem-list .listed-problem:hover {
+  background-color: #0077c2;
+}
+.problem-list .listed-problem .listed-problem-name {
+  text-align: left;
+  padding-left: 8px;
+}
+.problem-list .listed-problem .listed-problem-status {
+  text-align: center;
+  font-size: 1.2rem;
+}
+.problem-list .listed-problem .listed-problem-time-limit {
+  text-align: right;
+  padding-right: 8px;
+  font-size: 1.2rem;
+}
+.problem-list .listed-problem .problem-stats-container {
+  grid-column: 2/-1;
+}
+
+.problem-stats-container {
+  width: 100%;
+  min-height: 10px;
+  float: left;
+  font-size: 0;
+  display: flex;
+}
+.problem-stats-container .problem-stats {
+  position: relative;
+  font-size: 0;
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+  min-height: 20px;
+  flex-grow: 1;
+}
+.problem-stats-container .problem-stats.correct-color {
+  background: #00b600;
+}
+.problem-stats-container .problem-stats.wrong-color {
+  background: #e90000;
+}
+.problem-stats-container .problem-stats.timed-out-color {
+  background: #4444ff;
+}
+.problem-stats-container .problem-stats.other-color {
+  background: #595959;
+}
+.problem-stats-container .problem-stats .problem-stats-tooltip {
+  max-width: 150px;
+  width: 100%;
+  height: 40px;
+  text-align: center;
+  line-height: 50px;
+  cursor: default;
+  font-size: 14px;
+  padding: 5px 0;
+  border-bottom-right-radius: 6px;
+  border-bottom-left-radius: 6px;
+  background-color: inherit;
+  color: #fff;
+  position: absolute;
+  top: 0;
+  left: calc(50% - 75px);
+  opacity: 0;
+  transition: opacity 150ms;
+}
+.problem-stats-container .problem-stats:hover .problem-stats-tooltip {
+  opacity: 100;
 }
 
 /*# sourceMappingURL=core.css.map */

@@ -31,8 +31,8 @@ export class SubmissionResultRenderer extends BaseRenderer {
 
         let language_name = this.get_language_name(job.lang);
 
-        res.render("submission_result", {
-            navbar: { selected_tab: 1 },
+        res.render("submissions/submission_result", {
+            navbar: { selected_tab: 2 },
             problem: {
                 dir_name: problem.dir_name,
                 name: problem.name,

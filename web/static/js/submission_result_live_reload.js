@@ -42,7 +42,7 @@ window.addEventListener("load", function () {
 
             output += `
                 <div class="result-test-case ${i % 2 == 0 ? 'alternate-color' : ''}">
-                    <div class="result-test-case-state test-case-${testCond}"></div>
+                    <div class="result-test-case-state side-status ${testCond}-status"></div>
                     <div class="result-test-case-name">Test ${i + 1}</div>
                     <div class="result-test-case-message">${testMessage}</div>
                     <div class="result-test-case-runtime">

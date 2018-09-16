@@ -6,7 +6,7 @@
         <% let job = jobs[i] %>
         <a href="/submission_results?id=<%=job.id%>">
             <div class="submission <%=(i % 2 == 0 ? 'alternate-color' : '')%>">
-                <div class="<%= helpful_funcs.submission_status_class(job.status)%>"></div>
+                <div class="side-status <%= helpful_funcs.submission_status_class(job.status)%>"></div>
                 <div><%= helpful_funcs.get_problem_name(job.problem) %></div>
                 <div><%= helpful_funcs.get_job_status(job.status.kind) %></div>
                 <div><%= helpful_funcs.get_language_name(job.lang) %></div>

@@ -13,7 +13,7 @@ body {
     color: $white;
     //background: darken($primary-dark, 20);
     background-image: url(/static/imgs/grain_background.png);
-    background-color: black;
+    background-color: #111;
     background-repeat: repeat;
 }
 
@@ -58,62 +58,6 @@ main {
     border-bottom: 2px solid #444444;
 }
 
-.problem-stats-container {
-    margin-top: .75rem;
-    margin-left: 13%;
-    margin-right: 13%;
-    width: 74%;
-    min-height: 10px;
-    float: left;
-    font-size: 0;
-    display: flex;
-
-    .problem-stats {
-        position: relative;
-
-        font-size: 0;
-        display: inline-block;
-        padding: 0;
-        margin: 0;
-        min-height: 10px;
-        flex-grow: 1;
-       
-        &.correct-color {
-            background: lighten(#10a010, 4);
-        }
-
-        &.wrong-color {
-            background: lighten(#a01010, 4);
-        }
-
-        &.timed-out-color {
-            background: lighten(#1010a0, 4);
-        }
-
-        &.other-color {
-            background: lighten(#4f4f4f, 4);
-        }
-
-        .problem-stats-tooltip {
-            max-width: 90px;
-            width: 100%;
-            text-align: center;
-            cursor: default;
-
-            font-size: 14px;
-
-            padding: 5px 0;
-            border-top-right-radius: 6px;
-
-            background-color: inherit;
-            color: $white;
-
-            position: absolute;
-            top: -15px;
-            left: 0;
-        }
-    }
-}
 
 .problem-top-bar {
     margin-top: 20px;
@@ -135,7 +79,7 @@ main {
 
 .problem-container {
     background-image: url(/static/imgs/grain_background.png);
-    background-color: white;
+    background-color: #111;
     background-repeat: repeat;
     min-height: calc(100vh - #{$navbar-height});
     width: 100%;
@@ -146,7 +90,7 @@ main {
     grid-template-columns: minmax(250px, 1fr) 5fr;
 }
 
-.problem-list {
+.sidebar-problem-list {
     z-index: 50;
     box-shadow: 0 10px 0 0 transparent, 0 10px 0 0 transparent, 10px 0 0 0 transparent, 0 8px 8px 2px rgba(0, 0, 0, 0.5);
     background: darken($primary-dark, 22);
@@ -336,7 +280,6 @@ main {
 }
 
 .result-progress-bar-outline {
-    //position: relative;
     width: 80%;
     min-width: 650px;
     height: 40px;
@@ -384,18 +327,6 @@ main {
 
         &.alternate-color {
             background: darken($primary-dark, 10);
-        }
-
-        .test-case-good {
-            background: $test-case-good;
-        }
-
-        .test-case-bad {
-            background: darken($test-case-bad, 20); 
-        }
-
-        .test-case-pending {
-            background: $test-case-pending; 
         }
 
         // &:last-child {
@@ -473,6 +404,20 @@ main {
     }
 }
 
+.side-status {
+    min-height: 100%;
+
+    &.good-status {
+        background-color: $test-case-good;
+    }
+    &.bad-status {
+        background-color: darken($test-case-bad, 20);
+    }
+    &.pending-status {
+        background-color: $test-case-pending;
+    }
+}
+
 .submission-list {
     width: 80%;
     min-width: 400px;
@@ -495,20 +440,6 @@ main {
             background-color: darken($primary-dark, 5);
             &.alternate-color {
                 background-color: $primary-dark;
-            }
-        }
-
-        .submission-status {
-            min-height: 100%;
-
-            &.good-status {
-                background-color: $test-case-good;
-            }
-            &.bad-status {
-                background-color: $test-case-bad;
-            }
-            &.pending-status {
-                background-color: $test-case-pending;
             }
         }
 
@@ -593,5 +524,123 @@ main {
             border-radius: 4px;
         }
     }
-    
+}
+
+.problem-list {
+    min-width: 40%;
+    max-width: 1200px;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+
+    .listed-problem {
+        display: grid;
+        grid-template-columns: 32px minmax(200px, 3fr) minmax(200px, 1fr) minmax(100px, 1fr);
+        grid-template-rows: 60px 20px;
+
+        line-height: 60px;
+        font-size: 2rem;
+
+        cursor: pointer;
+        background-color: darken($primary-dark, 10);
+        transition: background-color 150ms;
+
+        margin-bottom: 40px;
+
+        box-shadow: 0px 1px 4px 0px rgba(0, 0, 0, 0.5);
+
+        .side-status {
+            grid-row: 1 / -1;
+            grid-column: 1 / 1;
+        }
+
+        &:hover {
+            background-color: $primary-dark;
+        }
+
+        .listed-problem-name {
+            text-align: left;
+            padding-left: 8px;
+        }
+
+        .listed-problem-status {
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .listed-problem-time-limit {
+            text-align: right;
+            padding-right: 8px;
+            font-size: 1.2rem;
+        }
+
+        .problem-stats-container {
+            grid-column: 2 / -1;
+        }
+    }
+}
+
+.problem-stats-container {
+    width: 100%;
+    min-height: 10px;
+    float: left;
+    font-size: 0;
+    display: flex;
+
+    .problem-stats {
+        position: relative;
+
+        font-size: 0;
+        display: inline-block;
+        padding: 0;
+        margin: 0;
+        min-height: 20px;
+        flex-grow: 1;
+       
+        &.correct-color {
+            background: darken($test-case-good, 30);
+        }
+
+        &.wrong-color {
+            background: darken($test-case-bad, 20);
+        }
+
+        &.timed-out-color {
+            background: darken(#aaaaff, 20);
+        }
+
+        &.other-color {
+            background: lighten(#4f4f4f, 4);
+        }
+
+        .problem-stats-tooltip {
+            max-width: 150px;
+            width: 100%;
+            height: 40px;
+
+            text-align: center;
+            line-height: 50px;
+            cursor: default;
+
+            font-size: 14px;
+
+            padding: 5px 0;
+            border-bottom-right-radius: 6px;
+            border-bottom-left-radius: 6px;
+
+            background-color: inherit;
+            color: $white;
+
+            position: absolute;
+            top: 0;
+            left: calc(50% - 75px);
+
+            opacity: 0;
+            transition: opacity 150ms;
+        }
+
+        &:hover .problem-stats-tooltip {
+            opacity: 100;
+        }
+    }
 }

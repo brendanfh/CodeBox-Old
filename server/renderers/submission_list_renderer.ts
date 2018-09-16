@@ -43,7 +43,7 @@ export class SubmissionListRenderer extends BaseRenderer {
                 switch (kind) {
                     case "BAD_EXECUTION":
                         return "Run-time error";
-                    case "TIME_LIMIT_EXECEEDED":
+                    case "TIME_LIMIT_EXCEEDED":
                         return "Time-limit exceeded";
                     case "WRONG_ANSWER":
                         return "Wrong answer";
@@ -104,11 +104,11 @@ export class SubmissionListRenderer extends BaseRenderer {
             }
         }
 
-        jobs.sort((a, b) => a.time_initiated < b.time_initiated ? 1 : 0);
+        jobs = jobs.sort((a, b) => b.time_initiated - a.time_initiated);
 
         let help_funcs = this.helpful_funcs();
 
-        res.render("submissions", {
+        res.render("submissions/submissions", {
             navbar: { selected_tab: 2 },
             jobs,
             problem: {
