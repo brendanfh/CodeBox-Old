@@ -3,9 +3,9 @@
 <div class="problem-page-container">
     <div class="problem-list">
         <% for(let prob of sidebar_problems) {%>
-            <a href="/problems/<%=prob.dir_name%>/">
+            <a href=<%= sidebar_href(prob.dir_name)%> >
                 <div class=<%= prob.dir_name == problem.dir_name ? "sidebar-problem selected" : "sidebar-problem"%>
-                    style=<%= prob.completed ? "border-left-color:#50ff50" : (prob.wrong_attempt ? "border-left-color:#ff5050" : "border-left-color:#b0b0ff") %> >
+                    style=<%= prob.completed ? "border-left-color:#50ff50" : (prob.wrong_attempt ? "border-left-color:#ff5050" : "border-left-color:#5050ff") %> >
                     <div class="sidebar-problem-name">
                         <%= prob.name %>
                     </div>

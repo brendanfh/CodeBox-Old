@@ -2,7 +2,7 @@
   z-index: 100;
   width: 100%;
   background: #0077c2;
-  height: 40px;
+  height: 47px;
   box-shadow: 0px 0px 4.9px 0.7px inset #000;
   display: flex;
   justify-content: space-around;
@@ -10,7 +10,8 @@
 .navbar ul {
   display: flex;
 }
-.navbar ul li {
+.navbar ul a li {
+  display: block;
   cursor: pointer;
   font-size: 24px;
   list-style: none;
@@ -23,7 +24,7 @@
   border-top-color: #0077c2;
   transition: 200ms all;
 }
-.navbar ul li.selected, .navbar ul li:hover {
+.navbar ul a li.selected, .navbar ul a li:hover {
   border-bottom: 2px solid #ffe766;
   color: white;
 }
@@ -48,7 +49,8 @@ a {
 }
 
 main {
-  min-height: calc(100vh - 40px);
+  min-height: calc(100vh - 47px);
+  position: relative;
 }
 
 .content {
@@ -141,7 +143,7 @@ main {
   background-image: url(/static/imgs/grain_background.png);
   background-color: white;
   background-repeat: repeat;
-  min-height: calc(100vh - 40px);
+  min-height: calc(100vh - 47px);
   width: 100%;
 }
 
@@ -352,7 +354,7 @@ main {
   background: #50ff50;
 }
 .result-test-case-list .result-test-case .test-case-bad {
-  background: #ff5050;
+  background: #e90000;
 }
 .result-test-case-list .result-test-case .test-case-pending {
   background: #5050ff;
@@ -403,6 +405,108 @@ main {
 }
 .result-source-code pre .hljs-ln-line {
   max-width: 200px !important;
+}
+
+.submission-list {
+  width: 80%;
+  min-width: 400px;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.submission-list .submission {
+  display: grid;
+  grid-template-columns: 32px 3fr 3fr 1fr 1fr 2fr;
+  width: 100%;
+  min-height: 60px;
+  transition: background-color 150ms;
+  background-color: #004876;
+}
+.submission-list .submission.alternate-color {
+  background-color: #00588f;
+}
+.submission-list .submission:hover {
+  background-color: #0067a9;
+}
+.submission-list .submission:hover.alternate-color {
+  background-color: #0077c2;
+}
+.submission-list .submission .submission-status {
+  min-height: 100%;
+}
+.submission-list .submission .submission-status.good-status {
+  background-color: #50ff50;
+}
+.submission-list .submission .submission-status.bad-status {
+  background-color: #ff5050;
+}
+.submission-list .submission .submission-status.pending-status {
+  background-color: #5050ff;
+}
+.submission-list .submission div {
+  text-align: center;
+  line-height: 60px;
+  font-size: 14pt;
+}
+
+.view-all-submissions-btn {
+  width: 30%;
+  min-height: 40px;
+  margin: 20px auto 0px auto;
+  background-color: #0067a9;
+  color: white;
+  font-size: 1.2rem;
+  border-radius: 4px;
+  text-align: center;
+  line-height: 40px;
+  box-shadow: 0px 1px 4px 1px rgba(0, 0, 0, 0.7);
+  transition: background-color 150ms;
+}
+.view-all-submissions-btn:hover {
+  background-color: #0077c2;
+}
+
+.login-form {
+  width: 30%;
+  height: calc(100vh - 47px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+.login-form form {
+  padding: 20px;
+  background-color: #444;
+  box-shadow: 0px 2px 3px 1px rgba(0, 0, 0, 0.7);
+}
+.login-form form .login-header {
+  text-align: center;
+  font-size: 27pt;
+  font-weight: 700;
+}
+.login-form form input[type=text], .login-form form input[type=password] {
+  display: block;
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 8px;
+  border: none;
+  background-color: #00588f;
+  color: white;
+  font-size: 1.3em;
+  border-radius: 4px;
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);
+}
+.login-form form input[type=submit] {
+  display: block;
+  width: 50%;
+  margin: 10px auto;
+  margin-top: 30px;
+  border: none;
+  background-color: #0077c2;
+  padding: 8px;
+  font-size: 1.5em;
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
 }
 
 /*# sourceMappingURL=core.css.map */

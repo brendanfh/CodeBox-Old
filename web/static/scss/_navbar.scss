@@ -13,7 +13,8 @@
     ul {
         display: flex;
 
-        li {
+        a li {
+            display: block;
             cursor: pointer;
 
             font-size: 24px;

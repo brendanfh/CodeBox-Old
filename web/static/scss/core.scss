@@ -25,6 +25,7 @@ a {
 main {
     //margin: 0 15%;
     min-height: calc(100vh - #{$navbar-height});
+    position: relative;
 }
 
 .content {
@@ -386,15 +387,15 @@ main {
         }
 
         .test-case-good {
-            background: #50ff50; 
+            background: $test-case-good;
         }
 
         .test-case-bad {
-            background: #ff5050; 
+            background: darken($test-case-bad, 20); 
         }
 
         .test-case-pending {
-            background: #5050ff; 
+            background: $test-case-pending; 
         }
 
         // &:last-child {
@@ -470,4 +471,127 @@ main {
             max-width: 200px !important;
         }
     }
+}
+
+.submission-list {
+    width: 80%;
+    min-width: 400px;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+
+    .submission {
+        display: grid;
+        grid-template-columns: 32px 3fr 3fr 1fr 1fr 2fr;
+        width: 100%;
+        min-height: 60px;
+        transition: background-color 150ms;
+
+        background-color: darken($primary-dark, 15);
+        &.alternate-color {
+            background-color: darken($primary-dark, 10);
+        }
+        &:hover {
+            background-color: darken($primary-dark, 5);
+            &.alternate-color {
+                background-color: $primary-dark;
+            }
+        }
+
+        .submission-status {
+            min-height: 100%;
+
+            &.good-status {
+                background-color: $test-case-good;
+            }
+            &.bad-status {
+                background-color: $test-case-bad;
+            }
+            &.pending-status {
+                background-color: $test-case-pending;
+            }
+        }
+
+        div {
+            text-align: center;
+            line-height: 60px;
+
+            font-size: 14pt;
+        }
+    }
+}
+
+.view-all-submissions-btn {
+    width: 30%;
+    min-height: 40px; 
+    margin: 20px auto 0px auto;
+
+    background-color: darken($primary-dark, 5);
+    color: white;
+    font-size: 1.2rem;
+    border-radius: 4px;
+
+    text-align: center;
+    line-height: 40px;
+
+    box-shadow: 0px 1px 4px 1px rgba(0, 0, 0, 0.7);
+
+    transition: background-color 150ms;
+
+    &:hover {
+        background-color: $primary-dark;
+    }
+}
+
+.login-form {
+    width: 30%;
+    height: calc(100vh - #{$navbar-height});
+    margin: 0 auto;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+
+    form {
+        padding: 20px;
+        background-color: #444;
+        box-shadow: 0px 2px 3px 1px rgba(0, 0, 0, 0.7);
+
+        .login-header {
+            text-align: center;
+            font-size: 27pt;
+            font-weight: 700;
+        }
+
+        input[type=text], input[type=password] {
+            display: block;
+            width: 100%;
+            margin-bottom: 20px;
+
+            padding: 8px;
+
+            border: none;
+            background-color: darken($primary-dark, 10);
+            color: white;
+            font-size: 1.3em;
+            border-radius: 4px;
+
+            box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);
+        }
+
+        input[type=submit] {
+            display: block;
+            width: 50%;
+            margin: 10px auto;
+            margin-top: 30px;
+
+            border: none;
+            background-color: $primary-dark;
+            padding: 8px;
+            font-size: 1.5em;
+            box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+        }
+    }
+    
 }

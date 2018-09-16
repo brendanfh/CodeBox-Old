@@ -27,10 +27,12 @@ async function main() {
 
 	let job_tracker = new JobTracker();
 	let ipc_server = new IPCServer();
+	let socket_io_server = new SocketIOServer(job_tracker);
 
 	ipc_server.add_event_listener("cctester.job_status_update", (data, socket) => {
 		if (data.job_id != undefined && data.status != undefined) {
 			job_tracker.update_job_by_id(data.job_id, data.status);
+			socket_io_server.push_update(data.job_id, data.status);
 
 			if (data.status.kind != "STARTED"
 				|| data.status.kind != "COMPILING"
@@ -39,21 +41,13 @@ async function main() {
 		}
 	});
 
-	await scoring.load_problems();
-
-	let socket_io_server = new SocketIOServer(job_tracker);
-
-	ipc_server.add_event_listener("cctester.job_status_update", (data, socket) => {
-		if (data.job_id != undefined && data.status != undefined) {
-			socket_io_server.push_update(data.job_id, data.status);
-		}
-	});
-
 	ipc_server.add_event_listener("cctester.job_completed", (data, socket) => {
 		if (data.job_id != undefined) {
 			socket_io_server.remove_subscription(data.job_id);
 		}
 	});
+
+	await scoring.load_problems();
 
 	let web_server = new WebServer(job_tracker, ipc_server, database, scoring);
 

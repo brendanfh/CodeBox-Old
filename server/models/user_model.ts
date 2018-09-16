@@ -5,9 +5,8 @@ import bcrypt from "bcrypt";
 type UserModel_T = {
     username: string,
     password_hash: string,
-    first_name: string,
-    last_name: string,
     email: string,
+    nickname: string,
 }
 
 export class UserModel extends BaseModel<UserModel_T> {
@@ -31,10 +30,7 @@ export class UserModel extends BaseModel<UserModel_T> {
                 type: Sequelize.STRING,
                 allowNull: false,
             },
-            first_name: {
-                type: Sequelize.STRING,
-            },
-            last_name: {
+            nickname: {
                 type: Sequelize.STRING
             },
             email: {

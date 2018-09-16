@@ -7,7 +7,7 @@
         </a>
 
         <% if (problem.has_submissions) { %>
-            <a href="/problems/<%=problem.dir_name%>/submissions">
+            <a href="/submissions?problem=<%=problem.dir_name%>">
                 <div class="submissions-btn">My Submissions</div>
             </a>
         <% } %>

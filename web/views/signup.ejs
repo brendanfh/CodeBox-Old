@@ -1,15 +1,31 @@
 <% layout('partials/master') %>
 
-<form action="/signup" method="POST">
-    <div>
-        <label>Username: </label>
-        <input type="text" name="username" />
-    </div> 
-    <div>
-        <label>Password: </label>
-        <input type="password" name="password" />
-    </div> 
-    <div>
-        <input type="submit" value="Signup"/>
-    </div>
-</form>
+<div class="content login-form">
+    <form action="/signup" method="POST">
+        <div class="login-header">Sign up</div>
+        <div>
+            <label>Username</label>
+            <input type="text" name="username" />
+        </div> 
+        <div>
+            <label>Password</label>
+            <input type="password" name="password" />
+        </div> 
+        <div>
+            <label>Confirm password</label>
+            <input type="password" name="confirm_password" />
+        </div> 
+        <div>
+            <label>Email</label>
+            <input type="text" name="email" />
+        </div> 
+        <div>
+            <label>Nickname (shown on leaderboard)</label>
+            <input type="text" name="nickname" />
+        </div> 
+        <div>
+            <input type="submit" value="Sign up"/>
+        </div>
+    </form>
+    <div></div>
+</div>

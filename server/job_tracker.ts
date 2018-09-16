@@ -22,7 +22,7 @@ export default class JobTracker {
         this.load_all_from_file();
     }
 
-    public add_job(id: shared_types.JobID, username: string, sub: shared_types.IPCJobSubmission) {
+    public add_job(id: shared_types.JobID, time_started: number, username: string, sub: shared_types.IPCJobSubmission) {
         let user_jobs = this.jobs.get(username);
         if (user_jobs == null) {
             let new_map = new Map();
@@ -43,7 +43,8 @@ export default class JobTracker {
             status: { kind: "STARTED" },
             problem: sub.problem,
             lang: sub.lang,
-            code: sub.code
+            code: sub.code,
+            time_initiated: time_started
         });
 
         this.job_ids.set(id, [username, sub.problem]);
@@ -54,7 +55,7 @@ export default class JobTracker {
     public update_job(username: string, problem: string, id: string, status: shared_types.JobStatus) {
         let user_jobs = this.jobs.get(username);
         if (user_jobs == null) return;
-        
+
         let problem_jobs = user_jobs.get(problem);
         if (problem_jobs == null) return;
 
@@ -79,20 +80,20 @@ export default class JobTracker {
 
         let user_jobs = this.jobs.get(user_and_prob[0]);
         if (user_jobs == null) return;
-        
+
         let problem_jobs = user_jobs.get(user_and_prob[1]);
         if (problem_jobs == null) return;
 
         let job = problem_jobs.find(j => j.id == id);
         if (job == null) return;
-        
+
         return job;
     }
 
     public *get_jobs_by_username(username: string): IterableIterator<shared_types.Job> {
         let user_jobs = this.jobs.get(username);
-        if (user_jobs == null) return; 
-        
+        if (user_jobs == null) return;
+
         for (let prob of user_jobs.values()) {
             yield* prob;
         }
@@ -110,7 +111,7 @@ export default class JobTracker {
     public *get_jobs_by_username_and_problem(username: string, problem: string): IterableIterator<shared_types.Job> {
         let user_jobs = this.jobs.get(username);
         if (user_jobs == null) return;
-        
+
         let problem_jobs = user_jobs.get(problem);
         if (problem_jobs == null) return;
 
@@ -133,7 +134,7 @@ export default class JobTracker {
 
         for (let user of users) {
             if (user == null) continue;
-            fs.readFile(path.join(job_dir, `${user}.dat`), { encoding: 'utf8'}, (err, data) => {
+            fs.readFile(path.join(job_dir, `${user}.dat`), { encoding: 'utf8' }, (err, data) => {
                 if (err) {
                     console.log(`[WARNING] Failed to load jobs for user: ${user}`);
                     return;
@@ -163,7 +164,8 @@ export default class JobTracker {
                         status: job.status,
                         problem: job.problem,
                         lang: job.lang,
-                        code: job.code
+                        code: job.code,
+                        time_initiated: job.time_initiated
                     });
 
                     this.job_ids.set(job.id, [user, job.problem]);

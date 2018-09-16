@@ -19,6 +19,16 @@ import showdown from "showdown";
 import * as shared_types from "../shared/types";
 import { UserModel } from "./models/user_model";
 import ScoringSystem from "./scoring_system";
+import { BaseRenderer } from "./renderers/base_renderer";
+import { ProblemDescriptionRenderer } from "./renderers/problem_description_renderer";
+import { ProblemSubmitRenderer } from "./renderers/problem_submit_renderer";
+import { SubmissionResultRenderer } from "./renderers/submission_result_renderer";
+import { SubmissionListRenderer } from "./renderers/submission_list_renderer";
+
+interface IRenderer {
+    RENDERER_NAME: string;
+    new(jt: JobTracker, ss: ScoringSystem, db: Database): BaseRenderer;
+}
 
 export default class WebServer {
     private expressApp: express.Application;
@@ -26,6 +36,8 @@ export default class WebServer {
     private job_tracker: JobTracker;
     private database: Database;
     private scoringSystem: ScoringSystem;
+
+    private renderers: Map<string, BaseRenderer>;
 
     public constructor(job_tracker: JobTracker, ipc_server: IPCServer, database: Database, scoringSystem: ScoringSystem) {
         this.expressApp = express();
@@ -36,6 +48,23 @@ export default class WebServer {
         this.ipc_server = ipc_server;
         this.database = database;
         this.scoringSystem = scoringSystem;
+
+        this.renderers = new Map();
+
+        this.add_renderer(ProblemDescriptionRenderer);
+        this.add_renderer(ProblemSubmitRenderer);
+        this.add_renderer(SubmissionResultRenderer);
+        this.add_renderer(SubmissionListRenderer);
+    }
+
+    private add_renderer(renderer: IRenderer) {
+        let ren = new renderer(this.job_tracker, this.scoringSystem, this.database);
+
+        this.renderers.set(renderer.RENDERER_NAME, ren);
+    }
+
+    private get_renderer(renderer: IRenderer): BaseRenderer | undefined {
+        return this.renderers.get(renderer.RENDERER_NAME);
     }
 
     protected setupApiRoutes() {
@@ -138,7 +167,7 @@ export default class WebServer {
             if (req.session && req.session.user)
                 res.render("index", {
                     navbar: { selected_tab: 0 },
-                    name: req.session.user.first_name
+                    name: req.session.user.nickname
                 });
             else
                 res.render("index", {
@@ -151,7 +180,7 @@ export default class WebServer {
             app.route("/login")
                 .get(redirectToLeaderboard, (req, res) => {
                     res.render("login", {
-                        navbar: { selected_tab: 0 },
+                        navbar: { selected_tab: -1 },
                     });
                 })
                 .post(async (req, res) => {
@@ -168,8 +197,7 @@ export default class WebServer {
                             req.session.user = {
                                 username: user.getDataValue("username"),
                                 email: user.getDataValue("email"),
-                                first_name: user.getDataValue("first_name"),
-                                last_name: user.getDataValue("last_name"),
+                                nickname: user.getDataValue("nickname"),
                             };
                         }
                         res.redirect("/");
@@ -187,24 +215,26 @@ export default class WebServer {
         signup: {
             app.route("/signup")
                 .get(redirectToLeaderboard, (req, res) => {
-                    res.render("signup", { navbar: { selected_tab : -1 }});
+                    res.render("signup", { navbar: { selected_tab: -1 } });
                 })
                 .post(async (req, res) => {
                     try {
+                        if (req.body.password != req.body.confirm_password) {
+                            throw new Error("Passwords do not match");
+                        }
+
                         let user = await this.database.getModel(UserModel).create({
                             username: req.body.username,
-                            email: "",
+                            email: req.body.email,
                             password_hash: await UserModel.generatePassword(req.body.password),
-                            first_name: "UNKNOWN",
-                            last_name: "UNKNOWN"
+                            nickname: req.body.nickname
                         });
 
                         if (req.session && user != null) {
                             req.session.user = {
                                 username: user.getDataValue("username"),
                                 email: user.getDataValue("email"),
-                                first_name: user.getDataValue("first_name"),
-                                last_name: user.getDataValue("last_name"),
+                                nickname: user.getDataValue("nickname"),
                             };
                         }
 
@@ -218,73 +248,23 @@ export default class WebServer {
         }
 
         problems: {
-
             app.get("/problems/:problem_name", requireLogin, async (req, res) => {
                 if (req.session == null) return;
 
-                let problem = this.scoringSystem.getProblem(req.params.problem_name);
+                let renderer = this.get_renderer(ProblemDescriptionRenderer);
+                if (renderer == null) return;
 
-                if (problem == undefined) {
-                    res.render("problem/description", {
-                        navbar: { selected_tab: 1 },
-                        problem_description: `<span>Problem "${req.params.problem_name}" not found.</span>`
-                    });
-                    return;
-                }
-
-                let showdown_conv = new showdown.Converter();
-                let desc_html = showdown_conv.makeHtml(problem.description);
-
-                let sidebar_problems = await this.get_sidebar_problems(req.params.problem_name, req.session.user.username);
-
-                let has_submissions: boolean = false;
-                for await (let j of this.job_tracker.get_jobs_by_username_and_problem(req.session.user.username, req.params.problem_name)) {
-                    has_submissions = true;
-                    break;
-                }
-
-                res.render("problem/description", {
-                    navbar: { selected_tab: 1 },
-                    problem: {
-                        description: desc_html,
-                        dir_name: problem.dir_name,
-                        name: problem.name,
-                        wrong_answer_attempts: problem.wrong_answer_attempts,
-                        other_bad_attempts: problem.other_bad_attempts,
-                        timed_out_attempts: problem.timed_out_attempts,
-                        correct_attempts: problem.correct_attempts,
-                        attempts: problem.attempts,
-                        time_limit: (problem.time_limit / 1000).toString() + " seconds",
-                        has_submissions
-                    },
-                    sidebar_problems
-                });
+                renderer.render(res, req.params.problem_name, req.session.user.username);
             });
 
             app.route("/problems/:problem_name/submit")
                 .get(requireLogin, async (req, res) => {
                     if (req.session == null) return;
 
-                    let problem = this.scoringSystem.getProblem(req.params.problem_name);
+                    let renderer = this.get_renderer(ProblemSubmitRenderer);
+                    if (renderer == null) return;
 
-                    if (problem == undefined) {
-                        res.render("problem/description", {
-                            navbar: { selected_tab: 1 },
-                            problem_description: `<span>Problem "${req.params.problem_name}" not found.</span>`
-                        })
-                        return;
-                    }
-
-                    let sidebar_problems = await this.get_sidebar_problems(req.params.problem_name, req.session.user.username);
-
-                    res.render("problem/submit", {
-                        navbar: { selected_tab: 1 },
-                        problem: {
-                            dir_name: problem.dir_name,
-                            name: problem.name,
-                        },
-                        sidebar_problems
-                    });
+                    renderer.render(res, req.params.problem_name, req.session.user.username);
                 })
                 .post(requireLogin, async (req, res) => {
                     if (req.files != null && req.session) {
@@ -296,8 +276,8 @@ export default class WebServer {
                                 code, lang, problem
                             };
 
-                            let job_id = await this.ipc_server.request_test(test);
-                            this.job_tracker.add_job(job_id, req.session.user.username, test);
+                            let [job_id, start_time] = await this.ipc_server.request_test(test);
+                            this.job_tracker.add_job(job_id, start_time, req.session.user.username, test);
 
                             res.redirect("/submission_results?" + querystring.stringify({ id: job_id }));
                             return;
@@ -309,47 +289,20 @@ export default class WebServer {
 
             app.get("/submission_results", requireLogin, async (req, res) => {
                 if (req.session == null) return;
-                if (req.query.id == null) {
-                    res.write("No id supplied");
-                    res.end();
-                    return;
-                }
 
-                let sidebar_problems = await this.get_sidebar_problems('test1', req.session.user.username);
+                let renderer = this.get_renderer(SubmissionResultRenderer);
+                if (renderer == null) return;
 
-                let job = this.job_tracker.get_job(req.query.id);
-                if (job == undefined) {
-                    res.write("No submission with id'" + req.query.id + "' found.");
-                    res.end();
-                    return;
-                }
+                renderer.render(res, req.query.id, req.session.user.username);
+            });
 
-                if (job.username != req.session.user.username) {
-                    res.write(`The job with id '${req.query.id}' does not belong to '${req.session.user.username}'`);
-                    res.end();
-                    return;
-                }
+            app.get("/submissions", requireLogin, async (req, res) => {
+                if (req.session == null) return;
 
-                let problem = this.scoringSystem.getProblem(job.problem);
-                if (problem == null) return;
+                let renderer = this.get_renderer(SubmissionListRenderer);
+                if (renderer == null) return;
 
-                let language_name = "";
-                switch (job.lang) {
-                    case "c": language_name = "C"; break;
-                    case "cpp": language_name = "C++"; break;
-                    case "py": language_name = "Python"; break;
-                }
-
-                res.render("submission_result", {
-                    navbar: { selected_tab: 1 },
-                    problem: {
-                        dir_name: problem.dir_name,
-                        name: problem.name,
-                    },
-                    sidebar_problems,
-                    job,
-                    language_name
-                });
+                renderer.render(res, req.session.user.username, req.query.problem);
             });
         }
     }
@@ -360,37 +313,5 @@ export default class WebServer {
         return this.expressApp.listen(PORT, () => {
             console.log("Server started and listening on port:", PORT)
         });
-    }
-
-
-    //Helper Functions used in routes
-    private async get_sidebar_problems(problem_name: string, username: string) {
-        let sidebar_problems = [];
-
-        let all_problems = this.scoringSystem.getProblems();
-        for (let prob of all_problems) {
-            let hasCompleted = false;
-            let hasWrong = false;
-
-            for await (let j of this.job_tracker.get_jobs_by_username(username)) {
-                if (j.problem != prob.dir_name) continue;
-
-                if (j.status.kind == "COMPLETED") {
-                    hasCompleted = true;
-                    break;
-                } else {
-                    hasWrong = true;
-                }
-            }
-
-            sidebar_problems.push({
-                name: prob.name,
-                dir_name: prob.dir_name,
-                completed: hasCompleted,
-                wrong_attempt: hasWrong,
-            });
-        }
-
-        return sidebar_problems;
     }
 }

@@ -15,7 +15,8 @@ function createJob(sub: shared_types.IPCJobSubmission): shared_types.Job {
 		username: "JOBS DO NOT NEED USERNAMES",
 		problem: sub.problem,
 		lang: sub.lang,
-		code: sub.code
+		code: sub.code,
+		time_initiated: Date.now()
 	}
 }
 
@@ -36,7 +37,8 @@ function main() {
 
 			ipc.of.ccmaster.emit("cctester.set_job_id", {
 				job_id: job.id,
-				ret_id: vals.ret_id
+				ret_id: vals.ret_id,
+				time: job.time_initiated,
 			});
 
 			for await (let update of checker.process_job(job)) {

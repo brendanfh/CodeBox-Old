@@ -53,7 +53,7 @@ export default class IPCServer {
             }
 
             if (data.ret_id != undefined && data.job_id != undefined) {
-                this.resolve_map["wait_for_job_id"][data.ret_id](data.job_id);
+                this.resolve_map["wait_for_job_id"][data.ret_id]([data.job_id, data.time]);
             }
         });
 
@@ -89,7 +89,7 @@ export default class IPCServer {
     }
 
     //Returns whether or not it has a connected ipc-socket
-    public async request_test(sub: shared_types.IPCJobSubmission): Promise<shared_types.JobID> {
+    public async request_test(sub: shared_types.IPCJobSubmission): Promise<[shared_types.JobID, number]> {
         if (this.cctester_socket == null) {
             throw "Socket not connected";
         }
@@ -97,11 +97,11 @@ export default class IPCServer {
         let ret_id: string = genUUID();
 
         ipc.server.emit(this.cctester_socket, "cctester.create_job", { ret_id, sub });
-        let job_id = await this.wait_for_job_id(ret_id);
-        return job_id;
+        let job_info = await this.wait_for_job_id(ret_id);
+        return job_info;
     }
 
-    public wait_for_job_id(ret_id: string): Promise<shared_types.JobID> {
+    public wait_for_job_id(ret_id: string): Promise<[shared_types.JobID, number]> {
         return new Promise((res, rej) => {
             this.resolve_map["wait_for_job_id"][ret_id] = res;
         });
