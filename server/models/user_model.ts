@@ -35,6 +35,7 @@ export class UserModel extends BaseModel<UserModel_T> {
             },
             email: {
                 type: Sequelize.STRING,
+                unique: true,
                 allowNull: false,
             }
         }

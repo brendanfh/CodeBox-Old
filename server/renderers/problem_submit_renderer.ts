@@ -6,7 +6,7 @@ export class ProblemSubmitRenderer extends BaseRenderer {
     public static RENDERER_NAME: string = "ProblemSubmitRenderer";
 
     public async render(res: express.Response, problem_name: string, username: string): Promise<void> {
-        let problem = this.scoring_system.getProblem(problem_name);
+        let problem = this.scoring_system.get_problem(problem_name);
 
         if (problem == undefined) {
             res.render("problem/description", {

@@ -115,11 +115,12 @@ main {
   visibility: hidden;
 }
 
-.problem-name {
+.main-header {
   width: 92%;
-  margin-top: 1rem;
+  margin-top: 0;
   margin-left: 4%;
   margin-right: 4%;
+  padding-top: 1.5rem;
   font-size: 3rem;
   text-align: center;
   border-bottom: 2px solid #444444;
@@ -142,7 +143,6 @@ main {
   background-image: url(/static/imgs/grain_background.png);
   background-color: #111;
   background-repeat: repeat;
-  min-height: calc(100vh - 47px);
   width: 100%;
 }
 
@@ -156,6 +156,7 @@ main {
   box-shadow: 0 10px 0 0 transparent, 0 10px 0 0 transparent, 10px 0 0 0 transparent, 0 8px 8px 2px rgba(0, 0, 0, 0.5);
   background: #003252;
   position: relative;
+  min-height: calc(100vh - 47px);
 }
 .sidebar-problem-list .sidebar-problem {
   width: 100%;
@@ -603,6 +604,56 @@ main {
 }
 .problem-stats-container .problem-stats:hover .problem-stats-tooltip {
   opacity: 100;
+}
+
+.my-account-container {
+  text-align: center;
+  width: 40%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.my-account-container .my-account-header {
+  width: 100%;
+  text-align: left;
+  font-size: 24pt;
+  margin-top: 10px;
+}
+.my-account-container label {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-size: 16pt;
+  margin-top: 20px;
+}
+.my-account-container input[type=text], .my-account-container input[type=password] {
+  width: 100%;
+  border: none;
+  background: #00588f;
+  color: white;
+  border-radius: 4px;
+  font-size: 20pt;
+  padding: 8px;
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);
+}
+.my-account-container input[type=text][readonly], .my-account-container input[type=password][readonly] {
+  background: #00385c;
+}
+.my-account-container input[type=submit] {
+  width: 50%;
+  border: none;
+  background: #00588f;
+  color: white;
+  border-radius: 4px;
+  font-size: 16pt;
+  padding: 12px;
+  margin-top: 20px;
+  margin-bottom: 50px;
+  transition: background-color 200ms;
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+.my-account-container input[type=submit]:hover {
+  background: #0077c2;
 }
 
 /*# sourceMappingURL=core.css.map */

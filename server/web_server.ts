@@ -25,10 +25,11 @@ import { ProblemSubmitRenderer } from "./renderers/problem_submit_renderer";
 import { SubmissionResultRenderer } from "./renderers/submission_result_renderer";
 import { SubmissionListRenderer } from "./renderers/submission_list_renderer";
 import { ProblemListRenderer } from "./renderers/problem_list_renderer";
+import { AccountRenderer } from "./renderers/account_renderer";
 
-interface IRenderer {
+interface IRenderer<T extends BaseRenderer> {
     RENDERER_NAME: string;
-    new(jt: JobTracker, ss: ScoringSystem, db: Database): BaseRenderer;
+    new(jt: JobTracker, ss: ScoringSystem, db: Database): T
 }
 
 export default class WebServer {
@@ -57,16 +58,17 @@ export default class WebServer {
         this.add_renderer(SubmissionResultRenderer);
         this.add_renderer(SubmissionListRenderer);
         this.add_renderer(ProblemListRenderer);
+        this.add_renderer(AccountRenderer);
     }
 
-    private add_renderer(renderer: IRenderer) {
+    private add_renderer<T extends BaseRenderer>(renderer: IRenderer<T>) {
         let ren = new renderer(this.job_tracker, this.scoringSystem, this.database);
 
         this.renderers.set(renderer.RENDERER_NAME, ren);
     }
 
-    private get_renderer(renderer: IRenderer): BaseRenderer | undefined {
-        return this.renderers.get(renderer.RENDERER_NAME);
+    private get_renderer<T extends BaseRenderer>(renderer: IRenderer<T>): T | undefined {
+        return this.renderers.get(renderer.RENDERER_NAME) as T;
     }
 
     protected setupApiRoutes() {
@@ -178,7 +180,7 @@ export default class WebServer {
                 });
         });
 
-        login: {
+        account: {
             app.route("/login")
                 .get(redirectToLeaderboard, (req, res) => {
                     res.render("login", {
@@ -205,16 +207,14 @@ export default class WebServer {
                         res.redirect("/");
                     }
                 });
-        }
 
-        app.get("/logout", (req, res) => {
-            if (req.session)
-                req.session.user = null;
+            app.get("/logout", (req, res) => {
+                if (req.session)
+                    req.session.user = null;
 
-            res.redirect("/login");
-        });
+                res.redirect("/login");
+            });
 
-        signup: {
             app.route("/signup")
                 .get(redirectToLeaderboard, (req, res) => {
                     res.render("signup", { navbar: { selected_tab: -1 } });
@@ -247,6 +247,15 @@ export default class WebServer {
                         res.redirect("/signup");
                     }
                 })
+
+            app.get("/account", requireLogin, (req, res) => {
+                if (req.session == null) return;
+
+                let renderer = this.get_renderer(AccountRenderer);
+                if (renderer == null) return;
+
+                renderer.render(res, req.session.user.username);
+            });
         }
 
         problems: {

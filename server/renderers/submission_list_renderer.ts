@@ -33,7 +33,7 @@ export class SubmissionListRenderer extends BaseRenderer {
             },
 
             get_problem_name(problem_dir_name: string) {
-                let problem = self.scoring_system.getProblem(problem_dir_name);
+                let problem = self.scoring_system.get_problem(problem_dir_name);
                 if (problem == null) return "---------";
 
                 return problem.name;
@@ -87,7 +87,7 @@ export class SubmissionListRenderer extends BaseRenderer {
 
         let page_title = "Submissions";
         if (problem != undefined) {
-            let prob = this.scoring_system.getProblem(problem);
+            let prob = this.scoring_system.get_problem(problem);
             if (prob != undefined) {
                 page_title = prob.name + " submissions";
             }

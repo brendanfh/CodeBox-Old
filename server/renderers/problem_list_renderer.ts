@@ -13,7 +13,7 @@ export class ProblemListRenderer extends BaseRenderer {
     public async render(res: express.Response, username: string): Promise<void> {
         let problems = new Array<ProblemExtension>();
 
-        for (let prob of this.scoring_system.getProblems()) {
+        for (let prob of this.scoring_system.get_problems()) {
             problems.push({
                 ...prob,
                 users_side_status: "",

@@ -1,0 +1,43 @@
+<% layout("/partials/master") %>
+
+<div class="content main-header">
+    My Account
+</div>
+
+<div class="content my-account-container">
+    <div class="my-account-header">Account info</div>
+    <form action="/account/change_info" method="POST">
+        <div>
+            <label for="">Username</label>
+            <input type="text" readonly value="<%= user.username %>" />
+        </div>
+        <div>
+            <label for="nickname">Nickname</label>
+            <input type="text" name="nickname" value="<%= user.nickname %>" />
+        </div>
+        <div>
+            <label for="email">Email</label>
+            <input type="text" name="email" value="<%= user.email %>" />
+        </div>
+
+        <input type="submit" value="Update account info" />
+    </form>
+
+    <div class="my-account-header">Change password</div>
+    <form action="/account/change_password" method="POST">
+        <div>
+            <label for="current_password">Current password</label>
+            <input type="password" name="current_password" value="" />
+        </div>
+        <div>
+            <label for="new_password_1">New password</label>
+            <input type="password" name="new_password_1" value="" />
+        </div>
+        <div>
+            <label for="new_password_2">Confirm password</label>
+            <input type="password" name="new_password_2" value="" />
+        </div>
+
+        <input type="submit" value="Update password" />
+    </form>
+</div>

@@ -26,7 +26,7 @@ export class SubmissionResultRenderer extends BaseRenderer {
             return;
         }
 
-        let problem = this.scoring_system.getProblem(job.problem);
+        let problem = this.scoring_system.get_problem(job.problem);
         if (problem == null) return;
 
         let language_name = this.get_language_name(job.lang);

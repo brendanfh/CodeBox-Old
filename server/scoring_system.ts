@@ -97,11 +97,20 @@ export default class ScoringSystem {
             prob_model.update(prob);
     }
 
-    public getProblem(name: string): ProblemModel_T | undefined {
+    public get_problem(name: string): ProblemModel_T | undefined {
         return this.problems.get(name);
     }
 
-    public getProblems(): Array<ProblemModel_T> {
+    public get_problem_by_letter(letter: string): ProblemModel_T | undefined {
+        for (let prob of this.problems.values()) {
+            if (prob.letter == letter) {
+                return prob;
+            }
+        }
+        return undefined;
+    }
+
+    public get_problems(): Array<ProblemModel_T> {
         let probs = [];
         for (let p of this.problems.values()) {
             probs.push(p);

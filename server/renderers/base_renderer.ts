@@ -33,7 +33,7 @@ export abstract class BaseRenderer {
     protected async get_sidebar_problems(username: string) {
         let sidebar_problems = [];
 
-        let all_problems = this.scoring_system.getProblems();
+        let all_problems = this.scoring_system.get_problems();
         for (let prob of all_problems) {
             let hasCompleted = false;
             let hasWrong = false;
