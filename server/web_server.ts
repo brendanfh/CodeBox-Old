@@ -191,13 +191,15 @@ export default class WebServer {
                     let username = req.body.username,
                         password = req.body.password;
 
-                    let user = await this.database.getModel(UserModel).findByUsername(username);
-                    if (!user) {
-                        res.redirect("/login");
-                    } else if (!(await UserModel.validatePassword(user.getDataValue("password_hash"), password))) {
+                    let validated = await this.database.getModel(UserModel).validateUser(username, password);
+
+                    if (!validated) {
                         res.redirect("/login");
                     } else {
                         if (req.session) {
+                            let user = await this.database.getModel(UserModel).findByUsername(username);
+                            if (user == null) return;
+
                             req.session.user = {
                                 username: user.getDataValue("username"),
                                 email: user.getDataValue("email"),
@@ -225,12 +227,12 @@ export default class WebServer {
                             throw new Error("Passwords do not match");
                         }
 
-                        let user = await this.database.getModel(UserModel).create({
-                            username: req.body.username,
-                            email: req.body.email,
-                            password_hash: await UserModel.generatePassword(req.body.password),
-                            nickname: req.body.nickname
-                        });
+                        let user = await this.database.getModel(UserModel).createWithValues(
+                            req.body.username,
+                            req.body.password,
+                            req.body.email,
+                            req.body.nickname
+                        );
 
                         if (req.session && user != null) {
                             req.session.user = {
@@ -254,7 +256,47 @@ export default class WebServer {
                 let renderer = this.get_renderer(AccountRenderer);
                 if (renderer == null) return;
 
-                renderer.render(res, req.session.user.username);
+                renderer.render(res, req.session.user.username, req.query.status);
+            });
+
+            app.post("/account/change_info", requireLogin, async (req, res) => {
+                if (req.session == null) return;
+
+                let worked = await this.database.getModel(UserModel).updateInfoByUsername(
+                    req.session.user.username,
+                    req.body.email,
+                    req.body.nickname
+                );
+
+                if (worked) {
+                    res.redirect("/account?status=change_info_successful");
+                } else {
+                    res.redirect("/account?status=change_info_failed");
+                }
+            });
+
+            app.post("/account/change_password", requireLogin, async (req, res) => {
+                if (req.session == null) return;
+                
+                let user_model = this.database.getModel(UserModel);
+
+                let username = req.session.user.username;
+                let curr_password = req.body.current_password;
+                let new_password_1 = req.body.new_password_1;
+                let new_password_2 = req.body.new_password_2;
+
+                let validated = await user_model.validateUser(username, curr_password);
+
+                if (!validated) {
+                    res.redirect("/account?status=change_password_failed");
+                } else {
+                    if (new_password_1 == new_password_2) {
+                        user_model.updatePasswordByUsername(username, new_password_1);
+                        res.redirect("/account?status=change_password_successful");
+                    } else {
+                        res.redirect("/account?status=change_password_failed");
+                    }
+                }
             });
         }
 

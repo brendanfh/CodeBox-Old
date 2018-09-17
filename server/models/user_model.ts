@@ -41,6 +41,15 @@ export class UserModel extends BaseModel<UserModel_T> {
         }
     }
 
+    public async createWithValues(username: string, password: string, email: string, nickname: string) {
+        return await this.create({
+            username,
+            password_hash: await UserModel.generatePassword(password),
+            email,
+            nickname
+        });
+    }
+
     //Convenience Functions
     public async findByUsername(username: string): Promise<Sequelize.Instance<UserModel_T> | null> {
         if (this.sql_model == null) return Promise.resolve(null);
@@ -49,6 +58,38 @@ export class UserModel extends BaseModel<UserModel_T> {
                 username: username
             }
         });
+    }
+
+    public async updateInfoByUsername(username: string, email: string, nickname: string): Promise<boolean> {
+        if (this.sql_model == null) return false;
+
+        let [num] = await this.sql_model.update({
+            email,
+            nickname
+        }, {
+            where: { username }
+        });
+
+        return num > 0;
+    }
+
+    public async updatePasswordByUsername(username: string, new_password: string): Promise<void> {
+        if (this.sql_model == null) return;
+
+        await this.sql_model.update({
+            password_hash: await UserModel.generatePassword(new_password)
+        }, {
+            where: { username }
+        });
+    }
+
+    public async validateUser(username: string, password: string): Promise<boolean> {
+        if (this.sql_model == null) return false;
+
+        let user = await this.sql_model.find({ where: { username }});
+        if (user == null) return false;
+
+        return UserModel.validatePassword(user.getDataValue("password_hash"), password);
     }
 
     public static generatePassword(password: string): Promise<string> {

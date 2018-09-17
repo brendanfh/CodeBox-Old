@@ -5,11 +5,27 @@
 </div>
 
 <div class="content my-account-container">
+    <div class="good-alert <%=(status == 'change_info_successful' ? '' : 'hidden')%>">
+        Updated account info successfully
+    </div>
+
+    <div class="failed-alert <%=(status == 'change_info_failed' ? '' : 'hidden')%>">
+        Updating account info failed
+    </div>
+
+    <div class="good-alert <%=(status == 'change_password_successful' ? '' : 'hidden')%>">
+        Updated password successfully
+    </div>
+
+    <div class="failed-alert <%=(status == 'change_password_failed' ? '' : 'hidden')%>">
+        Updating password failed
+    </div>
+
     <div class="my-account-header">Account info</div>
     <form action="/account/change_info" method="POST">
         <div>
             <label for="">Username</label>
-            <input type="text" readonly value="<%= user.username %>" />
+            <input type="text" readonly name="username" value="<%= user.username %>" />
         </div>
         <div>
             <label for="nickname">Nickname</label>
