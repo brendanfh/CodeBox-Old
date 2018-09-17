@@ -290,7 +290,7 @@ export default class WebServer {
                             let [job_id, start_time] = await this.ipc_server.request_test(test);
                             this.job_tracker.add_job(job_id, start_time, req.session.user.username, test);
 
-                            res.redirect("/submission_results?" + querystring.stringify({ id: job_id }));
+                            res.redirect("/submissions/result?" + querystring.stringify({ id: job_id }));
                             return;
                         }
                     }
@@ -298,7 +298,7 @@ export default class WebServer {
                     res.redirect("/submit_error");
                 });
 
-            app.get("/submission_results", requireLogin, async (req, res) => {
+            app.get("/submissions/result", requireLogin, async (req, res) => {
                 if (req.session == null) return;
 
                 let renderer = this.get_renderer(SubmissionResultRenderer);

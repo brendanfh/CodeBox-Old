@@ -17,6 +17,12 @@ body {
     background-repeat: repeat;
 }
 
+@media screen and (max-width: 1000px) {
+    :root {
+        font-size: 12px;
+    }
+}
+
 a {
     text-decoration: none;
     color: inherit;
@@ -52,7 +58,7 @@ main {
     margin-left: 4%;
     margin-right: 4%;
 
-    font-size: 3em;
+    font-size: 3rem;
     text-align: center; 
 
     border-bottom: 2px solid #444444;
@@ -70,7 +76,7 @@ main {
 
 .problem-description {
     margin-top: 15px;
-    font-size: 1.5em;
+    font-size: 1.5rem;
 
     p {
         margin-bottom: 20px;
@@ -152,7 +158,7 @@ main {
         color: $black;
         text-align: center;
 
-        font-size: 28px;
+        font-size: 1.75rem;
         line-height: 50px;
 
         &:hover {
@@ -170,7 +176,7 @@ main {
         background: $primary;
         text-align: center;
 
-        font-size: 28px;
+        font-size: 1.75rem;
         line-height: 50px;
 
         &:hover {
@@ -198,11 +204,12 @@ main {
     text-align: center;
 
     form {
-        font-size: 2em;
+        font-size: 2rem;
         padding: 20px;
 
         div {
             margin-bottom: 30px;
+            min-width: 300px;
         }
 
         select {
@@ -210,6 +217,7 @@ main {
             font-size: 1.1rem;
 
             width: 25%;
+            min-width: 300px;
             padding: 10px;
             border: none;
             border-radius: 0px;
@@ -227,6 +235,7 @@ main {
             overflow: hidden;
             display: inline-block;
             width: 25%;
+            min-width: 300px;
 
             span {
                 background-color: $primary-dark;
@@ -252,6 +261,7 @@ main {
             color: white;
 
             width: 25%;
+            min-width: 300px;
             font-size: 1.4rem;
             padding: 10px;
             border: none;
@@ -387,7 +397,7 @@ main {
     box-shadow: 0px 4px 4px 1px #151515;
 
     pre {
-        font-size: 12pt;
+        font-size: 1rem;
 
         .hljs-ln {
             td {
@@ -447,12 +457,12 @@ main {
             text-align: center;
             line-height: 60px;
 
-            font-size: 14pt;
+            font-size: 1.25rem;
         }
     }
 }
 
-.view-all-submissions-btn {
+.submissions-bottom-btn {
     width: 30%;
     min-height: 40px; 
     margin: 20px auto 0px auto;
@@ -519,9 +529,18 @@ main {
             border: none;
             background-color: $primary-dark;
             padding: 8px;
-            font-size: 1.5em;
+            font-size: 1.5rem;
             box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);
             border-radius: 4px;
+        }
+
+        .login-form-disclaimer {
+            text-align: center;
+
+            a {
+                color: #8a8aff;
+                text-decoration: underline;
+            }
         }
     }
 }
@@ -536,7 +555,7 @@ main {
     .listed-problem {
         display: grid;
         grid-template-columns: 32px minmax(200px, 3fr) minmax(200px, 1fr) minmax(100px, 1fr);
-        grid-template-rows: 60px 20px;
+        grid-template-rows: 60px 10px;
 
         line-height: 60px;
         font-size: 2rem;
@@ -594,7 +613,7 @@ main {
         display: inline-block;
         padding: 0;
         margin: 0;
-        min-height: 20px;
+        min-height: 10px;
         flex-grow: 1;
        
         &.correct-color {
@@ -616,10 +635,10 @@ main {
         .problem-stats-tooltip {
             max-width: 150px;
             width: 100%;
-            height: 40px;
+            height: 30px;
 
             text-align: center;
-            line-height: 50px;
+            line-height: 30px;
             cursor: default;
 
             font-size: 14px;

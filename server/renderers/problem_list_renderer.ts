@@ -61,7 +61,7 @@ export class ProblemListRenderer extends BaseRenderer {
         }
 
         res.render("problem/list", {
-            navbar: { selected_tab: 1 },
+            navbar: this.get_navbar(this.navbar_tabs.problems, username),
             problems
         });
     }

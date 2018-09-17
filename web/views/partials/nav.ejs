@@ -1,8 +1,28 @@
 <div class="navbar">
+    <div></div> <!-- Dummy element to make sure flex box works -->
     <ul>
         <a href="/"><li class=<%= navbar.selected_tab == 0 ? "selected" : ""%>>Leaderboard</li></a>
         <a href="/problems"><li class=<%= navbar.selected_tab == 1 ? "selected" : ""%>>Problems</li></a>
         <a href="/submissions"><li class=<%= navbar.selected_tab == 2 ? "selected" : ""%>>Submissions</li></a>
         <a href="/help"><li class=<%= navbar.selected_tab == 3 ? "selected" : ""%>>Help</li></a>
     </ul>
+
+    <% if (navbar.username) { %>
+        <div class="navbar-username">
+            <%= navbar.username %>
+            <div class="navbar-username-dropdown">
+                <a href="/account"><div class="navbar-username-dropdown-option">My Account</div></a>
+                <a href="/logout"><div class="navbar-username-dropdown-option">Log out</div></a>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="navbar-username">
+            <a href="/login">Log in</a>
+            <div class="navbar-username-dropdown">
+                <a href="/signup">
+                    <div class="navbar-username-dropdown-option">Sign up</div>
+                </a>
+            </div>
+        </div>
+    <% } %>
 </div>

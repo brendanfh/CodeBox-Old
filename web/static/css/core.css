@@ -1,22 +1,25 @@
 .navbar {
-  z-index: 100;
+  z-index: 10000;
   width: 100%;
   background: #0077c2;
   height: 47px;
-  box-shadow: 0px 0px 4.9px 0.7px inset #000;
-  display: flex;
-  justify-content: space-around;
+  position: relative;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.7);
+  display: grid;
+  grid-template-columns: 1fr 6fr 1fr;
 }
 .navbar ul {
-  display: flex;
+  display: block;
+  text-align: center;
+  font-size: 0;
 }
 .navbar ul a li {
-  display: block;
+  margin: 0;
+  display: inline-block;
   cursor: pointer;
   font-size: 24px;
   list-style: none;
   line-height: 40px;
-  flex-grow: 1;
   padding-left: 30px;
   padding-right: 30px;
   padding-top: 4px;
@@ -27,6 +30,43 @@
 .navbar ul a li.selected, .navbar ul a li:hover {
   border-bottom: 2px solid #ffe766;
   color: white;
+}
+.navbar .navbar-username {
+  position: relative;
+  font-size: 24px;
+  line-height: 40px;
+  text-align: center;
+  padding-top: 4px;
+  cursor: pointer;
+  background-color: #00385c;
+  transition: background-color 150ms;
+}
+.navbar .navbar-username:hover, .navbar .navbar-username.selected {
+  background-color: #00588f;
+}
+.navbar .navbar-username:hover .navbar-username-dropdown, .navbar .navbar-username.selected .navbar-username-dropdown {
+  display: block;
+}
+.navbar .navbar-username a {
+  display: block;
+  width: 100%;
+}
+.navbar .navbar-username .navbar-username-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+}
+.navbar .navbar-username .navbar-username-dropdown .navbar-username-dropdown-option {
+  border-bottom: 1px solid #00588f;
+  background: #00385c;
+}
+.navbar .navbar-username .navbar-username-dropdown .navbar-username-dropdown-option:last-child {
+  border-bottom: none;
+}
+.navbar .navbar-username .navbar-username-dropdown .navbar-username-dropdown-option:hover {
+  background-color: #00588f;
 }
 
 * {
@@ -43,6 +83,11 @@ body {
   background-repeat: repeat;
 }
 
+@media screen and (max-width: 1000px) {
+  :root {
+    font-size: 12px;
+  }
+}
 a {
   text-decoration: none;
   color: inherit;
@@ -75,7 +120,7 @@ main {
   margin-top: 1rem;
   margin-left: 4%;
   margin-right: 4%;
-  font-size: 3em;
+  font-size: 3rem;
   text-align: center;
   border-bottom: 2px solid #444444;
 }
@@ -87,7 +132,7 @@ main {
 
 .problem-description {
   margin-top: 15px;
-  font-size: 1.5em;
+  font-size: 1.5rem;
 }
 .problem-description p {
   margin-bottom: 20px;
@@ -155,7 +200,7 @@ main {
   background: #FFD700;
   color: #000;
   text-align: center;
-  font-size: 28px;
+  font-size: 1.75rem;
   line-height: 50px;
 }
 .problem-info .submit-btn:hover {
@@ -169,7 +214,7 @@ main {
   color: #000;
   background: #42a5f5;
   text-align: center;
-  font-size: 28px;
+  font-size: 1.75rem;
   line-height: 50px;
 }
 .problem-info .submissions-btn:hover {
@@ -193,16 +238,18 @@ main {
   text-align: center;
 }
 .submission-submit-form form {
-  font-size: 2em;
+  font-size: 2rem;
   padding: 20px;
 }
 .submission-submit-form form div {
   margin-bottom: 30px;
+  min-width: 300px;
 }
 .submission-submit-form form select {
   text-align: center;
   font-size: 1.1rem;
   width: 25%;
+  min-width: 300px;
   padding: 10px;
   border: none;
   border-radius: 0px;
@@ -217,6 +264,7 @@ main {
   overflow: hidden;
   display: inline-block;
   width: 25%;
+  min-width: 300px;
 }
 .submission-submit-form form .file-upload-wrapper span {
   background-color: #0077c2;
@@ -238,6 +286,7 @@ main {
   background-color: #0077c2;
   color: white;
   width: 25%;
+  min-width: 300px;
   font-size: 1.4rem;
   padding: 10px;
   border: none;
@@ -343,7 +392,7 @@ main {
   box-shadow: 0px 4px 4px 1px #151515;
 }
 .result-source-code pre {
-  font-size: 12pt;
+  font-size: 1rem;
 }
 .result-source-code pre .hljs-ln td {
   padding-right: 8px;
@@ -392,10 +441,10 @@ main {
 .submission-list .submission div {
   text-align: center;
   line-height: 60px;
-  font-size: 14pt;
+  font-size: 1.25rem;
 }
 
-.view-all-submissions-btn {
+.submissions-bottom-btn {
   width: 30%;
   min-height: 40px;
   margin: 20px auto 0px auto;
@@ -408,7 +457,7 @@ main {
   box-shadow: 0px 1px 4px 1px rgba(0, 0, 0, 0.7);
   transition: background-color 150ms;
 }
-.view-all-submissions-btn:hover {
+.submissions-bottom-btn:hover {
   background-color: #0077c2;
 }
 
@@ -450,9 +499,16 @@ main {
   border: none;
   background-color: #0077c2;
   padding: 8px;
-  font-size: 1.5em;
+  font-size: 1.5rem;
   box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);
   border-radius: 4px;
+}
+.login-form form .login-form-disclaimer {
+  text-align: center;
+}
+.login-form form .login-form-disclaimer a {
+  color: #8a8aff;
+  text-decoration: underline;
 }
 
 .problem-list {
@@ -465,7 +521,7 @@ main {
 .problem-list .listed-problem {
   display: grid;
   grid-template-columns: 32px minmax(200px, 3fr) minmax(200px, 1fr) minmax(100px, 1fr);
-  grid-template-rows: 60px 20px;
+  grid-template-rows: 60px 10px;
   line-height: 60px;
   font-size: 2rem;
   cursor: pointer;
@@ -511,7 +567,7 @@ main {
   display: inline-block;
   padding: 0;
   margin: 0;
-  min-height: 20px;
+  min-height: 10px;
   flex-grow: 1;
 }
 .problem-stats-container .problem-stats.correct-color {
@@ -529,9 +585,9 @@ main {
 .problem-stats-container .problem-stats .problem-stats-tooltip {
   max-width: 150px;
   width: 100%;
-  height: 40px;
+  height: 30px;
   text-align: center;
-  line-height: 50px;
+  line-height: 30px;
   cursor: default;
   font-size: 14px;
   padding: 5px 0;

@@ -37,6 +37,7 @@ export default class ScoringSystem {
                         name: "",
                         description: "",
                         time_limit: 0,
+                        letter: '_',
                         correct_attempts: 0,
                         timed_out_attempts: 0,
                         wrong_answer_attempts: 0,
@@ -57,6 +58,7 @@ export default class ScoringSystem {
             let info_contents = fs.readFileSync(path.resolve(problem_dir, dir_name, info_file), { encoding: "utf8" });
             let time_limit: number = 0.0;
             let name: string = "";
+            let letter: string = "";
 
             try {
                 let problem_info = JSON.parse(info_contents);
@@ -64,6 +66,7 @@ export default class ScoringSystem {
                 if (problem_info.time_limit && problem_info.name) {
                     time_limit = parseInt(problem_info.time_limit);
                     name = problem_info.name;
+                    letter = problem_info.letter;
                 } else {
                     throw new Error();
                 }
@@ -80,6 +83,7 @@ export default class ScoringSystem {
             p.description = description;
             p.name = name;
             p.time_limit = time_limit;
+            p.letter = letter;
             this.database.getModel(ProblemModel).update(p);
 
             this.problems.set(dir_name, p);
@@ -97,8 +101,23 @@ export default class ScoringSystem {
         return this.problems.get(name);
     }
 
-    public getProblems(): IterableIterator<ProblemModel_T> {
-        return this.problems.values();
+    public getProblems(): Array<ProblemModel_T> {
+        let probs = [];
+        for (let p of this.problems.values()) {
+            probs.push(p);
+        }
+
+        probs.sort((a, b) => {
+            if (a.letter < b.letter) {
+                return -1;
+            } else if (a.letter > b.letter) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+
+        return probs;
     }
 
     public update_problem_stats(job_id: shared_types.JobID, job_tracker: JobTracker) {

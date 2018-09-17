@@ -1,27 +1,30 @@
 .navbar {
-    z-index: 100;
+    z-index: 10000;
     width: 100%;
     background: $primary-dark;
     height: $navbar-height;
+    position: relative;
 
     //@include elevate(2px);
-    box-shadow: 0px 0px 4.9px .7px inset $black;
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.7);
 
-    display: flex;
-    justify-content: space-around;
+    display: grid;
+    grid-template-columns: 1fr 6fr 1fr;
 
     ul {
-        display: flex;
+        display: block;
+        text-align: center;
+        font-size: 0;
 
         a li {
-            display: block;
+            margin: 0;
+            display: inline-block;
             cursor: pointer;
 
             font-size: 24px;
 
             list-style: none;
             line-height: 40px;
-            flex-grow: 1;
             padding-left: 30px;
             padding-right: 30px;
             padding-top: 4px;
@@ -36,6 +39,55 @@
                 border-bottom: 2px solid $secondary-light;
                 color: white;
                 //padding-top: 0px;
+            }
+        }
+    }
+
+    .navbar-username {
+        position: relative;
+
+        font-size: 24px;
+        line-height: 40px;
+
+        text-align: center;
+        padding-top: 4px;
+
+        cursor: pointer;
+
+        background-color: darken($primary-dark, 20);
+        transition: background-color 150ms;
+
+        &:hover, &.selected {
+            background-color: darken($primary-dark, 10);
+
+            .navbar-username-dropdown {
+                display: block;
+            }
+        }
+
+        a {
+            display: block;
+            width: 100%;
+        }
+
+        .navbar-username-dropdown {
+            display: none;
+
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+
+            .navbar-username-dropdown-option {
+                border-bottom: 1px solid darken($primary-dark, 10);
+                &:last-child {
+                    border-bottom: none;
+                }
+
+                background: darken($primary-dark, 20);
+                &:hover {
+                    background-color: darken($primary-dark, 10);
+                }
             }
         }
     }

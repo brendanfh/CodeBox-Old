@@ -109,7 +109,7 @@ export class SubmissionListRenderer extends BaseRenderer {
         let help_funcs = this.helpful_funcs();
 
         res.render("submissions/submissions", {
-            navbar: { selected_tab: 2 },
+            navbar: this.get_navbar(this.navbar_tabs.submissions, username),
             jobs,
             problem: {
                 dir_name: problem,

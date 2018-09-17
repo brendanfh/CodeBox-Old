@@ -19,7 +19,7 @@ export class ProblemSubmitRenderer extends BaseRenderer {
         let sidebar_problems = await this.get_sidebar_problems(username);
 
         res.render("problem/submit", {
-            navbar: { selected_tab: 1 },
+            navbar: this.get_navbar(this.navbar_tabs.problems, username),
             problem: {
                 dir_name: problem.dir_name,
                 name: problem.name,

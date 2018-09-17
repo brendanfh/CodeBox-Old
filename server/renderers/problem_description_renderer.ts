@@ -29,7 +29,7 @@ export class ProblemDescriptionRenderer extends BaseRenderer {
         }
 
         res.render("problem/description", {
-            navbar: { selected_tab: 1 },
+            navbar: this.get_navbar(this.navbar_tabs.problems, username),
             problem: {
                 description: desc_html,
                 dir_name: problem.dir_name,

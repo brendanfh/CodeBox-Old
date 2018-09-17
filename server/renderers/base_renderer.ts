@@ -4,8 +4,19 @@ import JobTracker from "../job_tracker";
 import ScoringSystem from "../scoring_system";
 import { Database } from "../database";
 
+export type NavbarData = {
+    selected_tab: number;
+    username: string | undefined
+}
 
 export abstract class BaseRenderer {
+    protected navbar_tabs = {
+        "leaderboard": 0,
+        "problems": 1,
+        "submissions": 2,
+        "help": 3,
+    }
+
     protected job_tracker: JobTracker;
     protected scoring_system: ScoringSystem;
     protected database: Database;
@@ -55,6 +66,13 @@ export abstract class BaseRenderer {
             case "cpp": return "C++";
             case "py": return "Python";
             default: return "";
+        }
+    }
+
+    protected get_navbar(tab: number, username: string | undefined) {
+        return {
+            selected_tab: tab,
+            username: username
         }
     }
 }
