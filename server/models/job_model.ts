@@ -5,15 +5,15 @@ import { Database } from "../database";
 import * as shared_types from "../../shared/types";
 
 export interface JobModel_T extends shared_types.Job {
-    status_str: string
-}
+    status_str: shared_types.JobStatusStrs
+};
 
 export class JobModel extends BaseModel<JobModel_T> {
 
     public constructor() {
         super();
-        
-        this.force_sync = true;
+
+        this.force_sync = false;
     }
 
     public static MODEL_NAME: string = "Job";
@@ -42,7 +42,7 @@ export class JobModel extends BaseModel<JobModel_T> {
                 type: Sequelize.JSON,
                 allowNull: false
             },
-            status_str:{
+            status_str: {
                 type: Sequelize.STRING,
                 allowNull: false
             },
@@ -57,5 +57,80 @@ export class JobModel extends BaseModel<JobModel_T> {
                 type: Sequelize.INTEGER
             }
         }
+    }
+
+    public async update(job_id: string, new_data: Partial<JobModel_T>) {
+        if (this.sql_model == null) return;
+
+        this.sql_model.update(new_data, { where: { id: job_id } });
+    }
+
+    public async findById(job_id: string): Promise<JobModel_T | null> {
+        if (this.sql_model == null) return null;
+
+        return this.sql_model.find({
+            where: { id: job_id }
+        });
+    }
+
+    public async findByUsername(username: string): Promise<JobModel_T[]> {
+        if (this.sql_model == null) return [];
+
+        return this.sql_model.findAll({
+            where: { username: username }
+        });
+    }
+
+    public async findByProblem(problem: string): Promise<JobModel_T[]> {
+        if (this.sql_model == null) return [];
+
+        return this.sql_model.findAll({
+            where: { problem: problem }
+        });
+    }
+
+    public async findByUsernameAndProblem(username: string, problem: string): Promise<JobModel_T[]> {
+        if (this.sql_model == null) return [];
+
+        return this.sql_model.findAll({
+            where: { username: username, problem: problem }
+        });
+    }
+
+    public async findByUsernameAndStatus(username: string, status: shared_types.JobStatusStrs): Promise<JobModel_T[]> {
+        if (this.sql_model == null) return [];
+
+        return this.sql_model.findAll({
+            where: { username: username, status_str: status }
+        });
+    }
+
+    public async findByUsernameAndStatuses(username: string, status: shared_types.JobStatusStrs[]): Promise<JobModel_T[]> {
+        if (this.sql_model == null) return [];
+
+        return this.sql_model.findAll({
+            where: {
+                username: username,
+                status_str: {
+                    [Sequelize.Op.or]: status
+                }
+            }
+        });
+    }
+
+    public async findByProblemAndStatus(problem: string, status: shared_types.JobStatusStrs): Promise<JobModel_T[]> {
+        if (this.sql_model == null) return [];
+
+        return this.sql_model.findAll({
+            where: { problem: problem, status_str: status }
+        });
+    }
+
+    public async findByAll(username: string, problem: string, status: shared_types.JobStatusStrs): Promise<JobModel_T[]> {
+        if (this.sql_model == null) return [];
+
+        return this.sql_model.findAll({
+            where: { username: username, problem: problem, status_str: status }
+        });
     }
 }

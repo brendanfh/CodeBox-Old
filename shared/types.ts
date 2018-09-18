@@ -4,6 +4,18 @@ export type IPCJobSubmission = {
 	code: string
 }
 
+export type JobStatusStrs
+	= "STARTED"
+	| "BAD_LANGUAGE"
+	| "BAD_PROBLEM"
+	| "COMPILING"
+	| "COMPILE_ERR"
+	| "RUNNING"
+	| "COMPLETED"
+	| "WRONG_ANSWER"
+	| "TIME_LIMIT_EXCEEDED"
+	| "BAD_EXECUTION";
+
 export type JobStatus
 	= { kind: "STARTED" }
 	| { kind: "BAD_LANGUAGE" }

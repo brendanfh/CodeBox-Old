@@ -25,7 +25,7 @@ export class ProblemListRenderer extends BaseRenderer {
             let side_status = "pending-status";
             let status = "";
 
-            job_for: for (let job of this.job_tracker.get_jobs_by_username_and_problem(username, prob.dir_name)) {
+            job_for: for await (let job of this.job_tracker.get_jobs_by_username_and_problem(username, prob.dir_name)) {
                 switch (job.status.kind) {
                     case "COMPLETED":
                         side_status = "good-status";

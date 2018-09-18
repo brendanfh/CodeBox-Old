@@ -38,14 +38,27 @@ export abstract class BaseRenderer {
             let hasCompleted = false;
             let hasWrong = false;
 
-            for await (let j of this.job_tracker.get_jobs_by_username(username)) {
-                if (j.problem != prob.dir_name) continue;
+            for await (let _ of this.job_tracker.get_jobs_by_all(username, prob.dir_name, "COMPLETED")) {
+                hasCompleted = true;
+                break;
+            }
 
-                if (j.status.kind == "COMPLETED") {
-                    hasCompleted = true;
-                    break;
-                } else {
+            wrong_check: {
+                for await (let _ of this.job_tracker.get_jobs_by_all(username, prob.dir_name, "WRONG_ANSWER")) {
                     hasWrong = true;
+                    break wrong_check;
+                }
+                for await (let _ of this.job_tracker.get_jobs_by_all(username, prob.dir_name, "TIME_LIMIT_EXCEEDED")) {
+                    hasWrong = true;
+                    break wrong_check;
+                }
+                for await (let _ of this.job_tracker.get_jobs_by_all(username, prob.dir_name, "BAD_EXECUTION")) {
+                    hasWrong = true;
+                    break wrong_check;
+                }
+                for await (let _ of this.job_tracker.get_jobs_by_all(username, prob.dir_name, "COMPILE_ERR")) {
+                    hasWrong = true;
+                    break wrong_check;
                 }
             }
 

@@ -129,8 +129,8 @@ export default class ScoringSystem {
         return probs;
     }
 
-    public update_problem_stats(job_id: shared_types.JobID, job_tracker: JobTracker) {
-        let job = job_tracker.get_job(job_id);
+    public async update_problem_stats(job_id: shared_types.JobID, job_tracker: JobTracker) {
+        let job = await job_tracker.get_job(job_id);
         if (job == null) return;
 
         let problem = this.problems.get(job.problem);

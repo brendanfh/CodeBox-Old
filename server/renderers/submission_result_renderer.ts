@@ -13,7 +13,7 @@ export class SubmissionResultRenderer extends BaseRenderer {
 
         let sidebar_problems = await this.get_sidebar_problems(username);
 
-        let job = this.job_tracker.get_job(job_id);
+        let job = await this.job_tracker.get_job(job_id);
         if (job == undefined) {
             res.write("No submission with id'" + job_id + "' found.");
             res.end();

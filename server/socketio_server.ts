@@ -17,12 +17,12 @@ export class SocketIOServer {
     }
 
     protected on_connection(socket: socket_io.Socket) {
-        socket.on("request_submission_updates", (data) => {
+        socket.on("request_submission_updates", async (data) => {
             if (data.job_id == null) return;
 
             this.subscriptions.set(data.job_id, socket);
 
-            let job = this.job_tracker.get_job(data.job_id);
+            let job = await this.job_tracker.get_job(data.job_id);
             if (job != null) {
                 //Send the status as it is right now
                 socket.emit("submission_update", job.status);

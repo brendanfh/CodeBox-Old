@@ -205,9 +205,6 @@ export default class WebServer {
                                 email: user.getDataValue("email"),
                                 nickname: user.getDataValue("nickname"),
                             };
-
-                            //Dont need to await this but doing so don't hurt
-                            await this.job_tracker.load_user(req.session.user.username);
                         }
                         res.redirect("/");
                     }
@@ -215,7 +212,6 @@ export default class WebServer {
 
             app.get("/logout", (req, res) => {
                 if (req.session) {
-                    this.job_tracker.clear_user_from_memory(req.session.user.username);
                     req.session.user = null;
                 }
 

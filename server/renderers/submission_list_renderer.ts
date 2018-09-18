@@ -95,7 +95,7 @@ export class SubmissionListRenderer extends BaseRenderer {
 
         let gen_jobs = this.job_tracker.get_jobs_by_username(username);
         let jobs = new Array<shared_types.Job>();
-        for (let j of gen_jobs) {
+        for await (let j of gen_jobs) {
             if (problem) {
                 if (j.problem == problem)
                     jobs.push(j);
