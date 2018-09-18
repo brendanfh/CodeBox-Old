@@ -214,8 +214,10 @@ export default class WebServer {
                 });
 
             app.get("/logout", (req, res) => {
-                if (req.session)
+                if (req.session) {
+                    this.job_tracker.clear_user_from_memory(req.session.user.username);
                     req.session.user = null;
+                }
 
                 res.redirect("/login");
             });

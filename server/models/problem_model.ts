@@ -21,8 +21,9 @@ export class ProblemModel extends BaseModel<ProblemModel_T> {
         this.force_sync = false;
     }
 
-    public getName(): string {
-        return "Problem";
+    public static MODEL_NAME: string = "Problem";
+    public getName() {
+        return ProblemModel.MODEL_NAME;
     }
 
     protected getModelAttributes(): Sequelize.DefineModelAttributes<ProblemModel_T> {

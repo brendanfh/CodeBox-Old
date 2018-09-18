@@ -8,14 +8,16 @@ import { ProblemModel } from "./models/problem_model";
 
 import { setupAsyncIterators } from "../shared/utils";
 import { SocketIOServer } from "./socketio_server";
+import { JobModel } from "./models/job_model";
 setupAsyncIterators();
 
 
 async function setupDatabase(database: Database) {
 	await database.initConnection();
 
-	database.addModel(new UserModel());
-	database.addModel(new ProblemModel());
+	database.addModel(UserModel);
+	database.addModel(ProblemModel);
+	database.addModel(JobModel);
 	await database.setupModels();
 }
 

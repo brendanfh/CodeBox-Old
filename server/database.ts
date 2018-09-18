@@ -2,6 +2,11 @@ import path from "path";
 import Sequelize, { SequelizeLoDash } from "sequelize";
 import { BaseModel } from "./models/base_model";
 
+export interface IBaseModel<R, T extends BaseModel<R>> {
+    MODEL_NAME: string;
+    new(): T;
+}
+
 export class Database {
     protected models: Map<string, BaseModel<any>>;
 
@@ -26,15 +31,12 @@ export class Database {
         }
     }
 
-    public addModel(mdl: BaseModel<any>): void {
-        this.models.set(mdl.getName(), mdl);
+    public addModel(mdl: IBaseModel<any, any>): void {
+        this.models.set(mdl.MODEL_NAME, new mdl());
     }
 
-    public getModel<T extends BaseModel<any>>(con: new () => T): T {
-        let t: T = new con();
-        let name = t.getName();
-
-        return (this.models.get(name)) as T;
+    public getModel<R, T extends BaseModel<R>>(mdl: IBaseModel<R, T>): T {
+        return (this.models.get(mdl.MODEL_NAME)) as T;
     }
 
     public async setupModels(): Promise<void> {
@@ -44,7 +46,7 @@ export class Database {
             let updateFunc = async () => {
                 if (this.sqlz == null) throw new Error("DB NOT CONNECTED");
 
-                await model[1].define(this.sqlz);
+                await model[1].define(this, this.sqlz);
             }
 
             proms.push(updateFunc());

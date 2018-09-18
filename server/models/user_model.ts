@@ -15,8 +15,9 @@ export class UserModel extends BaseModel<UserModel_T> {
         super();
     }
 
-    public getName(): string {
-        return "User";
+    public static MODEL_NAME: string = "User";
+    public getName() {
+        return UserModel.MODEL_NAME;
     }
 
     protected getModelAttributes(): Sequelize.DefineModelAttributes<UserModel_T> {

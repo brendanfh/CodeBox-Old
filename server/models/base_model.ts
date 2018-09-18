@@ -1,4 +1,5 @@
 import sequelize from "sequelize";
+import { Database } from "../database";
 
 export abstract class BaseModel<T> {
     protected sql_model: sequelize.Model<sequelize.Instance<T> & T, T> | null = null;
@@ -16,9 +17,13 @@ export abstract class BaseModel<T> {
     public abstract getName(): string;
     protected abstract getModelAttributes(): sequelize.DefineModelAttributes<T>;
 
-    public async define(sequelize: sequelize.Sequelize): Promise<void> {
+    public async define(db: Database, sequelize: sequelize.Sequelize): Promise<void> {
         this.sql_model = sequelize.define(this.getName(), this.getModelAttributes());
         await this.sql_model.sync({ force: this.force_sync });
+        this.postDefinition(db);
+    }
+
+    protected postDefinition(db: Database): void {
     }
 
     public async create(t: T): Promise<(sequelize.Instance<T> & T) | null> {
