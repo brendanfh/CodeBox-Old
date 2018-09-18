@@ -584,8 +584,7 @@ main {
   background: #595959;
 }
 .problem-stats-container .problem-stats .problem-stats-tooltip {
-  max-width: 150px;
-  width: 100%;
+  width: 150px;
   height: 30px;
   text-align: center;
   line-height: 30px;
@@ -600,7 +599,8 @@ main {
   top: 0;
   left: calc(50% - 75px);
   opacity: 0;
-  transition: opacity 150ms;
+  transition: opacity 30ms;
+  z-index: 100;
 }
 .problem-stats-container .problem-stats:hover .problem-stats-tooltip {
   opacity: 100;

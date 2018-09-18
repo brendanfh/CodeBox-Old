@@ -635,8 +635,8 @@ main {
         }
 
         .problem-stats-tooltip {
-            max-width: 150px;
-            width: 100%;
+            width: 150px;
+            //width: 100%;
             height: 30px;
 
             text-align: center;
@@ -657,7 +657,8 @@ main {
             left: calc(50% - 75px);
 
             opacity: 0;
-            transition: opacity 150ms;
+            transition: opacity 30ms;
+            z-index: 100;
         }
 
         &:hover .problem-stats-tooltip {
