@@ -205,6 +205,9 @@ export default class WebServer {
                                 email: user.getDataValue("email"),
                                 nickname: user.getDataValue("nickname"),
                             };
+
+                            //Dont need to await this but doing so don't hurt
+                            await this.job_tracker.load_user(req.session.user.username);
                         }
                         res.redirect("/");
                     }
@@ -277,7 +280,7 @@ export default class WebServer {
 
             app.post("/account/change_password", requireLogin, async (req, res) => {
                 if (req.session == null) return;
-                
+
                 let user_model = this.database.getModel(UserModel);
 
                 let username = req.session.user.username;

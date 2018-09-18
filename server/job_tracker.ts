@@ -7,9 +7,6 @@ export type UsersJobs = Map<string, Map<string, shared_types.Job[]>>;
 export type JobIDMap = Map<string, [string, string]>;
 
 export default class JobTracker {
-    //TODO: store jobs in jobs folder with each user name being a different file to easily get jobs for a given user
-
-
     private static JOB_FOLDER_LOCATION: string = "/jobs";
 
     private jobs: UsersJobs;
@@ -18,8 +15,6 @@ export default class JobTracker {
     public constructor() {
         this.jobs = new Map();
         this.job_ids = new Map();
-
-        this.load_all_from_file();
     }
 
     public add_job(id: shared_types.JobID, time_started: number, username: string, sub: shared_types.IPCJobSubmission) {
@@ -118,6 +113,47 @@ export default class JobTracker {
         yield* problem_jobs;
     }
 
+    public async load_user(username: string) {
+        if (process.env.ROOT_DIR == undefined) {
+            throw new Error("ROOT_DIR NOT SET");
+        }
+
+        let job_dir = path.join(process.env.ROOT_DIR, JobTracker.JOB_FOLDER_LOCATION);
+
+        fs.readFile(path.join(job_dir, `${username}.dat`), { encoding: 'utf8' }, (err, data) => {
+            if (err) {
+                console.log(`[INFO] No jobs found for user: ${username}`);
+                return;
+            }
+
+            let job_obj = JSON.parse(data);
+
+            for (let job of job_obj) {
+                let user_jobs = this.jobs.get(username);
+                if (user_jobs == null) {
+                    let new_map = new Map();
+                    this.jobs.set(username, new_map);
+                    user_jobs = new_map;
+                }
+
+                let problem_jobs = new Array();
+                user_jobs.set(job.problem, problem_jobs);
+
+                problem_jobs.push({
+                    id: job.id,
+                    username: username,
+                    status: job.status,
+                    problem: job.problem,
+                    lang: job.lang,
+                    code: job.code,
+                    time_initiated: job.time_initiated
+                });
+
+                this.job_ids.set(job.id, [username, job.problem]);
+            }
+        });
+    }
+
     private async load_all_from_file() {
         if (process.env.ROOT_DIR == undefined) {
             throw new Error("ROOT_DIR NOT SET");
@@ -134,43 +170,7 @@ export default class JobTracker {
 
         for (let user of users) {
             if (user == null) continue;
-            fs.readFile(path.join(job_dir, `${user}.dat`), { encoding: 'utf8' }, (err, data) => {
-                if (err) {
-                    console.log(`[WARNING] Failed to load jobs for user: ${user}`);
-                    return;
-                }
-                if (user == null) return;
-
-                let job_obj = JSON.parse(data);
-
-                for (let job of job_obj) {
-                    let user_jobs = this.jobs.get(user);
-                    if (user_jobs == null) {
-                        let new_map = new Map();
-                        this.jobs.set(user, new_map);
-                        user_jobs = new_map;
-                    }
-
-                    let problem_jobs = user_jobs.get(job.problem);
-                    if (problem_jobs == null) {
-                        let new_arr = new Array();
-                        user_jobs.set(job.problem, new_arr);
-                        problem_jobs = new_arr;
-                    }
-
-                    problem_jobs.push({
-                        id: job.id,
-                        username: user,
-                        status: job.status,
-                        problem: job.problem,
-                        lang: job.lang,
-                        code: job.code,
-                        time_initiated: job.time_initiated
-                    });
-
-                    this.job_ids.set(job.id, [user, job.problem]);
-                }
-            });
+            this.load_user(user);
         }
     }
 
@@ -203,5 +203,9 @@ export default class JobTracker {
         for (let user of this.jobs.keys()) {
             await this.save_user_to_file(user);
         }
+    }
+
+    public clear_user_from_memory(username: string) {
+        this.jobs.delete(username);
     }
 }
