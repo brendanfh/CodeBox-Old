@@ -1,0 +1,45 @@
+.leaderboard {
+    text-align: center;
+
+    .leaderboard-grid {
+        display: inline-grid;
+
+        box-shadow: 0px 4px 0px 0px rgba(0, 0, 0, 0.7);
+
+        .leaderboard-header {
+            grid-row: 1 / span 1;
+            background-color: darken($primary-dark, 30);
+            color: white;
+
+            line-height: 64px;
+            font-size: 2rem;
+        }
+
+        .leaderboard-username {
+            grid-column: 1 / span 1;
+            background-color: darken($primary-dark, 20);
+            color: white;
+            line-height: 48px;
+            font-size: 1.7rem;
+
+            &.alternate-color {
+                background-color: darken($primary-dark, 10);
+            }
+        }
+
+        .leaderboard-submission {
+            background-color: darken($primary-dark, 20);
+            &.alternate-color {
+                background-color: darken($primary-dark, 10);
+            }
+
+            .good {
+                background-color: $test-case-good;
+            }
+
+            .bad {
+                background-color: $test-case-bad;
+            }
+        }
+    }
+}

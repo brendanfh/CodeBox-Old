@@ -69,6 +69,43 @@
   background-color: #00588f;
 }
 
+.leaderboard {
+  text-align: center;
+}
+.leaderboard .leaderboard-grid {
+  display: inline-grid;
+  box-shadow: 0px 4px 0px 0px rgba(0, 0, 0, 0.7);
+}
+.leaderboard .leaderboard-grid .leaderboard-header {
+  grid-row: 1/span 1;
+  background-color: #001929;
+  color: white;
+  line-height: 64px;
+  font-size: 2rem;
+}
+.leaderboard .leaderboard-grid .leaderboard-username {
+  grid-column: 1/span 1;
+  background-color: #00385c;
+  color: white;
+  line-height: 48px;
+  font-size: 1.7rem;
+}
+.leaderboard .leaderboard-grid .leaderboard-username.alternate-color {
+  background-color: #00588f;
+}
+.leaderboard .leaderboard-grid .leaderboard-submission {
+  background-color: #00385c;
+}
+.leaderboard .leaderboard-grid .leaderboard-submission.alternate-color {
+  background-color: #00588f;
+}
+.leaderboard .leaderboard-grid .leaderboard-submission .good {
+  background-color: #50ff50;
+}
+.leaderboard .leaderboard-grid .leaderboard-submission .bad {
+  background-color: #ff5050;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -324,7 +361,7 @@ main {
 .result-progress-bar-outline {
   width: 80%;
   min-width: 650px;
-  height: 40px;
+  height: 25px;
   margin: 20px auto 0px auto;
   background: #00588f;
   box-shadow: 0px 2px 5px 2px #151515;
@@ -549,7 +586,9 @@ main {
 }
 .problem-list .listed-problem .listed-problem-letter {
   text-align: center;
+  line-height: 70px;
   background: #00385c;
+  grid-row: 1/-1;
 }
 .problem-list .listed-problem .listed-problem-name {
   text-align: left;
@@ -565,7 +604,7 @@ main {
   font-size: 1.2rem;
 }
 .problem-list .listed-problem .problem-stats-container {
-  grid-column: 2/-1;
+  grid-column: 3/-1;
 }
 
 .problem-stats-container {

@@ -176,12 +176,12 @@ export default class WebServer {
         app.get("/", (req, res) => {
             if (req.session && req.session.user)
                 res.render("index", {
-                    navbar: { selected_tab: 0 },
+                    navbar: { selected_tab: -1 },
                     name: req.session.user.nickname
                 });
             else
                 res.render("index", {
-                    navbar: { selected_tab: 0 },
+                    navbar: { selected_tab: -1 },
                     name: ""
                 });
         });
