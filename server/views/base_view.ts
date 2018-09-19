@@ -9,7 +9,7 @@ export type NavbarData = {
     username: string | undefined
 }
 
-export abstract class BaseRenderer {
+export abstract class BaseView {
     protected navbar_tabs = {
         "leaderboard": 0,
         "problems": 1,

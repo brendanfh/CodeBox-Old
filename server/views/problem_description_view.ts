@@ -1,9 +1,9 @@
 import express from "express";
 import showdown from "showdown";
 
-import { BaseRenderer } from "./base_renderer";
+import { BaseView } from "./base_view";
 
-export class ProblemDescriptionRenderer extends BaseRenderer {
+export class ProblemDescriptionView extends BaseView {
     public static RENDERER_NAME: string = "ProblemDescriptionRenderer";
 
     public async render(res: express.Response, problem_name: string, username: string): Promise<void> {

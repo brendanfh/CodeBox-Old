@@ -1,8 +1,8 @@
 import express from "express";
 
-import { BaseRenderer } from "./base_renderer";
+import { BaseView } from "./base_view";
 
-export class ProblemSubmitRenderer extends BaseRenderer {
+export class ProblemSubmitView extends BaseView {
     public static RENDERER_NAME: string = "ProblemSubmitRenderer";
 
     public async render(res: express.Response, problem_name: string, username: string): Promise<void> {

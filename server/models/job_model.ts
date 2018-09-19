@@ -126,11 +126,17 @@ export class JobModel extends BaseModel<JobModel_T> {
         });
     }
 
-    public async findByAll(username: string, problem: string, status: shared_types.JobStatusStrs): Promise<JobModel_T[]> {
+    public async findByAll(username: string, problem: string, statuses: shared_types.JobStatusStrs[], options?: Sequelize.FindOptions<JobModel_T>): Promise<JobModel_T[]> {
         if (this.sql_model == null) return [];
 
         return this.sql_model.findAll({
-            where: { username: username, problem: problem, status_str: status }
+            ...options,
+            where: {
+                username: username, problem: problem,
+                status_str: {
+                    [Sequelize.Op.or]: statuses
+                }
+            },
         });
     }
 }

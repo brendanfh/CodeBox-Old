@@ -19,15 +19,16 @@ import showdown from "showdown";
 import * as shared_types from "../shared/types";
 import { UserModel } from "./models/user_model";
 import ScoringSystem from "./scoring_system";
-import { BaseRenderer } from "./renderers/base_renderer";
-import { ProblemDescriptionRenderer } from "./renderers/problem_description_renderer";
-import { ProblemSubmitRenderer } from "./renderers/problem_submit_renderer";
-import { SubmissionResultRenderer } from "./renderers/submission_result_renderer";
-import { SubmissionListRenderer } from "./renderers/submission_list_renderer";
-import { ProblemListRenderer } from "./renderers/problem_list_renderer";
-import { AccountRenderer } from "./renderers/account_renderer";
+import { BaseView } from "./views/base_view";
+import { ProblemDescriptionView } from "./views/problem_description_view";
+import { SubmissionListView } from "./views/submission_list_view";
+import { ProblemListView } from "./views/problem_list_view";
+import { SubmissionResultView } from "./views/submission_result_view";
+import { ProblemSubmitView } from "./views/problem_submit_view";
+import { AccountView } from "./views/account_view";
+import { LeaderboardView } from "./views/leaderboard_view";
 
-interface IRenderer<T extends BaseRenderer> {
+interface IView<T extends BaseView> {
     RENDERER_NAME: string;
     new(jt: JobTracker, ss: ScoringSystem, db: Database): T
 }
@@ -39,7 +40,7 @@ export default class WebServer {
     private database: Database;
     private scoringSystem: ScoringSystem;
 
-    private renderers: Map<string, BaseRenderer>;
+    private views: Map<string, BaseView>;
 
     public constructor(job_tracker: JobTracker, ipc_server: IPCServer, database: Database, scoringSystem: ScoringSystem) {
         this.expressApp = express();
@@ -51,24 +52,25 @@ export default class WebServer {
         this.database = database;
         this.scoringSystem = scoringSystem;
 
-        this.renderers = new Map();
+        this.views = new Map();
 
-        this.add_renderer(ProblemDescriptionRenderer);
-        this.add_renderer(ProblemSubmitRenderer);
-        this.add_renderer(SubmissionResultRenderer);
-        this.add_renderer(SubmissionListRenderer);
-        this.add_renderer(ProblemListRenderer);
-        this.add_renderer(AccountRenderer);
+        this.add_view(ProblemDescriptionView);
+        this.add_view(ProblemListView);
+        this.add_view(SubmissionListView);
+        this.add_view(SubmissionResultView);
+        this.add_view(ProblemSubmitView);
+        this.add_view(AccountView);
+        this.add_view(LeaderboardView);
     }
 
-    private add_renderer<T extends BaseRenderer>(renderer: IRenderer<T>) {
+    private add_view<T extends BaseView>(renderer: IView<T>) {
         let ren = new renderer(this.job_tracker, this.scoringSystem, this.database);
 
-        this.renderers.set(renderer.RENDERER_NAME, ren);
+        this.views.set(renderer.RENDERER_NAME, ren);
     }
 
-    private get_renderer<T extends BaseRenderer>(renderer: IRenderer<T>): T | undefined {
-        return this.renderers.get(renderer.RENDERER_NAME) as T;
+    private get_view<T extends BaseView>(renderer: IView<T>): T | undefined {
+        return this.views.get(renderer.RENDERER_NAME) as T;
     }
 
     protected setupApiRoutes() {
@@ -258,7 +260,7 @@ export default class WebServer {
             app.get("/account", requireLogin, (req, res) => {
                 if (req.session == null) return;
 
-                let renderer = this.get_renderer(AccountRenderer);
+                let renderer = this.get_view(AccountView);
                 if (renderer == null) return;
 
                 renderer.render(res, req.session.user.username, req.query.status);
@@ -309,7 +311,7 @@ export default class WebServer {
             app.get("/problems", requireLogin, async (req, res) => {
                 if (req.session == null) return;
 
-                let renderer = this.get_renderer(ProblemListRenderer);
+                let renderer = this.get_view(ProblemListView);
                 if (renderer == null) return;
 
                 renderer.render(res, req.session.user.username);
@@ -318,7 +320,7 @@ export default class WebServer {
             app.get("/problems/:problem_name", requireLogin, async (req, res) => {
                 if (req.session == null) return;
 
-                let renderer = this.get_renderer(ProblemDescriptionRenderer);
+                let renderer = this.get_view(ProblemDescriptionView);
                 if (renderer == null) return;
 
                 renderer.render(res, req.params.problem_name, req.session.user.username);
@@ -328,7 +330,7 @@ export default class WebServer {
                 .get(requireLogin, async (req, res) => {
                     if (req.session == null) return;
 
-                    let renderer = this.get_renderer(ProblemSubmitRenderer);
+                    let renderer = this.get_view(ProblemSubmitView);
                     if (renderer == null) return;
 
                     renderer.render(res, req.params.problem_name, req.session.user.username);
@@ -361,7 +363,7 @@ export default class WebServer {
             app.get("/submissions/result", requireLogin, async (req, res) => {
                 if (req.session == null) return;
 
-                let renderer = this.get_renderer(SubmissionResultRenderer);
+                let renderer = this.get_view(SubmissionResultView);
                 if (renderer == null) return;
 
                 renderer.render(res, req.query.id, req.session.user.username);
@@ -370,12 +372,21 @@ export default class WebServer {
             app.get("/submissions", requireLogin, async (req, res) => {
                 if (req.session == null) return;
 
-                let renderer = this.get_renderer(SubmissionListRenderer);
+                let renderer = this.get_view(SubmissionListView);
                 if (renderer == null) return;
 
                 renderer.render(res, req.session.user.username, req.query.problem);
             });
         }
+
+        app.get("/leaderboard", requireLogin, async (req, res) => {
+            if (req.session == null) return;
+
+            let view = this.get_view(LeaderboardView);
+            if (view == null) return;
+
+            view.render(res, req.session.user.username);
+        });
     }
 
     public start(): http.Server {

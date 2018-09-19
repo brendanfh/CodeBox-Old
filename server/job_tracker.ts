@@ -63,7 +63,7 @@ export default class JobTracker {
     }
 
     public async *get_jobs_by_all(username: string, problem: string, status: shared_types.JobStatusStrs): AsyncIterableIterator<shared_types.Job> {
-        yield* (await this.job_model.findByAll(username, problem, status));
+        yield* (await this.job_model.findByAll(username, problem, [status]));
     }
 
     public async *get_solved_problems_by_username(username: string): AsyncIterableIterator<shared_types.Job> {
@@ -73,6 +73,17 @@ export default class JobTracker {
     public async *get_failed_problems_by_username(username: string): AsyncIterableIterator<shared_types.Job> {
         yield* (await this.job_model.findByUsernameAndStatuses(
             username,
+            ["WRONG_ANSWER", "TIME_LIMIT_EXCEEDED", "BAD_EXECUTION", "COMPILE_ERR"]
+        ));
+    }
+
+    public async *get_solved_problems_by_username_and_problem(username: string, problem: string): AsyncIterableIterator<shared_types.Job> {
+        yield* (await this.job_model.findByAll(username, problem, ["COMPLETED"], { order: [['time_initiated', "ASC"]] }));
+    }
+
+    public async *get_failed_problems_by_username_and_problem(username: string, problem: string): AsyncIterableIterator<shared_types.Job> {
+        yield* (await this.job_model.findByAll(
+            username, problem,
             ["WRONG_ANSWER", "TIME_LIMIT_EXCEEDED", "BAD_EXECUTION", "COMPILE_ERR"]
         ));
     }

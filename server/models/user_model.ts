@@ -68,8 +68,8 @@ export class UserModel extends BaseModel<UserModel_T> {
             email,
             nickname
         }, {
-            where: { username }
-        });
+                where: { username }
+            });
 
         return num > 0;
     }
@@ -80,17 +80,26 @@ export class UserModel extends BaseModel<UserModel_T> {
         await this.sql_model.update({
             password_hash: await UserModel.generatePassword(new_password)
         }, {
-            where: { username }
-        });
+                where: { username }
+            });
     }
 
     public async validateUser(username: string, password: string): Promise<boolean> {
         if (this.sql_model == null) return false;
 
-        let user = await this.sql_model.find({ where: { username }});
+        let user = await this.sql_model.find({ where: { username } });
         if (user == null) return false;
 
         return UserModel.validatePassword(user.getDataValue("password_hash"), password);
+    }
+
+    public async getAllUsernames(): Promise<string[]> {
+        if (this.sql_model == null) return [];
+
+        let usernames = await this.sql_model.findAll({ attributes: ["username"] });
+        if (usernames == null) return [];
+
+        return usernames.map(u => u.username);
     }
 
     public static generatePassword(password: string): Promise<string> {

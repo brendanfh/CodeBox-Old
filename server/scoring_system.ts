@@ -6,17 +6,24 @@ import JobTracker from "./job_tracker";
 
 import * as shared_types from "../shared/types";
 
-
 export default class ScoringSystem {
+    //letter to problem
     private problems: Map<string, ProblemModel_T>;
     private database: Database;
+    private job_tracker: JobTracker;
+
+    //username to score
+    private user_scores: Map<string, number>;
 
     private start_time: Date;
     private end_time: Date;
 
-    constructor(database: Database) {
+    constructor(database: Database, job_tracker: JobTracker) {
         this.problems = new Map<string, ProblemModel_T>();
         this.database = database;
+        this.job_tracker = job_tracker;
+
+        this.user_scores = new Map();
 
         this.start_time = new Date(0);
         this.end_time = new Date(0);
@@ -134,8 +141,8 @@ export default class ScoringSystem {
         return probs;
     }
 
-    public async update_problem_stats(job_id: shared_types.JobID, job_tracker: JobTracker) {
-        let job = await job_tracker.get_job(job_id);
+    public async update_problem_stats(job_id: shared_types.JobID) {
+        let job = await this.job_tracker.get_job(job_id);
         if (job == null) return;
 
         let problem = this.get_problem_by_dir_name(job.problem);
@@ -163,7 +170,53 @@ export default class ScoringSystem {
                 problem.attempts++;
         }
 
+        await this.database.getModel(ProblemModel).update(problem);
+    }
 
-        this.database.getModel(ProblemModel).update(problem);
+    public async score_user(username: string): Promise<void> {
+        let completed = 0;
+        let wrong = 0;
+        let times = new Array<number>();
+
+        for (let prob of this.problems.values()) {
+            for await (let j of this.job_tracker.get_solved_problems_by_username_and_problem(username, prob.dir_name)) {
+                completed++;
+                times.push(j.time_initiated);
+                break;
+            }
+            for await (let _ of this.job_tracker.get_failed_problems_by_username_and_problem(username, prob.dir_name)) {
+                wrong++;
+            }
+        }
+
+        let score = this.calculate_score(completed, wrong, times);
+        this.user_scores.set(username, score);
+
+        this.sort_users_by_score();
+    }
+
+    private sort_users_by_score(): void {
+        let user_scores_gen = this.user_scores.entries();
+        let user_scores = [];
+
+        for (let us of user_scores_gen) {
+            user_scores.push(us);
+        }
+
+        user_scores.sort((u1, u2) => u2[1] - u1[1]);
+
+        this.user_scores = new Map(user_scores);
+    }
+
+    private calculate_score(num_completed: number, num_wrong: number, times: number[]): number {
+        let time_diffs_sum =
+            times
+                .map(t => t - this.start_time.getTime())
+                .reduce((a, b) => a + b);
+
+        let duration = this.end_time.getTime() - this.start_time.getTime();
+        let num_problems = this.problems.size;
+
+        return 20 * num_problems * duration * (num_completed + 1) - time_diffs_sum - 900000 * num_wrong;
     }
 }

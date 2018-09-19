@@ -1,7 +1,7 @@
 import express from "express";
-import { BaseRenderer } from "./base_renderer";
+import { BaseView } from "./base_view";
 
-export class SubmissionResultRenderer extends BaseRenderer {
+export class SubmissionResultView extends BaseView {
     public static RENDERER_NAME: string = "SubmissionResultRenderer";
 
     public async render(res: express.Response, job_id: string | null, username: string): Promise<void> {

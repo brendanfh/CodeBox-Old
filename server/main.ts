@@ -26,21 +26,30 @@ async function main() {
 	let database = new Database();
 	await setupDatabase(database);
 
-	let scoring = new ScoringSystem(database);
-
 	let job_tracker = new JobTracker(database);
-	let ipc_server = new IPCServer();
+	let scoring = new ScoringSystem(database, job_tracker);
 	let socket_io_server = new SocketIOServer(job_tracker);
 
-	ipc_server.add_event_listener("cctester.job_status_update", (data, socket) => {
+	let ipc_server = new IPCServer();
+	ipc_server.add_event_listener("cctester.job_status_update", async (data, socket) => {
 		if (data.job_id != undefined && data.status != undefined) {
-			job_tracker.update_job(data.job_id, data.status);
+			//Tell the result screen of the changes
 			socket_io_server.push_update(data.job_id, data.status);
 
+			//Update the database with the job
+			await job_tracker.update_job(data.job_id, data.status);
+
+			//Update the stats of the problem
 			if (data.status.kind != "STARTED"
-				|| data.status.kind != "COMPILING"
-				|| data.status.kind != "RUNNING")
-				scoring.update_problem_stats(data.job_id, job_tracker);
+				&& data.status.kind != "COMPILING"
+				&& data.status.kind != "RUNNING") {
+				await scoring.update_problem_stats(data.job_id);
+
+				let j = await job_tracker.get_job(data.job_id);
+				if (j == null) return;
+
+				await scoring.score_user(j.username);
+			}
 		}
 	});
 
@@ -52,11 +61,10 @@ async function main() {
 
 	loadConfig(scoring);
 
-	let web_server = new WebServer(job_tracker, ipc_server, database, scoring);
-
 	ipc_server.init();
-
 	ipc_server.start();
+
+	let web_server = new WebServer(job_tracker, ipc_server, database, scoring);
 	let http_server = web_server.start();
 
 	socket_io_server.connect_to_http_server(http_server);

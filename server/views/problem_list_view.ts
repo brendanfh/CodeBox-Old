@@ -1,5 +1,5 @@
 import express from "express";
-import { BaseRenderer } from "./base_renderer";
+import { BaseView } from "./base_view";
 import { ProblemModel_T } from "../models/problem_model";
 
 interface ProblemExtension extends ProblemModel_T {
@@ -8,7 +8,7 @@ interface ProblemExtension extends ProblemModel_T {
     users_status: string
 }
 
-export class ProblemListRenderer extends BaseRenderer {
+export class ProblemListView extends BaseView {
     public static RENDERER_NAME: string = "ProblemListRenderer";
 
     public async render(res: express.Response, username: string): Promise<void> {

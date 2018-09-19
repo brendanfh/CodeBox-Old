@@ -1,8 +1,8 @@
 import express from "express";
-import { BaseRenderer } from "./base_renderer";
+import { BaseView } from "./base_view";
 import * as shared_types from "../../shared/types";
 
-export class SubmissionListRenderer extends BaseRenderer {
+export class SubmissionListView extends BaseView {
     public static RENDERER_NAME: string = "SubmissionListRenderer";
 
     private helpful_funcs() {

@@ -17,7 +17,7 @@ export function loadConfig(scoring: ScoringSystem) {
     let config = JSON.parse(config_contents);
 
     scoring.set_start_time(config.start_time);
-    scoring.set_end_time(config.start_time);
+    scoring.set_end_time(config.end_time);
 
     for (let letter in config.problems) {
         let problem_dir = config.problems[letter];
