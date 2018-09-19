@@ -74,7 +74,7 @@
 }
 .leaderboard .leaderboard-grid {
   display: inline-grid;
-  box-shadow: 0px 4px 0px 0px rgba(0, 0, 0, 0.7);
+  box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.7);
 }
 .leaderboard .leaderboard-grid .leaderboard-header {
   grid-row: 1/span 1;
@@ -99,11 +99,17 @@
 .leaderboard .leaderboard-grid .leaderboard-submission.alternate-color {
   background-color: #00588f;
 }
-.leaderboard .leaderboard-grid .leaderboard-submission .good {
-  background-color: #50ff50;
+.leaderboard .leaderboard-grid .leaderboard-submission.good {
+  background-color: #50ff50 !important;
 }
-.leaderboard .leaderboard-grid .leaderboard-submission .bad {
-  background-color: #ff5050;
+.leaderboard .leaderboard-grid .leaderboard-submission.bad {
+  background-color: #e90000 !important;
+}
+.leaderboard .leaderboard-grid .leaderboard-time {
+  background-color: #00385c;
+}
+.leaderboard .leaderboard-grid .leaderboard-time.alternate-color {
+  background-color: #00588f;
 }
 
 * {

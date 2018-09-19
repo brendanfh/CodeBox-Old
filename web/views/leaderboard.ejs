@@ -44,5 +44,11 @@
                 ></div>
             <% } %>
         <% } %>
+
+        <% for (let i = 2; i <= 6; i++) { %>
+            <div class="leaderboard-time <%= (i % 2 == 1 ? 'alternate-color' : '') %>"
+                style="grid-column: 17 / span 1; grid-row: <%= i %> / span 1;"
+            ></div>
+        <% } %>
     </div> 
 </div>

@@ -28,7 +28,7 @@ async function main() {
 
 	let job_tracker = new JobTracker(database);
 	let scoring = new ScoringSystem(database, job_tracker);
-	let socket_io_server = new SocketIOServer(job_tracker);
+	let socket_io_server = new SocketIOServer(job_tracker, scoring);
 
 	let ipc_server = new IPCServer();
 	ipc_server.add_event_listener("cctester.job_status_update", async (data, socket) => {
@@ -49,13 +49,14 @@ async function main() {
 				if (j == null) return;
 
 				await scoring.score_user(j.username);
+				socket_io_server.push_leaderboard_update();
 			}
 		}
 	});
 
 	ipc_server.add_event_listener("cctester.job_completed", (data, socket) => {
 		if (data.job_id != undefined) {
-			socket_io_server.remove_subscription(data.job_id);
+			socket_io_server.remove_submission_subscription(data.job_id);
 		}
 	});
 

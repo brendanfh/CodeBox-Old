@@ -11,7 +11,7 @@ type LeaderboardProblemStatus
     | "WRONG"
     | "CORRECT";
 
-type LPSMap = Map<string, LeaderboardProblemStatus>;
+type LPSMap = { [k: string]: LeaderboardProblemStatus };
 
 export default class ScoringSystem {
     //letter to problem
@@ -195,11 +195,11 @@ export default class ScoringSystem {
         let wrong = 0;
         let times = new Array<number>();
 
-        let statuses : LPSMap = new Map();
+        let statuses : LPSMap = {};
         let total_minutes = 0;
 
         for (let [letter, prob] of this.problems.entries()) {
-            statuses.set(letter, "NON_ATTEMPTED");
+            statuses[letter] = "NON_ATTEMPTED";
 
             let hasCorrect = false;
             for await (let j of this.job_tracker.get_solved_problems_by_username_and_problem(username, prob.dir_name)) {
@@ -208,13 +208,13 @@ export default class ScoringSystem {
 
                 total_minutes += (j.time_initiated / (1000 * 60));
 
-                statuses.set(letter, "CORRECT");
+                statuses[letter] = "CORRECT";
                 hasCorrect = true;
                 break;
             }
             for await (let _ of this.job_tracker.get_failed_problems_by_username_and_problem(username, prob.dir_name)) {
                 if (!hasCorrect)
-                    statuses.set(letter, "WRONG");
+                    statuses[letter] = "WRONG";
 
                 wrong++;
             }

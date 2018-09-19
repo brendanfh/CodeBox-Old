@@ -4,7 +4,7 @@
     .leaderboard-grid {
         display: inline-grid;
 
-        box-shadow: 0px 4px 0px 0px rgba(0, 0, 0, 0.7);
+        box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.7);
 
         .leaderboard-header {
             grid-row: 1 / span 1;
@@ -33,12 +33,23 @@
                 background-color: darken($primary-dark, 10);
             }
 
-            .good {
-                background-color: $test-case-good;
+            &.good {
+                background-color: $test-case-good !important;
             }
 
-            .bad {
-                background-color: $test-case-bad;
+            &.bad {
+                background-color: darken($test-case-bad, 20) !important;
+            }
+        }
+
+        .leaderboard-time {
+            color: white;
+            line-height: 48px;
+            font-size: 1.1rem;
+
+            background-color: darken($primary-dark, 20);
+            &.alternate-color {
+                background-color: darken($primary-dark, 10);
             }
         }
     }
