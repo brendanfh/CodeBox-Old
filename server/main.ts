@@ -9,6 +9,7 @@ import { ProblemModel } from "./models/problem_model";
 import { setupAsyncIterators } from "../shared/utils";
 import { SocketIOServer } from "./socketio_server";
 import { JobModel } from "./models/job_model";
+import { loadConfig } from "./config_loader";
 setupAsyncIterators();
 
 
@@ -49,7 +50,7 @@ async function main() {
 		}
 	});
 
-	await scoring.load_problems();
+	loadConfig(scoring);
 
 	let web_server = new WebServer(job_tracker, ipc_server, database, scoring);
 

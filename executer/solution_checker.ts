@@ -12,14 +12,10 @@ import path from "path";
 import * as shared_types from "../shared/types";
 import { TempFile } from "./file_saver";
 
-type Problem = {
-    test_cases: Array<{
-        input_file: string,
-        output: string
-    }>,
-
-    time_limit: number
-}
+type ProblemTestCases = Array<{
+    input_file: string,
+    output: string
+}>
 
 let clean_output = (otpt: string): string =>
     otpt.split("\n")
@@ -42,10 +38,10 @@ export class SolutionChecker {
         "py": new BaseCompiler(),
     };
 
-    protected problems: Map<string, Problem>;
+    protected problems: Map<string, ProblemTestCases>;
 
     constructor() {
-        this.problems = new Map<string, Problem>();
+        this.problems = new Map<string, ProblemTestCases>();
     }
 
     public load_problems(): void {
@@ -76,25 +72,7 @@ export class SolutionChecker {
                 throw new Error("Insufficient files for problem: " + prob);
             }
 
-            let problem: Problem = {
-                test_cases: [],
-                time_limit: -1,
-            };
-
-            let info_contents = fs.readFileSync(path.resolve(p_dir, prob, info_file), { encoding: "utf8" });
-            let time_limit: number = 0.0;
-            try {
-                let problem_info = JSON.parse(info_contents);
-                if (problem_info.time_limit) {
-                    time_limit = parseInt(problem_info.time_limit);
-                } else {
-                    throw new Error();
-                }
-            } catch (err) {
-                throw new Error("Failed parsing time limit for problem: " + prob);
-            }
-
-            problem.time_limit = time_limit;
+            let problem: ProblemTestCases = [];
 
             test_cases.sort((a, b) =>
                 (a ? a[1] : "") < (b ? b[1] : "") ? 0 : 1
@@ -120,14 +98,14 @@ export class SolutionChecker {
 
                 test_case.output = clean_output(output_contents);
 
-                problem.test_cases.push(test_case);
+                problem.push(test_case);
             }
 
             this.problems.set(prob, problem);
         }
     }
 
-    public async *process_job(job: shared_types.Job): AsyncIterableIterator<shared_types.JobStatus> {
+    public async *process_job(job: shared_types.Job, time_limit: number): AsyncIterableIterator<shared_types.JobStatus> {
         let compiler = this.compilers[job.lang];
         if (compiler == undefined) {
             yield { kind: "BAD_LANGUAGE" };
@@ -156,8 +134,8 @@ export class SolutionChecker {
             return;
         }
 
-        let problem = this.problems.get(job.problem);
-        if (problem == undefined) {
+        let problem_test_cases = this.problems.get(job.problem);
+        if (problem_test_cases == undefined) {
             yield { kind: "BAD_PROBLEM" };
 
             exec_file.deleteFile();
@@ -165,14 +143,14 @@ export class SolutionChecker {
         }
 
 
-        let total = problem.test_cases.length;
+        let total = problem_test_cases.length;
         let run_times = new Array<number>(total);
         let completed = 0;
 
         yield { kind: "RUNNING", completed: 0, total: total, run_times }
 
-        for (let test_case of problem.test_cases) {
-            let result = await executer.execute(exec_file.file_path, test_case.input_file, problem.time_limit);
+        for (let test_case of problem_test_cases) {
+            let result = await executer.execute(exec_file.file_path, test_case.input_file, time_limit);
 
             switch (result.kind) {
                 case "OK":

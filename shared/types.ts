@@ -1,7 +1,8 @@
 export type IPCJobSubmission = {
 	problem: string,
 	lang: string,
-	code: string
+	code: string,
+	time_limit: number
 }
 
 export type JobStatusStrs

@@ -41,7 +41,7 @@ function main() {
 				time: job.time_initiated,
 			});
 
-			for await (let update of checker.process_job(job)) {
+			for await (let update of checker.process_job(job, vals.sub.time_limit)) {
 				ipc.of.ccmaster.emit("cctester.job_status_update", {
 					job_id: job.id,
 					status: update

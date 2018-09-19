@@ -160,6 +160,8 @@ main {
 }
 .sidebar-problem-list .sidebar-problem {
   width: 100%;
+  display: grid;
+  grid-template-columns: 32px 1fr;
   border-left-width: 24px;
   border-left-style: solid;
   transition: background-color 200ms ease-in-out;
@@ -175,6 +177,13 @@ main {
 }
 .sidebar-problem-list .sidebar-problem:hover {
   background-color: #128ef2;
+}
+.sidebar-problem-list .sidebar-problem-letter {
+  text-align: center;
+  background-color: #001929;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  font-size: 1.2rem;
 }
 .sidebar-problem-list .sidebar-problem-name {
   font-size: 1.2rem;
@@ -521,7 +530,7 @@ main {
 }
 .problem-list .listed-problem {
   display: grid;
-  grid-template-columns: 32px minmax(200px, 3fr) minmax(200px, 1fr) minmax(100px, 1fr);
+  grid-template-columns: 32px 64px minmax(200px, 3fr) minmax(200px, 1fr) minmax(100px, 1fr);
   grid-template-rows: 60px 10px;
   line-height: 60px;
   font-size: 2rem;
@@ -537,6 +546,10 @@ main {
 }
 .problem-list .listed-problem:hover {
   background-color: #0077c2;
+}
+.problem-list .listed-problem .listed-problem-letter {
+  text-align: center;
+  background: #00385c;
 }
 .problem-list .listed-problem .listed-problem-name {
   text-align: left;

@@ -107,6 +107,9 @@ main {
     .sidebar-problem {
         width: 100%;
 
+        display: grid;
+        grid-template-columns: 32px 1fr;
+
         border-left-width: 24px;
         border-left-style: solid;
 
@@ -127,6 +130,14 @@ main {
 
     .sidebar-problem:hover {
         background-color: darken($primary, 10);
+    }
+
+    .sidebar-problem-letter {
+        text-align: center;
+        background-color: darken($primary-dark, 30);
+        padding-top: 20px;
+        padding-bottom: 20px;
+        font-size: 1.2rem;
     }
 
     .sidebar-problem-name {
@@ -556,7 +567,7 @@ main {
 
     .listed-problem {
         display: grid;
-        grid-template-columns: 32px minmax(200px, 3fr) minmax(200px, 1fr) minmax(100px, 1fr);
+        grid-template-columns: 32px 64px minmax(200px, 3fr) minmax(200px, 1fr) minmax(100px, 1fr);
         grid-template-rows: 60px 10px;
 
         line-height: 60px;
@@ -577,6 +588,11 @@ main {
 
         &:hover {
             background-color: $primary-dark;
+        }
+
+        .listed-problem-letter {
+            text-align: center;
+            background: darken($primary-dark, 20);
         }
 
         .listed-problem-name {

@@ -78,10 +78,14 @@ export default class WebServer {
         api.use(body_parser.json());
 
         api.post("/request_check", async (req, res) => {
+            let problem = this.scoringSystem.get_problem_by_dir_name(req.body.problem);
+            if (problem == null) return;
+
             let test: shared_types.IPCJobSubmission = {
                 problem: req.body.problem,
                 lang: req.body.lang,
-                code: req.body.code
+                code: req.body.code,
+                time_limit: problem.time_limit
             };
 
             try {
@@ -332,11 +336,15 @@ export default class WebServer {
                 .post(requireLogin, async (req, res) => {
                     if (req.files != null && req.session) {
                         if (req.files.code_file != null) {
+                            let problem_data = this.scoringSystem.get_problem_by_dir_name(req.params.problem_name);
+                            if (problem_data == null) return;
+
                             let code = (req.files.code_file as fileUpload.UploadedFile).data.toString();
                             let lang = req.body.lang;
                             let problem = req.params.problem_name;
+
                             let test = {
-                                code, lang, problem
+                                code, lang, problem, time_limit: problem_data.time_limit
                             };
 
                             let [job_id, start_time] = await this.ipc_server.request_test(test);

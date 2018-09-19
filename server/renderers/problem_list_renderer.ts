@@ -3,7 +3,8 @@ import { BaseRenderer } from "./base_renderer";
 import { ProblemModel_T } from "../models/problem_model";
 
 interface ProblemExtension extends ProblemModel_T {
-    users_side_status: string,
+    letter: string;
+    users_side_status: string;
     users_status: string
 }
 

@@ -6,7 +6,6 @@ export type ProblemModel_T = {
     name: string, //Name from problem.json
     description: string, // Markdown string of problem description
     time_limit: number,
-    letter: string,
     attempts: number,
     correct_attempts: number,
     timed_out_attempts: number,
@@ -44,10 +43,6 @@ export class ProblemModel extends BaseModel<ProblemModel_T> {
                 type: Sequelize.SMALLINT,
                 allowNull: false
             },
-            letter: {
-                type: Sequelize.STRING,
-                allowNull: false
-            },
             attempts: {
                 type: Sequelize.INTEGER,
                 allowNull: false,
@@ -71,7 +66,7 @@ export class ProblemModel extends BaseModel<ProblemModel_T> {
         }
     }
 
-    public async findOrCreate(dir_name: string, defaults: () => ProblemModel_T): Promise<Sequelize.Instance<ProblemModel_T> | null> {
+    public async findOrCreate(dir_name: string, defaults: ProblemModel_T): Promise<Sequelize.Instance<ProblemModel_T> | null> {
         if (this.sql_model == null) return null;
 
         let res = await this.sql_model.findOne({
@@ -81,7 +76,7 @@ export class ProblemModel extends BaseModel<ProblemModel_T> {
         });
 
         if (res == null) {
-            return this.sql_model.create(defaults());
+            return this.sql_model.create(defaults);
         } else {
             return res;
         }
@@ -95,7 +90,6 @@ export class ProblemModel extends BaseModel<ProblemModel_T> {
             name: values.name,
             description: "",
             time_limit: values.time_limit,
-            letter: values.letter,
             correct_attempts: values.correct_attempts,
             wrong_answer_attempts: values.wrong_answer_attempts,
             timed_out_attempts: values.timed_out_attempts,

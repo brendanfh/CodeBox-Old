@@ -65,6 +65,7 @@ export abstract class BaseRenderer {
             sidebar_problems.push({
                 name: prob.name,
                 dir_name: prob.dir_name,
+                letter: prob.letter,
                 completed: hasCompleted,
                 wrong_attempt: hasWrong,
             });
