@@ -34,7 +34,7 @@ async function main() {
 	ipc_server.add_event_listener("cctester.job_status_update", async (data, socket) => {
 		if (data.job_id != undefined && data.status != undefined) {
 			//Tell the result screen of the changes
-			socket_io_server.push_update(data.job_id, data.status);
+			socket_io_server.push_submission_update(data.job_id, data.status);
 
 			//Update the database with the job
 			await job_tracker.update_job(data.job_id, data.status);
