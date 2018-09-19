@@ -3,7 +3,7 @@ import fs from "fs";
 import ScoringSystem from "./scoring_system";
 import JobTracker from "./job_tracker";
 
-export function loadConfig(scoring: ScoringSystem) {
+export async function loadConfig(scoring: ScoringSystem) {
     if (process.env.ROOT_DIR == null) {
         throw new Error("ROOT_DIR not set");
     }
@@ -22,6 +22,6 @@ export function loadConfig(scoring: ScoringSystem) {
     for (let letter in config.problems) {
         let problem_dir = config.problems[letter];
 
-        scoring.load_problem(letter, problem_dir);
+        await scoring.load_problem(letter, problem_dir);
     }
 }

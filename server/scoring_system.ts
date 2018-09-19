@@ -6,6 +6,13 @@ import JobTracker from "./job_tracker";
 
 import * as shared_types from "../shared/types";
 
+type LeaderboardProblemStatus
+    = "NON_ATTEMPTED"
+    | "WRONG"
+    | "CORRECT";
+
+type LPSMap = Map<string, LeaderboardProblemStatus>;
+
 export default class ScoringSystem {
     //letter to problem
     private problems: Map<string, ProblemModel_T>;
@@ -13,7 +20,7 @@ export default class ScoringSystem {
     private job_tracker: JobTracker;
 
     //username to score
-    private user_scores: Map<string, number>;
+    private user_scores: Map<string, [number, LPSMap, number]>;
 
     private start_time: Date;
     private end_time: Date;
@@ -173,24 +180,46 @@ export default class ScoringSystem {
         await this.database.getModel(ProblemModel).update(problem);
     }
 
+    public async score_all_users(usernames: string[]): Promise<void> {
+        for (let user of usernames) {
+            await this.score_user(user);
+        }
+    }
+
     public async score_user(username: string): Promise<void> {
         let completed = 0;
         let wrong = 0;
         let times = new Array<number>();
 
-        for (let prob of this.problems.values()) {
+        let statuses : LPSMap = new Map();
+        let total_minutes = 0;
+
+        for (let [letter, prob] of this.problems.entries()) {
+            statuses.set(letter, "NON_ATTEMPTED");
+
+            let hasCorrect = false;
             for await (let j of this.job_tracker.get_solved_problems_by_username_and_problem(username, prob.dir_name)) {
                 completed++;
                 times.push(j.time_initiated);
+
+                total_minutes += (j.time_initiated / (1000 * 60));
+
+                statuses.set(letter, "CORRECT");
+                hasCorrect = true;
                 break;
             }
             for await (let _ of this.job_tracker.get_failed_problems_by_username_and_problem(username, prob.dir_name)) {
+                if (!hasCorrect)
+                    statuses.set(letter, "WRONG");
+
                 wrong++;
             }
         }
 
+        total_minutes += wrong * 15;
+
         let score = this.calculate_score(completed, wrong, times);
-        this.user_scores.set(username, score);
+        this.user_scores.set(username, [score, statuses, total_minutes]);
 
         this.sort_users_by_score();
     }
@@ -203,12 +232,14 @@ export default class ScoringSystem {
             user_scores.push(us);
         }
 
-        user_scores.sort((u1, u2) => u2[1] - u1[1]);
+        user_scores.sort((u1, u2) => u2[1][0] - u1[1][0]);
 
         this.user_scores = new Map(user_scores);
     }
 
     private calculate_score(num_completed: number, num_wrong: number, times: number[]): number {
+        if (num_completed == 0 && num_wrong == 0) return 0;
+
         let time_diffs_sum =
             times
                 .map(t => t - this.start_time.getTime())
@@ -217,6 +248,6 @@ export default class ScoringSystem {
         let duration = this.end_time.getTime() - this.start_time.getTime();
         let num_problems = this.problems.size;
 
-        return 20 * num_problems * duration * (num_completed + 1) - time_diffs_sum - 900000 * num_wrong;
+        return 20000 * num_problems * duration * (num_completed + 1) - time_diffs_sum - 900000 * num_wrong;
     }
 }

@@ -59,7 +59,9 @@ async function main() {
 		}
 	});
 
-	loadConfig(scoring);
+	await loadConfig(scoring);
+
+	await scoring.score_all_users(await database.getModel(UserModel).getAllUsernames());
 
 	ipc_server.init();
 	ipc_server.start();
