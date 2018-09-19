@@ -180,6 +180,10 @@ export default class ScoringSystem {
         await this.database.getModel(ProblemModel).update(problem);
     }
 
+    public get current_scores() {
+        return this.user_scores;
+    }
+
     public async score_all_users(usernames: string[]): Promise<void> {
         for (let user of usernames) {
             await this.score_user(user);
