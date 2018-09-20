@@ -38,6 +38,8 @@ export default class WebServer {
     private database: Database;
     private scoringSystem: ScoringSystem;
 
+    private emailVerifyRegex: RegExp;
+
     private views: Map<string, BaseView>;
 
     public constructor(job_tracker: JobTracker, ipc_server: IPCServer, database: Database, scoringSystem: ScoringSystem) {
@@ -59,6 +61,8 @@ export default class WebServer {
         this.add_view(ProblemSubmitView);
         this.add_view(AccountView);
         this.add_view(LeaderboardView);
+
+        this.emailVerifyRegex = new RegExp("");
     }
 
     private add_view<T extends BaseView>(renderer: IView<T>) {
@@ -69,6 +73,10 @@ export default class WebServer {
 
     private get_view<T extends BaseView>(renderer: IView<T>): T | undefined {
         return this.views.get(renderer.RENDERER_NAME) as T;
+    }
+
+    public set_email_verify_regex(pattern: string) {
+        this.emailVerifyRegex = new RegExp(pattern);
     }
 
     protected setupApiRoutes() {
@@ -138,6 +146,16 @@ export default class WebServer {
             if (req.cookies.uuid && !(req.session ? req.session.user : true)) {
                 res.clearCookie("uuid");
             }
+
+            //Tack on flash messages
+            if (req.session) {
+                res.locals = {
+                    flash_message: req.session.flash
+                };
+
+                if (req.session.flash)
+                    req.session.flash = null;
+            }
             next();
         });
 
@@ -162,12 +180,15 @@ export default class WebServer {
                 res.redirect("/login");
                 return;
             }
+
             next();
         };
 
         let afterStart: express.Handler = (req, res, next) => {
             let time = Date.now();
             if (time < this.scoringSystem.get_start_time()) {
+                if (req.session) req.session.flash = "Competition has not started yet.";
+
                 let url = req.header("Referer") || "/";
                 res.redirect(url);
                 return;
@@ -178,6 +199,8 @@ export default class WebServer {
         let beforeEnd: express.Handler = (req, res, next) => {
             let time = Date.now();
             if (time > this.scoringSystem.get_end_time()) {
+                if (req.session) req.session.flash = "Competition has ended.";
+
                 let url = req.header("Referer") || "/";
                 res.redirect(url);
                 return;
@@ -192,16 +215,7 @@ export default class WebServer {
         app.use("/static", express.static(path.resolve(process.cwd(), "web/static")));
 
         app.get("/", (req, res) => {
-            if (req.session && req.session.user)
-                res.render("index", {
-                    navbar: { selected_tab: -1 },
-                    name: req.session.user.nickname
-                });
-            else
-                res.render("index", {
-                    navbar: { selected_tab: -1 },
-                    name: ""
-                });
+            res.redirect("/leaderboard")
         });
 
         account: {
@@ -218,6 +232,9 @@ export default class WebServer {
                     let validated = await this.database.getModel(UserModel).validateUser(username, password);
 
                     if (!validated) {
+                        if (req.session) {
+                            req.session.flash = "Incorrect username or password.";
+                        }
                         res.redirect("/login");
                     } else {
                         if (req.session) {
@@ -249,7 +266,16 @@ export default class WebServer {
                 .post(async (req, res) => {
                     try {
                         if (req.body.password != req.body.confirm_password) {
+                            if (req.session) req.session.flash = "Passwords do not match.";
                             throw new Error("Passwords do not match");
+                        }
+
+                        if (req.body.email) {
+                            let works = this.emailVerifyRegex.test(req.body.email);
+                            if (!works) {
+                                if (req.session) req.session.flash = "Invalid email.";
+                                throw new Error("Bad email");
+                            }
                         }
 
                         let user = await this.database.getModel(UserModel).createWithValues(
@@ -289,16 +315,29 @@ export default class WebServer {
             app.post("/account/change_info", requireLogin, async (req, res) => {
                 if (req.session == null) return;
 
-                let worked = await this.database.getModel(UserModel).updateInfoByUsername(
-                    req.session.user.username,
-                    req.body.email,
-                    req.body.nickname
-                );
+                if (req.body.email) {
+                    let works = this.emailVerifyRegex.test(req.body.email);
+                    if (!works) {
+                        if (req.session) req.session.flash = "Invalid email.";
+                        res.redirect("/account");
+                    }
+                }
 
-                if (worked) {
-                    res.redirect("/account?status=change_info_successful");
-                } else {
-                    res.redirect("/account?status=change_info_failed");
+                try {
+                    let worked = await this.database.getModel(UserModel).updateInfoByUsername(
+                        req.session.user.username,
+                        req.body.email,
+                        req.body.nickname
+                    );
+
+                    if (worked) {
+                        res.redirect("/account?status=change_info_successful");
+                    } else {
+                        res.redirect("/account?status=change_info_failed");
+                    }
+                } catch (err) {
+                    req.session.flash = "Something went wrong.";
+                    res.redirect("/account");
                 }
             });
 
@@ -399,13 +438,17 @@ export default class WebServer {
             });
         }
 
-        app.get("/leaderboard", requireLogin, async (req, res) => {
-            if (req.session == null) return;
+        app.get("/leaderboard", async (req, res) => {
+            // if (req.session == null) return;
 
             let view = this.get_view(LeaderboardView);
             if (view == null) return;
 
-            view.render(res, req.session.user.username);
+            let username = "";
+            if (req.session && req.session.user)
+                username = req.session.user.username;
+
+            view.render(res, username);
         });
     }
 

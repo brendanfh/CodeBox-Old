@@ -32,7 +32,8 @@ export class UserModel extends BaseModel<UserModel_T> {
                 allowNull: false,
             },
             nickname: {
-                type: Sequelize.STRING
+                type: Sequelize.STRING,
+                unique: true,
             },
             email: {
                 type: Sequelize.STRING,

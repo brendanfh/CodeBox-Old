@@ -2,8 +2,9 @@ import path from "path";
 import fs from "fs";
 import ScoringSystem from "./scoring_system";
 import JobTracker from "./job_tracker";
+import WebServer from "./web_server";
 
-export async function loadConfig(scoring: ScoringSystem) {
+export async function loadConfig(scoring: ScoringSystem, web_server: WebServer) {
     if (process.env.ROOT_DIR == null) {
         throw new Error("ROOT_DIR not set");
     }
@@ -24,4 +25,6 @@ export async function loadConfig(scoring: ScoringSystem) {
 
         await scoring.load_problem(letter, problem_dir);
     }
+
+    web_server.set_email_verify_regex(config.email_verify_regex);
 }

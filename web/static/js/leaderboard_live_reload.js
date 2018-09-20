@@ -162,6 +162,9 @@ window.addEventListener("load", function () {
         if (time > duration)
             time = duration;
 
+        if (time < 0)
+            time = 0;
+
         let hours = time / (1000 * 60 * 60);
         let minutes = (hours - Math.floor(hours)) * 60;
         let seconds = Math.floor((minutes - Math.floor(minutes)) * 60);

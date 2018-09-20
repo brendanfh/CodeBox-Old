@@ -60,14 +60,13 @@ async function main() {
 		}
 	});
 
-	await loadConfig(scoring);
+	let web_server = new WebServer(job_tracker, ipc_server, database, scoring);
+	await loadConfig(scoring, web_server);
 
 	await scoring.score_all_users(await database.getModel(UserModel).getAllUsernames());
 
 	ipc_server.init();
 	ipc_server.start();
-
-	let web_server = new WebServer(job_tracker, ipc_server, database, scoring);
 	let http_server = web_server.start();
 
 	socket_io_server.connect_to_http_server(http_server);

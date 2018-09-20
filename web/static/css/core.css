@@ -8,6 +8,14 @@
   display: grid;
   grid-template-columns: 1fr 6fr 1fr;
 }
+.navbar .navbar-logo {
+  padding-left: 8px;
+  text-align: center;
+}
+.navbar .navbar-logo img {
+  max-height: calc(47px - 2px);
+  display: inline;
+}
 .navbar ul {
   display: block;
   text-align: center;
@@ -33,6 +41,7 @@
 }
 .navbar .navbar-username {
   position: relative;
+  max-height: 47px;
   font-size: 24px;
   line-height: 40px;
   text-align: center;

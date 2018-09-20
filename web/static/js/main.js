@@ -1,14 +1,9 @@
 "use strict";
 
 function main() {
-    //Navbar jquery stuff
-
-    // let $navbar_username = $(".navbar-username");
-    // let $navbar_username_dropdown = $(".navbar-username-dropdown");
-
-    // $navbar_username.on("click", () => {
-    //     $navbar_username.toggleClass("selected");
-    // });
+    if (window.FLASH_MESSAGE && window.FLASH_MESSAGE != "undefined" && window.FLASH_MESSAGE != "null") {
+        setTimeout(window.alert, 250, window.FLASH_MESSAGE);
+    }
 }
 
-window.onload = main;
+window.addEventListener("load", main);
