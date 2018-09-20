@@ -25,6 +25,8 @@ export class CExecuter extends BaseExecuter {
 				output: output,
 				run_time: diff_time[0] * 1_000_000 + Math.floor(diff_time[1] / 1000) / 1_000_000
 			});
+		} else if (program_res == 139) {
+			return ERR("system");
 		} else {
 			bash_shell.kill();
 

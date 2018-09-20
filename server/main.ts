@@ -28,7 +28,7 @@ async function main() {
 
 	let job_tracker = new JobTracker(database);
 	let scoring = new ScoringSystem(database, job_tracker);
-	let socket_io_server = new SocketIOServer(job_tracker, scoring);
+	let socket_io_server = new SocketIOServer(job_tracker, scoring, database.getModel(UserModel));
 
 	let ipc_server = new IPCServer();
 	ipc_server.add_event_listener("cctester.job_status_update", async (data, socket) => {

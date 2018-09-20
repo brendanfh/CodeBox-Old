@@ -1,6 +1,37 @@
 .leaderboard {
     text-align: center;
 
+    .leaderboard-time-container {
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+
+        margin-top: 20px;
+        margin-bottom: 20px;
+
+        .leaderboard-time-remaining {
+            font-size: 3rem;
+        }
+
+        .leaderboard-time-progress-outline {
+            position: relative;
+            width: 100%;
+
+            background-color: darken($primary-dark, 20);
+            border-radius: 12px;
+            clear: both;
+
+            min-height: 24px;
+
+            .leaderboard-time-progress {
+                position: absolute;
+                min-height: 100%;
+                background-color: #FFF200;
+                border-radius: 12px;
+            }
+        }
+    }
+
     .leaderboard-grid {
         display: inline-grid;
 
@@ -15,8 +46,24 @@
             font-size: 2rem;
         }
 
-        .leaderboard-username {
+        .leaderboard-place-number {
             grid-column: 1 / span 1;
+            color: white;
+            line-height: 48px;
+            font-size: 1.7rem;
+
+            background-color: darken($primary-dark, 20);
+            &.alternate-color {
+                background-color: darken($primary-dark, 10);
+            }
+
+            &.highlighted {
+                background-color: $primary-dark;
+            }
+        }
+
+        .leaderboard-username {
+            grid-column: 2 / span 1;
             background-color: darken($primary-dark, 20);
             color: white;
             line-height: 48px;
@@ -25,16 +72,30 @@
             &.alternate-color {
                 background-color: darken($primary-dark, 10);
             }
+
+            &.highlighted {
+                background-color: $primary-dark;
+            }
         }
 
         .leaderboard-submission {
+
+            color: white;
+            line-height: 48px;
+            font-size: 1.2rem;
+
             background-color: darken($primary-dark, 20);
             &.alternate-color {
                 background-color: darken($primary-dark, 10);
             }
 
+            &.highlighted {
+                background-color: $primary-dark;
+            }
+
             &.good {
                 background-color: $test-case-good !important;
+                color: #111;
             }
 
             &.bad {
@@ -50,6 +111,10 @@
             background-color: darken($primary-dark, 20);
             &.alternate-color {
                 background-color: darken($primary-dark, 10);
+            }
+
+            &.highlighted {
+                background-color: $primary-dark;
             }
         }
     }

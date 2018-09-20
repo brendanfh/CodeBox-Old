@@ -14,8 +14,6 @@ import session from "express-session";
 import fileUpload from "express-fileupload";
 import querystring from "querystring";
 
-import showdown from "showdown";
-
 import * as shared_types from "../shared/types";
 import { UserModel } from "./models/user_model";
 import ScoringSystem from "./scoring_system";
@@ -165,7 +163,27 @@ export default class WebServer {
                 return;
             }
             next();
-        }
+        };
+
+        let afterStart: express.Handler = (req, res, next) => {
+            let time = Date.now();
+            if (time < this.scoringSystem.get_start_time()) {
+                let url = req.header("Referer") || "/";
+                res.redirect(url);
+                return;
+            }
+            next();
+        };
+
+        let beforeEnd: express.Handler = (req, res, next) => {
+            let time = Date.now();
+            if (time > this.scoringSystem.get_end_time()) {
+                let url = req.header("Referer") || "/";
+                res.redirect(url);
+                return;
+            }
+            next();
+        };
 
         app.engine('ejs', require('ejs-mate'));
         app.set('views', path.resolve(process.cwd(), "web/views"));
@@ -247,6 +265,8 @@ export default class WebServer {
                                 email: user.getDataValue("email"),
                                 nickname: user.getDataValue("nickname"),
                             };
+
+                            this.scoringSystem.score_user(user.getDataValue("username"));
                         }
 
                         res.redirect("/");
@@ -308,7 +328,7 @@ export default class WebServer {
         }
 
         problems: {
-            app.get("/problems", requireLogin, async (req, res) => {
+            app.get("/problems", requireLogin, afterStart, async (req, res) => {
                 if (req.session == null) return;
 
                 let renderer = this.get_view(ProblemListView);
@@ -317,7 +337,7 @@ export default class WebServer {
                 renderer.render(res, req.session.user.username);
             });
 
-            app.get("/problems/:problem_name", requireLogin, async (req, res) => {
+            app.get("/problems/:problem_name", requireLogin, afterStart, async (req, res) => {
                 if (req.session == null) return;
 
                 let renderer = this.get_view(ProblemDescriptionView);
@@ -327,7 +347,7 @@ export default class WebServer {
             });
 
             app.route("/problems/:problem_name/submit")
-                .get(requireLogin, async (req, res) => {
+                .get(requireLogin, afterStart, beforeEnd, async (req, res) => {
                     if (req.session == null) return;
 
                     let renderer = this.get_view(ProblemSubmitView);
@@ -335,7 +355,7 @@ export default class WebServer {
 
                     renderer.render(res, req.params.problem_name, req.session.user.username);
                 })
-                .post(requireLogin, async (req, res) => {
+                .post(requireLogin, afterStart, beforeEnd, async (req, res) => {
                     if (req.files != null && req.session) {
                         if (req.files.code_file != null) {
                             let problem_data = this.scoringSystem.get_problem_by_dir_name(req.params.problem_name);
@@ -360,7 +380,7 @@ export default class WebServer {
                     res.redirect("/submit_error");
                 });
 
-            app.get("/submissions/result", requireLogin, async (req, res) => {
+            app.get("/submissions/result", requireLogin, afterStart, async (req, res) => {
                 if (req.session == null) return;
 
                 let renderer = this.get_view(SubmissionResultView);
@@ -369,7 +389,7 @@ export default class WebServer {
                 renderer.render(res, req.query.id, req.session.user.username);
             });
 
-            app.get("/submissions", requireLogin, async (req, res) => {
+            app.get("/submissions", requireLogin, afterStart, async (req, res) => {
                 if (req.session == null) return;
 
                 let renderer = this.get_view(SubmissionListView);

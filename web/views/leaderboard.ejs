@@ -2,53 +2,13 @@
 
 <script src="/socket.io/socket.io.js" type="text/javascript"></script>
 <script type="text/javascript" src="/static/js/leaderboard_live_reload.js"></script>
+<script type="text/javascript">
+    window.LEADERBOARD_NICKNAME="<%= nickname %>";
+</script>
 
 <h1 class="content main-header">
     Leaderboard
 </h1>
 
 <div class="content leaderboard">
-    <div class="leaderboard-grid"
-        style="
-            grid-template-columns: minmax(200px, 800px) repeat(15, 64px) minmax(100px, 300px);
-            grid-template-rows: 64px repeat(5, 48px);
-        ">
-        <div class="leaderboard-header" style="grid-column: 1 / span 1;">Nickname</div>
-        <div class="leaderboard-header" style="grid-column: 2 / span 1;">A</div>
-        <div class="leaderboard-header" style="grid-column: 3 / span 1;">B</div>
-        <div class="leaderboard-header" style="grid-column: 4 / span 1;">C</div>
-        <div class="leaderboard-header" style="grid-column: 5 / span 1;">D</div>
-        <div class="leaderboard-header" style="grid-column: 6 / span 1;">E</div>
-        <div class="leaderboard-header" style="grid-column: 7 / span 1;">E</div>
-        <div class="leaderboard-header" style="grid-column: 8 / span 1;">E</div>
-        <div class="leaderboard-header" style="grid-column: 9 / span 1;">E</div>
-        <div class="leaderboard-header" style="grid-column: 10 / span 1;">E</div>
-        <div class="leaderboard-header" style="grid-column: 11 / span 1;">E</div>
-        <div class="leaderboard-header" style="grid-column: 12 / span 1;">E</div>
-        <div class="leaderboard-header" style="grid-column: 13 / span 1;">E</div>
-        <div class="leaderboard-header" style="grid-column: 14 / span 1;">E</div>
-        <div class="leaderboard-header" style="grid-column: 15 / span 1;">E</div>
-        <div class="leaderboard-header" style="grid-column: 16 / span 1;">E</div>
-        <div class="leaderboard-header" style="grid-column: 17 / span 1;">Total time</div>
-
-        <div class="leaderboard-username">USERNAME</div>
-        <div class="leaderboard-username alternate-color">OTHER</div>
-        <div class="leaderboard-username">QWER</div>
-        <div class="leaderboard-username alternate-color">ZCV</div>
-        <div class="leaderboard-username">qwpeoiruqwpeoir</div>
-
-        <% for (let i = 2; i <= 6; i++) { %>
-            <% for (let j = 2; j <= 16; j++) { %>
-                <div class="leaderboard-submission <%= (i % 2 == 1 ? 'alternate-color' : '') %>"
-                    style="grid-column: <%= j %> / span 1; grid-row: <%= i %> / span 1;"
-                ></div>
-            <% } %>
-        <% } %>
-
-        <% for (let i = 2; i <= 6; i++) { %>
-            <div class="leaderboard-time <%= (i % 2 == 1 ? 'alternate-color' : '') %>"
-                style="grid-column: 17 / span 1; grid-row: <%= i %> / span 1;"
-            ></div>
-        <% } %>
-    </div> 
 </div>

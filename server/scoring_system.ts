@@ -11,7 +11,7 @@ type LeaderboardProblemStatus
     | "WRONG"
     | "CORRECT";
 
-type LPSMap = { [k: string]: LeaderboardProblemStatus };
+type LPSMap = { [k: string]: [LeaderboardProblemStatus, number] };
 
 export default class ScoringSystem {
     //letter to problem
@@ -19,7 +19,7 @@ export default class ScoringSystem {
     private database: Database;
     private job_tracker: JobTracker;
 
-    //username to score
+    //username to score, problem map, total time
     private user_scores: Map<string, [number, LPSMap, number]>;
 
     private start_time: Date;
@@ -112,6 +112,14 @@ export default class ScoringSystem {
         this.end_time = new Date(time);
     }
 
+    public get_start_time(): number {
+        return this.start_time.getTime();
+    }
+
+    public get_end_time(): number {
+        return this.end_time.getTime();
+    }
+
     public get_problem_by_dir_name(name: string): ProblemModel_T | undefined {
         for (let prob of this.problems.values()) {
             if (prob.dir_name == name) {
@@ -195,30 +203,36 @@ export default class ScoringSystem {
         let wrong = 0;
         let times = new Array<number>();
 
-        let statuses : LPSMap = {};
+        let statuses: LPSMap = {};
         let total_minutes = 0;
 
         for (let [letter, prob] of this.problems.entries()) {
-            statuses[letter] = "NON_ATTEMPTED";
+            let attempts = 0;
+            statuses[letter] = ["NON_ATTEMPTED", attempts];
 
             let hasCorrect = false;
             for await (let j of this.job_tracker.get_solved_problems_by_username_and_problem(username, prob.dir_name)) {
+                attempts++;
                 completed++;
                 times.push(j.time_initiated);
 
-                total_minutes += (j.time_initiated / (1000 * 60));
+                total_minutes += ((j.time_initiated - this.start_time.getTime()) / (1000 * 60));
 
-                statuses[letter] = "CORRECT";
+                statuses[letter][0] = "CORRECT";
                 hasCorrect = true;
                 break;
             }
             for await (let _ of this.job_tracker.get_failed_problems_by_username_and_problem(username, prob.dir_name)) {
                 if (!hasCorrect)
-                    statuses[letter] = "WRONG";
+                    statuses[letter][0] = "WRONG";
 
                 wrong++;
+                attempts++;
             }
+
+            statuses[letter][1] = attempts;
         }
+
 
         total_minutes += wrong * 15;
 
@@ -247,7 +261,7 @@ export default class ScoringSystem {
         let time_diffs_sum =
             times
                 .map(t => t - this.start_time.getTime())
-                .reduce((a, b) => a + b);
+                .reduce((a, b) => a + b, 0);
 
         let duration = this.end_time.getTime() - this.start_time.getTime();
         let num_problems = this.problems.size;

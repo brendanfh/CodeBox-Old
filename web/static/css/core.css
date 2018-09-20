@@ -72,6 +72,30 @@
 .leaderboard {
   text-align: center;
 }
+.leaderboard .leaderboard-time-container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.leaderboard .leaderboard-time-container .leaderboard-time-remaining {
+  font-size: 3rem;
+}
+.leaderboard .leaderboard-time-container .leaderboard-time-progress-outline {
+  position: relative;
+  width: 100%;
+  background-color: #00385c;
+  border-radius: 12px;
+  clear: both;
+  min-height: 24px;
+}
+.leaderboard .leaderboard-time-container .leaderboard-time-progress-outline .leaderboard-time-progress {
+  position: absolute;
+  min-height: 100%;
+  background-color: #FFF200;
+  border-radius: 12px;
+}
 .leaderboard .leaderboard-grid {
   display: inline-grid;
   box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.7);
@@ -83,8 +107,21 @@
   line-height: 64px;
   font-size: 2rem;
 }
-.leaderboard .leaderboard-grid .leaderboard-username {
+.leaderboard .leaderboard-grid .leaderboard-place-number {
   grid-column: 1/span 1;
+  color: white;
+  line-height: 48px;
+  font-size: 1.7rem;
+  background-color: #00385c;
+}
+.leaderboard .leaderboard-grid .leaderboard-place-number.alternate-color {
+  background-color: #00588f;
+}
+.leaderboard .leaderboard-grid .leaderboard-place-number.highlighted {
+  background-color: #0077c2;
+}
+.leaderboard .leaderboard-grid .leaderboard-username {
+  grid-column: 2/span 1;
   background-color: #00385c;
   color: white;
   line-height: 48px;
@@ -93,23 +130,39 @@
 .leaderboard .leaderboard-grid .leaderboard-username.alternate-color {
   background-color: #00588f;
 }
+.leaderboard .leaderboard-grid .leaderboard-username.highlighted {
+  background-color: #0077c2;
+}
 .leaderboard .leaderboard-grid .leaderboard-submission {
+  color: white;
+  line-height: 48px;
+  font-size: 1.2rem;
   background-color: #00385c;
 }
 .leaderboard .leaderboard-grid .leaderboard-submission.alternate-color {
   background-color: #00588f;
 }
+.leaderboard .leaderboard-grid .leaderboard-submission.highlighted {
+  background-color: #0077c2;
+}
 .leaderboard .leaderboard-grid .leaderboard-submission.good {
   background-color: #50ff50 !important;
+  color: #111;
 }
 .leaderboard .leaderboard-grid .leaderboard-submission.bad {
   background-color: #e90000 !important;
 }
 .leaderboard .leaderboard-grid .leaderboard-time {
+  color: white;
+  line-height: 48px;
+  font-size: 1.1rem;
   background-color: #00385c;
 }
 .leaderboard .leaderboard-grid .leaderboard-time.alternate-color {
   background-color: #00588f;
+}
+.leaderboard .leaderboard-grid .leaderboard-time.highlighted {
+  background-color: #0077c2;
 }
 
 * {

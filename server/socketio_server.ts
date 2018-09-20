@@ -3,21 +3,24 @@ import http from "http";
 import JobTracker from "./job_tracker";
 import { JobStatus } from "../shared/types";
 import ScoringSystem from "./scoring_system";
+import { UserModel } from "./models/user_model";
 
 export class SocketIOServer {
 
     private io: socket_io.Server | null = null;
     private job_tracker: JobTracker;
     private scoring_system: ScoringSystem;
+    private user_model: UserModel;
 
     private subscriptions: {
         "submission_updates": Map<string, socket_io.Socket | null>,
         "leaderboard_updates": Map<string, socket_io.Socket>,
     };
 
-    constructor(job_tracker: JobTracker, scoring_system: ScoringSystem) {
+    constructor(job_tracker: JobTracker, scoring_system: ScoringSystem, user_model: UserModel) {
         this.job_tracker = job_tracker;
         this.scoring_system = scoring_system;
+        this.user_model = user_model;
 
         this.subscriptions = {
             "submission_updates": new Map(),
@@ -41,7 +44,7 @@ export class SocketIOServer {
         socket.on("request_leaderboard_updates", async (data) => {
             this.subscriptions["leaderboard_updates"].set(socket.id, socket);
 
-            socket.emit("leaderboard_update", [...this.scoring_system.current_scores] );
+            this.push_single_leaderboard_update(socket, undefined);
         });
 
         socket.on("disconnect", () => {
@@ -56,11 +59,36 @@ export class SocketIOServer {
         }
     }
 
-    public push_leaderboard_update() {
+    private async push_single_leaderboard_update(socket: socket_io.Socket, nickname_map: { [k: string]: string } | undefined) {
         let scores = this.scoring_system.current_scores;
 
+        if (nickname_map == undefined) {
+            nickname_map = {};
+            let users = await this.user_model.findAll();
+            for (let user of users) {
+                nickname_map[user.username] = user.nickname;
+            }
+        }
+
+        socket.emit("leaderboard_update", {
+            scores: [...scores],
+            nickname_map,
+            start_time: this.scoring_system.get_start_time(),
+            end_time: this.scoring_system.get_end_time()
+        });
+    }
+
+    public async push_leaderboard_update() {
+        let scores = this.scoring_system.current_scores;
+
+        let nickname_map: { [k: string]: string } = {};
+        let users = await this.user_model.findAll();
+        for (let user of users) {
+            nickname_map[user.username] = user.nickname;
+        }
+
         for (let socket of this.subscriptions["leaderboard_updates"].values()) {
-            socket.emit("leaderboard_update", [...scores]);
+            this.push_single_leaderboard_update(socket, nickname_map);
         }
     }
 

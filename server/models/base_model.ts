@@ -32,8 +32,8 @@ export abstract class BaseModel<T> {
         return await this.sql_model.create(t);
     }
 
-    public async findAll(): Promise<T[] | null> {
-        if (this.sql_model == null) return Promise.resolve(null);
+    public async findAll(): Promise<T[]> {
+        if (this.sql_model == null) return [];
         return await this.sql_model.findAll();
     }
 }
