@@ -6,6 +6,8 @@ window.addEventListener("load", function () {
     let $resultProgressBar = $(".result-progress-bar");
     let $resultProgressBarOutline = $(".result-progress-bar-outline");
 
+    let job_id = new URL(window.location.href).searchParams.get("id");
+
     function renderStatusList(status) {
         if (status.kind == "STARTED" || status.kind == "COMPILING" || status.kind == "COMPILE_ERR") {
             return "";
@@ -54,6 +56,13 @@ window.addEventListener("load", function () {
         return output;
     }
 
+    function renderResubmitButton() {
+        return `
+            <a href="/problems/${window.PROBLEM_ID}/submit"><div class="resubmit-button">Submit again</div></a>
+            <a href="/problems/${window.PROBLEM_ID}"><div class="resubmit-button">Back to problem</div></a>
+        `;
+    }
+
     function renderStatus(status) {
         $resultProgressBarOutline.removeClass("completed");
         $resultProgressBarOutline.removeClass("error");
@@ -73,7 +82,7 @@ window.addEventListener("load", function () {
             }
 
             case "COMPILE_ERR": {
-                $resultStatus.html("Compile Error");
+                $resultStatus.html("Compile Error\n" + renderResubmitButton());
                 $resultProgressBar.css({ width: "20%" });
                 $resultProgressBarOutline.addClass("error");
 
@@ -96,21 +105,21 @@ window.addEventListener("load", function () {
             }
 
             case "WRONG_ANSWER": {
-                $resultStatus.html(`Wrong answer on test case ${status.completed + 1} out of ${status.total} `);
+                $resultStatus.html(`Wrong answer on test case ${status.completed + 1} out of ${status.total}\n` + renderResubmitButton());
                 $resultProgressBar.css({ width: `${40 + 60 * (status.completed / status.total)}% ` });
                 $resultProgressBarOutline.addClass("error");
                 break;
             }
 
             case "TIME_LIMIT_EXCEEDED": {
-                $resultStatus.html(`Time limit exceeded on test case ${status.completed + 1} out of ${status.total} `);
+                $resultStatus.html(`Time limit exceeded on test case ${status.completed + 1} out of ${status.total} ` + renderResubmitButton());
                 $resultProgressBar.css({ width: `${40 + 60 * (status.completed / status.total)}% ` });
                 $resultProgressBarOutline.addClass("error");
                 break;
             }
 
             case "BAD_EXECUTION": {
-                $resultStatus.html(`Run time error on test case ${status.completed + 1} out of ${status.total} `);
+                $resultStatus.html(`Run time error on test case ${status.completed + 1} out of ${status.total} ` + renderResubmitButton());
                 $resultProgressBar.css({ width: `${40 + 60 * (status.completed / status.total)}% ` });
                 $resultProgressBarOutline.addClass("error");
                 break;
@@ -118,7 +127,6 @@ window.addEventListener("load", function () {
         }
     }
 
-    let job_id = new URL(window.location.href).searchParams.get("id");
     socket.emit('request_submission_updates', { job_id: job_id });
 
     socket.on("submission_update", function (status) {

@@ -1,5 +1,6 @@
 import socket_io from "socket.io";
 import http from "http";
+import https from "https";
 import JobTracker from "./job_tracker";
 import { JobStatus } from "../shared/types";
 import ScoringSystem from "./scoring_system";
@@ -8,6 +9,7 @@ import { UserModel } from "./models/user_model";
 export class SocketIOServer {
 
     private io: socket_io.Server | null = null;
+    private io_ssl: socket_io.Server | null = null;
     private job_tracker: JobTracker;
     private scoring_system: ScoringSystem;
     private user_model: UserModel;
@@ -104,8 +106,15 @@ export class SocketIOServer {
         this.io = socket_io(server);
     }
 
+    public connect_to_https_server(server: https.Server) {
+        this.io_ssl = socket_io(server);
+    }
+
     public start_server() {
         if (this.io != null)
             this.io.on('connection', this.on_connection.bind(this));
+
+        if (this.io_ssl != null)
+            this.io_ssl.on('connection', this.on_connection.bind(this));
     }
 }

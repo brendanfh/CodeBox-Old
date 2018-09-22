@@ -1,5 +1,7 @@
 <% layout("partials/problem") %>
 
+<script type="text/javascript" src="/static/js/submit_page.js"></script>
+
 <div class="submission-submit-form">
     <form action="/problems/<%=problem.dir_name%>/submit" method="POST" enctype="multipart/form-data">
         <div>
@@ -7,17 +9,25 @@
             <select name="lang">
                 <option value="c" selected>C</option>
                 <option value="cpp">C++11</option>
-                <option value="py3">Python 3</option>
-                <option value="py2">Python 2</option>
             </select>
         </div>
 
         <div>
             <label for="code_file">Source file</label><br>
 
-            <div class="file-upload-wrapper">
+            <div id="upload-file-btn" class="file-upload-wrapper" style="margin-bottom: 10px">
                 <span>Upload a file</span>
                 <input type="file" name="code_file" accept=".c, .cpp, .py" />
+            </div>
+
+            <div style="margin-bottom: 0">
+                <div class="file-upload-wrapper switch-btn">
+                    <span>Switch to editor</span>
+                </div>
+            </div>
+
+            <div id="text-editor" class="text-editor" style="display: none">
+                <textarea name="raw_code"></textarea>
             </div>
         </div>
         

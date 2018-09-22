@@ -4,6 +4,15 @@ import ScoringSystem from "./scoring_system";
 import JobTracker from "./job_tracker";
 import WebServer from "./web_server";
 
+export let GLOBAL_CONFIG = {
+    HOSTING_NAME: "ORGANIZATION NAME HERE",
+
+    PORT: 0,
+    SSL_PORT: 0,
+    SSL_CERTIFICATE_PATH: "",
+    SSL_KEY_PATH: "",
+}
+
 export async function loadConfig(scoring: ScoringSystem, web_server: WebServer) {
     if (process.env.ROOT_DIR == null) {
         throw new Error("ROOT_DIR not set");
@@ -27,4 +36,10 @@ export async function loadConfig(scoring: ScoringSystem, web_server: WebServer) 
     }
 
     web_server.set_email_verify_regex(config.email_verify_regex);
+
+    GLOBAL_CONFIG.HOSTING_NAME = config.hosting_name;
+    GLOBAL_CONFIG.PORT = config.port || 8000;
+    GLOBAL_CONFIG.SSL_PORT = config.ssl_port || 8443;
+    GLOBAL_CONFIG.SSL_CERTIFICATE_PATH = config.ssl_cert || "";
+    GLOBAL_CONFIG.SSL_KEY_PATH = config.ssl_key || "";
 }

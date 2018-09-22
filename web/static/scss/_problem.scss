@@ -1,0 +1,50 @@
+.problem-description {
+    .disclaimer {
+        font-size: 16px;
+        margin-bottom: 20px;
+
+        a {
+            text-decoration: underline;
+            color: #aaf;
+        }
+    }
+
+    .example-test-cases {
+        display: block;
+        width: 100%;
+
+        $exlist: example-in example-out;
+
+        @each $ex in $exlist {
+            .#{$ex} {
+                width: 48%;
+                border: 2px solid white;
+                background: rgba(0, 0, 0, 0.4);
+                box-shadow: 0px 2px 8px 1px rgba(0, 0, 0, 0.7);
+                font-size: 20px;
+                margin-right: 2%;
+                margin-bottom: 10px;
+                border-radius: 4px;
+                padding: 8px;
+                min-height: 150px;
+                overflow-x: auto;
+            }
+
+            .#{$ex}-header {
+                font-size: 32px;
+                width: 48%;
+                margin-right: 2%;
+                margin-bottom: 8px;
+                text-align: center;
+            }
+        }
+
+        .example-in, .example-in-header {
+            float: left;
+        }
+        
+        .exmaple-out, .example-out-header {
+            float: right;
+        }
+    }
+}

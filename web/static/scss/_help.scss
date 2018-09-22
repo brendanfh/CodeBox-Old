@@ -1,0 +1,55 @@
+.help-page {
+    padding: 10px 20%;
+
+    h2 {
+        font-size: 2.5rem;
+    }
+
+    p {
+        font-size: 1.4rem;
+        line-height: 1.6rem;
+
+        a {
+            color: rgba(100, 100, 255, 1);
+            text-decoration: underline;
+        }
+    }
+
+    ol {
+        font-size: 1.4rem;
+        line-height: 1.6rem;
+
+        * {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+    }
+
+    blockquote {
+        margin-top: 6px;
+        margin-bottom: 6px;
+
+        background: rgba(255, 255, 255, 0.05);
+        border-left: 4px solid white;
+        border-radius: 4px;
+        padding: 8px;
+        font-size: 1.4rem;
+        line-height: 1.6rem;
+    }
+
+    em {
+        font-size: 2rem;
+        line-height: 2.3rem;
+    }
+
+    .breaker {
+        width: 100%;
+        border-top: 2px solid rgba(255, 255, 255, 0.1);
+        margin-top: 50px;
+        padding-top: 20px;
+    }
+
+    .spacer {
+        margin-top: 40px;
+    }
+}

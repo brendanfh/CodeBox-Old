@@ -27,15 +27,14 @@ export class SubmissionResultView extends BaseView {
         }
 
         let problem = this.scoring_system.get_problem_by_dir_name(job.problem);
-        if (problem == null) return;
 
         let language_name = this.get_language_name(job.lang);
 
         res.render("submissions/submission_result", {
             navbar: this.get_navbar(this.navbar_tabs.submissions, username),
             problem: {
-                dir_name: problem.dir_name,
-                name: problem.name,
+                dir_name: problem ? problem.dir_name : "",
+                name: problem ? problem.name : "From previous competition",
             },
             sidebar_problems,
             sidebar_href(dir_name: string) {

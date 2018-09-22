@@ -34,7 +34,7 @@ export class SubmissionListView extends BaseView {
 
             get_problem_name(problem_dir_name: string) {
                 let problem = self.scoring_system.get_problem_by_dir_name(problem_dir_name);
-                if (problem == null) return "---------";
+                if (problem == null) return "Previous Competition";
 
                 return problem.name;
             },

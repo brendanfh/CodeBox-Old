@@ -19,7 +19,7 @@ export class ProblemSubmitView extends BaseView {
         let sidebar_problems = await this.get_sidebar_problems(username);
 
         res.render("problem/submit", {
-            navbar: this.get_navbar(this.navbar_tabs.problems, username),
+            navbar: this.get_navbar(this.navbar_tabs.submissions, username),
             problem: {
                 dir_name: problem.dir_name,
                 name: problem.name,

@@ -9,7 +9,7 @@ import { ProblemModel } from "./models/problem_model";
 import { setupAsyncIterators } from "../shared/utils";
 import { SocketIOServer } from "./socketio_server";
 import { JobModel } from "./models/job_model";
-import { loadConfig } from "./config_loader";
+import { loadConfig } from "./config";
 setupAsyncIterators();
 
 
@@ -67,9 +67,10 @@ async function main() {
 
 	ipc_server.init();
 	ipc_server.start();
-	let http_server = web_server.start();
+	let [http_server, https_server] = web_server.start();
 
 	socket_io_server.connect_to_http_server(http_server);
+	socket_io_server.connect_to_https_server(https_server);
 	socket_io_server.start_server();
 }
 

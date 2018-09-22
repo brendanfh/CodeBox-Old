@@ -174,6 +174,111 @@
   background-color: #0077c2;
 }
 
+.problem-description .disclaimer {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+.problem-description .disclaimer a {
+  text-decoration: underline;
+  color: #aaf;
+}
+.problem-description .example-test-cases {
+  display: block;
+  width: 100%;
+}
+.problem-description .example-test-cases .example-in {
+  width: 48%;
+  border: 2px solid white;
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 0px 2px 8px 1px rgba(0, 0, 0, 0.7);
+  font-size: 20px;
+  margin-right: 2%;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  padding: 8px;
+  min-height: 150px;
+  overflow-x: auto;
+}
+.problem-description .example-test-cases .example-in-header {
+  font-size: 32px;
+  width: 48%;
+  margin-right: 2%;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.problem-description .example-test-cases .example-out {
+  width: 48%;
+  border: 2px solid white;
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 0px 2px 8px 1px rgba(0, 0, 0, 0.7);
+  font-size: 20px;
+  margin-right: 2%;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  padding: 8px;
+  min-height: 150px;
+  overflow-x: auto;
+}
+.problem-description .example-test-cases .example-out-header {
+  font-size: 32px;
+  width: 48%;
+  margin-right: 2%;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.problem-description .example-test-cases .example-in, .problem-description .example-test-cases .example-in-header {
+  float: left;
+}
+.problem-description .example-test-cases .exmaple-out, .problem-description .example-test-cases .example-out-header {
+  float: right;
+}
+
+.help-page {
+  padding: 10px 20%;
+}
+.help-page h2 {
+  font-size: 2.5rem;
+}
+.help-page p {
+  font-size: 1.4rem;
+  line-height: 1.6rem;
+}
+.help-page p a {
+  color: #6464ff;
+  text-decoration: underline;
+}
+.help-page ol {
+  font-size: 1.4rem;
+  line-height: 1.6rem;
+}
+.help-page ol * {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.help-page blockquote {
+  margin-top: 6px;
+  margin-bottom: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 4px solid white;
+  border-radius: 4px;
+  padding: 8px;
+  font-size: 1.4rem;
+  line-height: 1.6rem;
+}
+.help-page em {
+  font-size: 2rem;
+  line-height: 2.3rem;
+}
+.help-page .breaker {
+  width: 100%;
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+  margin-top: 50px;
+  padding-top: 20px;
+}
+.help-page .spacer {
+  margin-top: 40px;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -378,6 +483,7 @@ main {
   position: relative;
   overflow: hidden;
   display: inline-block;
+  clear: right;
   width: 25%;
   min-width: 300px;
 }
@@ -396,6 +502,30 @@ main {
   left: 0;
   top: 0;
   opacity: 0;
+}
+.submission-submit-form form .switch-btn span {
+  cursor: pointer;
+  background-color: #0077c2;
+  transition: background-color 200ms;
+}
+.submission-submit-form form .switch-btn span:hover {
+  background-color: #42a5f5;
+}
+.submission-submit-form form .text-editor {
+  width: 70%;
+  display: inline-block;
+}
+.submission-submit-form form .text-editor textarea {
+  font-family: monospace;
+  font-weight: 400;
+  padding: 8px;
+  background-color: rgba(0, 0, 0, 0.4);
+  color: white;
+  width: 100%;
+  min-height: 500px;
+  resize: none;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 .submission-submit-form form input[type=submit] {
   background-color: #0077c2;
@@ -424,6 +554,22 @@ main {
   text-align: center;
   font-size: 40px;
   font-weight: 400;
+}
+.result-status .resubmit-button {
+  font-size: 24px;
+  width: 20%;
+  min-width: 200px;
+  margin-top: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 200ms;
+  background-color: #0077c2;
+  box-shadow: 0px 1px 4px 1px rgba(0, 0, 0, 0.7);
+}
+.result-status .resubmit-button:hover {
+  background-color: #42a5f5;
 }
 
 .result-progress-bar-outline {
@@ -577,6 +723,7 @@ main {
 }
 
 .login-form {
+  min-width: 500px;
   width: 30%;
   height: calc(100vh - 47px);
   margin: 0 auto;

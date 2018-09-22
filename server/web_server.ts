@@ -1,7 +1,9 @@
 import path from "path";
+import fs from "fs";
 
 import express from "express";
 import http from "http";
+import https from "https";
 import body_parser from "body-parser";
 import IPCServer from "./ipc_server";
 import JobTracker from "./job_tracker";
@@ -25,6 +27,8 @@ import { SubmissionResultView } from "./views/submission_result_view";
 import { ProblemSubmitView } from "./views/problem_submit_view";
 import { AccountView } from "./views/account_view";
 import { LeaderboardView } from "./views/leaderboard_view";
+import { GLOBAL_CONFIG } from "./config";
+import { HelpView } from "./views/help_view";
 
 interface IView<T extends BaseView> {
     RENDERER_NAME: string;
@@ -61,6 +65,7 @@ export default class WebServer {
         this.add_view(ProblemSubmitView);
         this.add_view(AccountView);
         this.add_view(LeaderboardView);
+        this.add_view(HelpView);
 
         this.emailVerifyRegex = new RegExp("");
     }
@@ -150,6 +155,7 @@ export default class WebServer {
             //Tack on flash messages
             if (req.session) {
                 res.locals = {
+                    page_title: GLOBAL_CONFIG.HOSTING_NAME,
                     flash_message: req.session.flash
                 };
 
@@ -395,29 +401,45 @@ export default class WebServer {
                     renderer.render(res, req.params.problem_name, req.session.user.username);
                 })
                 .post(requireLogin, afterStart, beforeEnd, async (req, res) => {
-                    if (req.files != null && req.session) {
+                    let code: string = "";
+
+                    if (req.body.raw_code && req.body.raw_code.length > 4) {
+                        code = req.body.raw_code;
+                    } else if (req.files != null) {
                         if (req.files.code_file != null) {
-                            let problem_data = this.scoringSystem.get_problem_by_dir_name(req.params.problem_name);
-                            if (problem_data == null) return;
+                            code = (req.files.code_file as fileUpload.UploadedFile).data.toString();
+                        }
+                    }
 
-                            let code = (req.files.code_file as fileUpload.UploadedFile).data.toString();
-                            let lang = req.body.lang;
-                            let problem = req.params.problem_name;
+                    if (req.session) {
+                        let problem_data = this.scoringSystem.get_problem_by_dir_name(req.params.problem_name);
+                        if (problem_data == null) return;
 
-                            let test = {
-                                code, lang, problem, time_limit: problem_data.time_limit
-                            };
+                        let lang = req.body.lang;
+                        let problem = req.params.problem_name;
 
+                        let test = {
+                            code, lang, problem, time_limit: problem_data.time_limit
+                        };
+
+                        try {
                             let [job_id, start_time] = await this.ipc_server.request_test(test);
                             this.job_tracker.add_job(job_id, start_time, req.session.user.username, test);
 
                             res.redirect("/submissions/result?" + querystring.stringify({ id: job_id }));
                             return;
+                        } catch (_) {
+                            res.redirect("/submit_error");
                         }
                     }
 
                     res.redirect("/submit_error");
                 });
+
+            app.get("/submit_error", async (req, res) => {
+                res.write("Something went wrong with your submission :(\nDon't worry, you're not going to be penalized for it since it is probably not your fault.");
+                res.end();
+            });
 
             app.get("/submissions/result", requireLogin, afterStart, async (req, res) => {
                 if (req.session == null) return;
@@ -450,13 +472,39 @@ export default class WebServer {
 
             view.render(res, username);
         });
+
+        app.get("/help", async (req, res) => {
+            let username = "";
+            if (req.session && req.session.user)
+                username = req.session.user.username;
+
+            let view = this.get_view(HelpView);
+            if (view == null) return;
+            view.render(res, username);
+        });
     }
 
-    public start(): http.Server {
-        const PORT = process.env.PORT || 8000;
+    public start(): [http.Server, https.Server] {
 
-        return this.expressApp.listen(PORT, () => {
-            console.log("Server started and listening on port:", PORT)
-        });
+        let http_server = http.createServer(this.expressApp);
+
+        try {
+            let ssl_cert = fs.readFileSync(GLOBAL_CONFIG.SSL_CERTIFICATE_PATH, 'utf8');
+            let ssl_key = fs.readFileSync(GLOBAL_CONFIG.SSL_KEY_PATH, 'utf8');
+
+            let creds = {
+                cert: ssl_cert,
+                key: ssl_key
+            };
+
+            let https_server = https.createServer(creds, this.expressApp);
+
+            http_server.listen(GLOBAL_CONFIG.PORT, () => { console.log("HTTP Listening on port", GLOBAL_CONFIG.PORT); });
+            https_server.listen(GLOBAL_CONFIG.SSL_PORT, () => { console.log("HTTPS Listening on port", GLOBAL_CONFIG.SSL_PORT); });
+
+            return [http_server, https_server];
+        } catch (err) {
+            throw new Error("Failed loading SSL Credentials: " + err);
+        }
     }
 }
