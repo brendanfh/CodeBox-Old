@@ -13,18 +13,21 @@ import * as shared_types from "../shared/types";
 import { TempFile } from "./file_saver";
 import { GoExecuter } from "./executers/go_executer";
 import { GoCompiler } from "./compilers/go_compiler";
+import { OutputMatcher } from "./outputs/output_matcher";
+import { make_matcher } from "./outputs/matcher_utils";
 
 type ProblemTestCases = Array<{
     input_file: string,
-    output: string
+    output: Array<OutputMatcher>
 }>
 
-let clean_output = (otpt: string): string =>
+let clean_output = (otpt: string): string[] =>
     otpt.split("\n")
         .map(s => s.trim())
         .filter(s => s != "")
-        .join("\n");
 
+let create_matchers = (otpt: string[]): Array<OutputMatcher> =>
+    otpt.map(s => make_matcher(s))
 
 
 export class SolutionChecker {
@@ -87,7 +90,7 @@ export class SolutionChecker {
 
                 let test_case = {
                     input_file: path.resolve(p_dir, prob, i[0]),
-                    output: ""
+                    output: new Array<OutputMatcher>()
                 };
 
                 let output_file = outputs.filter(p => (p ? p[1] : "") == (i ? i[1] : "-1"))[0];
@@ -97,7 +100,10 @@ export class SolutionChecker {
 
                 let output_contents = fs.readFileSync(path.resolve(p_dir, prob, output_file[0]), { encoding: "utf8" });
 
-                test_case.output = clean_output(output_contents);
+                let cleaned_output = clean_output(output_contents);
+                let matchers = create_matchers(cleaned_output);
+
+                test_case.output = matchers;
 
                 problem.push(test_case);
             }
@@ -159,7 +165,22 @@ export class SolutionChecker {
                     //Check output here
                     let output = clean_output(result.output);
 
-                    if (output === test_case.output) {
+                    let worked = true;
+                    let i = 0;
+                    for (let matcher of test_case.output) {
+                        if (!matcher.test(output[i])) {
+                            worked = false;
+                            break;
+                        }
+
+                        i++;
+                    }
+
+                    if (worked && i != output.length) {
+                        worked = false;
+                    }
+
+                    if (worked) {
                         run_times[completed] = result.run_time;
                         completed++;
 

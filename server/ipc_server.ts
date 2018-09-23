@@ -79,6 +79,10 @@ export default class IPCServer {
                 this.resolve_map["wait_for_job_completion"][data.job_id](void 0);
             }
         });
+
+        ipc.server.on("socket.disconnected", () => {
+            this.cctester_socket = null;
+        });
     }
 
     public add_event_listener(event: IPCServerEvent, func: (data: any, socket: any) => void) {
@@ -98,11 +102,11 @@ export default class IPCServer {
 
         try {
             ipc.server.emit(this.cctester_socket, "cctester.create_job", { ret_id, sub });
-            let job_info = await this.wait_for_job_id(ret_id);
-            return job_info;
         } catch (err) {
             throw "Socket not connect";
         }
+        let job_info = await this.wait_for_job_id(ret_id);
+        return job_info;
     }
 
     public wait_for_job_id(ret_id: string): Promise<[shared_types.JobID, number]> {
