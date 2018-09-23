@@ -11,6 +11,8 @@ import * as fs from "fs";
 import path from "path";
 import * as shared_types from "../shared/types";
 import { TempFile } from "./file_saver";
+import { GoExecuter } from "./executers/go_executer";
+import { GoCompiler } from "./compilers/go_compiler";
 
 type ProblemTestCases = Array<{
     input_file: string,
@@ -30,12 +32,14 @@ export class SolutionChecker {
         "c": new CExecuter(),
         "cpp": new CPPExecuter(),
         "py": new PyExecuter(),
+        "go": new GoExecuter(),
     };
 
     protected compilers: { [k: string]: BaseCompiler | undefined } = {
         "c": new CCompiler(),
         "cpp": new CPPCompiler(),
         "py": new BaseCompiler(),
+        "go": new GoCompiler(),
     };
 
     protected problems: Map<string, ProblemTestCases>;
@@ -65,10 +69,7 @@ export class SolutionChecker {
                 .map(p => /test-([0-9]+)\.([a-z]+)/g.exec(p))
                 .filter(p => p != null);
 
-            let info_file = problem_files
-                .filter(p => /problem\.json/g.exec(p))[0];
-
-            if (info_file == null || test_cases.length == 0) {
+            if (test_cases.length == 0) {
                 throw new Error("Insufficient files for problem: " + prob);
             }
 
@@ -112,6 +113,7 @@ export class SolutionChecker {
             return;
         }
 
+        //Wait so the submissions result page looks cooler
         await new Promise((res, rej) => {
             setTimeout(res, 1000);
         });
@@ -153,12 +155,12 @@ export class SolutionChecker {
             let result = await executer.execute(exec_file.file_path, test_case.input_file, time_limit);
 
             switch (result.kind) {
-                case "OK":
+                case "SUCCESS":
                     //Check output here
-                    let output = clean_output(result.val.output);
+                    let output = clean_output(result.output);
 
                     if (output === test_case.output) {
-                        run_times[completed] = result.val.run_time;
+                        run_times[completed] = result.run_time;
                         completed++;
 
                         if (completed != total)
@@ -166,7 +168,7 @@ export class SolutionChecker {
 
                         break;
                     } else {
-                        run_times[completed] = result.val.run_time;
+                        run_times[completed] = result.run_time;
 
                         yield { kind: "WRONG_ANSWER", completed: completed, total: total, run_times };
 
@@ -174,13 +176,14 @@ export class SolutionChecker {
                         return;
                     }
 
-                case "ERR":
+                case "BAD_EXECUTION":
                     exec_file.deleteFile();
-                    if (result.val.includes("system")) {
-                        yield { kind: "BAD_EXECUTION", completed: completed, total: total, run_times };
-                    } else {
-                        yield { kind: "TIME_LIMIT_EXCEEDED", completed: completed, total: total, run_times };
-                    }
+                    yield { kind: "BAD_EXECUTION", completed: completed, total: total, run_times };
+                    return;
+
+                case "TIME_LIMIT_EXCEEDED":
+                    exec_file.deleteFile();
+                    yield { kind: "TIME_LIMIT_EXCEEDED", completed: completed, total: total, run_times };
                     return;
             }
         }

@@ -7,8 +7,10 @@
         <div>
             <label for="lang">Language</label><br>
             <select name="lang">
-                <option value="c" selected>C</option>
-                <option value="cpp">C++11</option>
+                <option value="c" selected>C (GCC)</option>
+                <option value="cpp">C++ (G++)</option>
+                <option value="py">Python 3</option>
+                <option value="go">Go 1.10</option>
             </select>
         </div>
 
@@ -17,7 +19,7 @@
 
             <div id="upload-file-btn" class="file-upload-wrapper" style="margin-bottom: 10px">
                 <span>Upload a file</span>
-                <input type="file" name="code_file" accept=".c, .cpp, .py" />
+                <input type="file" name="code_file" accept=".c, .cpp, .py, .go" />
             </div>
 
             <div style="margin-bottom: 0">

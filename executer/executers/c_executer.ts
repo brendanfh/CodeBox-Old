@@ -5,7 +5,7 @@ import { onChildExit } from "../child_process_helpers";
 
 
 export class CExecuter extends BaseExecuter {
-	public async execute(exec_path: string, input_file: string, time_limit: number): Promise<Result<ExecutionResult, string>> {
+	public async execute(exec_path: string, input_file: string, time_limit: number): Promise<ExecutionResult> {
 		let bash_shell = spawn("bash");
 
 		let output = "";
@@ -20,21 +20,18 @@ export class CExecuter extends BaseExecuter {
 		let program_res = await onChildExit(bash_shell);
 		let diff_time = process.hrtime(start_time);
 
+		let run_time = diff_time[0] * 1_000_000 + Math.floor(diff_time[1] / 1000) / 1_000_000;
+
 		if (program_res == 0) {
-			return OK({
-				output: output,
-				run_time: diff_time[0] * 1_000_000 + Math.floor(diff_time[1] / 1000) / 1_000_000
-			});
-		} else if (program_res == 139) {
-			return ERR("system");
+			return { kind: "SUCCESS", output, run_time };
+		} else if (program_res == 124 || program_res == 137) {
+			bash_shell.kill();
+
+			return { kind: "TIME_LIMIT_EXCEEDED" };
 		} else {
 			bash_shell.kill();
 
-			if (err_output.includes("Bad system call") !== false) {
-				return ERR("Unpermitted system call detected");
-			}
-
-			return ERR(err_output);
+			return { kind: "BAD_EXECUTION", err: err_output }
 		}
 	}
 }

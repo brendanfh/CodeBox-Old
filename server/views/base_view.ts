@@ -79,6 +79,7 @@ export abstract class BaseView {
             case "c": return "C";
             case "cpp": return "C++";
             case "py": return "Python";
+            case "go": return "Go"
             default: return "";
         }
     }
