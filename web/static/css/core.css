@@ -186,6 +186,11 @@
   display: block;
   width: 100%;
 }
+.problem-description .example-test-cases .example-row {
+  display: flex;
+  width: 100%;
+  position: relative;
+}
 .problem-description .example-test-cases .example-in {
   width: 48%;
   border: 2px solid white;
@@ -198,6 +203,7 @@
   padding: 8px;
   min-height: 150px;
   overflow-x: auto;
+  display: inline-block;
 }
 .problem-description .example-test-cases .example-in-header {
   font-size: 32px;
@@ -205,6 +211,7 @@
   margin-right: 2%;
   margin-bottom: 8px;
   text-align: center;
+  display: inline-block;
 }
 .problem-description .example-test-cases .example-out {
   width: 48%;
@@ -218,6 +225,7 @@
   padding: 8px;
   min-height: 150px;
   overflow-x: auto;
+  display: inline-block;
 }
 .problem-description .example-test-cases .example-out-header {
   font-size: 32px;
@@ -225,11 +233,12 @@
   margin-right: 2%;
   margin-bottom: 8px;
   text-align: center;
+  display: inline-block;
 }
-.problem-description .example-test-cases .example-in, .problem-description .example-test-cases .example-in-header {
+.problem-description .example-test-cases .example-in-header {
   float: left;
 }
-.problem-description .example-test-cases .exmaple-out, .problem-description .example-test-cases .example-out-header {
+.problem-description .example-test-cases .example-out-header {
   float: right;
 }
 

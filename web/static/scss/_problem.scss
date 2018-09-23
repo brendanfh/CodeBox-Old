@@ -15,6 +15,12 @@
 
         $exlist: example-in example-out;
 
+        .example-row {
+            display: flex;
+            width: 100%;
+            position: relative;
+        }
+
         @each $ex in $exlist {
             .#{$ex} {
                 width: 48%;
@@ -28,6 +34,7 @@
                 padding: 8px;
                 min-height: 150px;
                 overflow-x: auto;
+                display: inline-block;
             }
 
             .#{$ex}-header {
@@ -36,14 +43,15 @@
                 margin-right: 2%;
                 margin-bottom: 8px;
                 text-align: center;
+                display: inline-block;
             }
         }
 
-        .example-in, .example-in-header {
+        .example-in-header {
             float: left;
         }
         
-        .exmaple-out, .example-out-header {
+        .example-out-header {
             float: right;
         }
     }
