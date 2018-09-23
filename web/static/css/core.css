@@ -732,8 +732,8 @@ main {
 }
 
 .login-form {
-  min-width: 500px;
-  width: 30%;
+  min-width: 700px;
+  width: 40%;
   height: calc(100vh - 47px);
   margin: 0 auto;
   display: flex;
@@ -768,11 +768,16 @@ main {
   margin: 10px auto;
   margin-top: 30px;
   border: none;
-  background-color: #0077c2;
   padding: 8px;
   font-size: 1.5rem;
   box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);
   border-radius: 4px;
+  transition: background-color 200ms;
+  cursor: pointer;
+  background-color: #0077c2;
+}
+.login-form form input[type=submit]:hover {
+  background-color: #0096f5;
 }
 .login-form form .login-form-disclaimer {
   text-align: center;

@@ -29,6 +29,8 @@ import { AccountView } from "./views/account_view";
 import { LeaderboardView } from "./views/leaderboard_view";
 import { GLOBAL_CONFIG } from "./config";
 import { HelpView } from "./views/help_view";
+import { ForgotPasswordView } from "./views/forgot_password_view";
+import { Emailer } from "./emailer";
 
 interface IView<T extends BaseView> {
     RENDERER_NAME: string;
@@ -43,6 +45,7 @@ export default class WebServer {
     private scoringSystem: ScoringSystem;
 
     private emailVerifyRegex: RegExp;
+    private emailer: Emailer;
 
     private views: Map<string, BaseView>;
 
@@ -66,8 +69,11 @@ export default class WebServer {
         this.add_view(AccountView);
         this.add_view(LeaderboardView);
         this.add_view(HelpView);
+        this.add_view(ForgotPasswordView);
 
         this.emailVerifyRegex = new RegExp("");
+
+        this.emailer = new Emailer("");
     }
 
     private add_view<T extends BaseView>(renderer: IView<T>) {
@@ -82,6 +88,11 @@ export default class WebServer {
 
     public set_email_verify_regex(pattern: string) {
         this.emailVerifyRegex = new RegExp(pattern);
+    }
+
+    public update_emailer() {
+        this.emailer = new Emailer(GLOBAL_CONFIG.FORGOT_PASSWORD_EMAIL);
+        this.emailer.authenticate(GLOBAL_CONFIG.FORGOT_PASSWORD_EMAIL_PASSWORD);
     }
 
     protected setupApiRoutes() {
@@ -148,9 +159,9 @@ export default class WebServer {
 
         //THIS WILL HAVE TO CHANGE
         app.use((req, res, next) => {
-            if (req.cookies.uuid && !(req.session ? req.session.user : true)) {
-                res.clearCookie("uuid");
-            }
+            // if (req.cookies.uuid && !(req.session ? req.session.user : true)) {
+            //     res.clearcookie("uuid");
+            // }
 
             //Tack on flash messages
             if (req.session) {
@@ -227,7 +238,7 @@ export default class WebServer {
         account: {
             app.route("/login")
                 .get(redirectToLeaderboard, (req, res) => {
-                    res.render("login", {
+                    res.render("account/login", {
                         navbar: { selected_tab: -1 },
                     });
                 })
@@ -267,7 +278,7 @@ export default class WebServer {
 
             app.route("/signup")
                 .get(redirectToLeaderboard, (req, res) => {
-                    res.render("signup", { navbar: { selected_tab: -1 } });
+                    res.render("account/signup", { navbar: { selected_tab: -1 } });
                 })
                 .post(async (req, res) => {
                     try {
@@ -370,6 +381,54 @@ export default class WebServer {
                     }
                 }
             });
+
+            app.route("/forgot_password")
+                .get(redirectToLeaderboard, async (req, res) => {
+                    let view = this.get_view(ForgotPasswordView);
+                    if (view == null) return;
+
+                    view.render(res);
+                })
+                .post(async (req, res) => {
+                    if (!req.session) {
+                        res.redirect("/");
+                        return;
+                    }
+
+                    if (!req.body.email) {
+                        req.session.flash = "An error occured";
+                        res.redirect("/forgot_password");
+                        return;
+                    }
+
+                    let user_model = this.database.getModel(UserModel);
+
+                    let user = await user_model.findByEmail(req.body.email);
+                    if (user == null) {
+                        req.session.flash = "Email not found.";
+                        res.redirect("/forgot_password");
+                        return;
+                    }
+
+                    let new_password = UserModel.generateRandomPassword(12);
+
+                    let result = await this.emailer.sendEmail(user.getDataValue("email"), "Password reset",
+                        `You have recently reset your password with ${GLOBAL_CONFIG.HOSTING_NAME}.\n
+                        Your new password is <b>${new_password}</b>.\n
+                        Please log in using this password and then change it in the 'My Account' section.
+                        `);
+
+                    if (result) {
+                        await user_model.updatePasswordByUsername(user.getDataValue("username"), new_password);
+                        console.log("New password is ", new_password);
+
+                        req.session.flash = "Password reset email sent successfully. Please check your email.";
+                        res.redirect("/login");
+                    } else {
+                        req.session.flash = "There was an error resetting your password. Your password has not changed."
+                        res.redirect("/forgot_password");
+                    }
+                });
         }
 
         problems: {
@@ -398,7 +457,7 @@ export default class WebServer {
                     let renderer = this.get_view(ProblemSubmitView);
                     if (renderer == null) return;
 
-                    renderer.render(res, req.params.problem_name, req.session.user.username);
+                    renderer.render(res, req.params.problem_name, req.session.user.username, req.session.user.lang_choice);
                 })
                 .post(requireLogin, afterStart, beforeEnd, async (req, res) => {
                     let code: string = "";
@@ -417,6 +476,9 @@ export default class WebServer {
 
                         let lang = req.body.lang;
                         let problem = req.params.problem_name;
+
+                        //Store the lang so it is set to what they choose next time
+                        req.session.user.lang_choice = lang;
 
                         let test = {
                             code, lang, problem, time_limit: problem_data.time_limit

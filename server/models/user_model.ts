@@ -62,6 +62,15 @@ export class UserModel extends BaseModel<UserModel_T> {
         });
     }
 
+    public async findByEmail(email: string): Promise<Sequelize.Instance<UserModel_T> | null> {
+        if (this.sql_model == null) return null;
+        return await this.sql_model.findOne({
+            where: {
+                email: email
+            }
+        });
+    }
+
     public async updateInfoByUsername(username: string, email: string, nickname: string): Promise<boolean> {
         if (this.sql_model == null) return false;
 
@@ -101,6 +110,15 @@ export class UserModel extends BaseModel<UserModel_T> {
         if (usernames == null) return [];
 
         return usernames.map(u => u.username);
+    }
+
+    public static generateRandomPassword(length: number = 8): string {
+        let str = "";
+        for (let i = 0; i < length; i++) {
+            str += String.fromCharCode(65 + Math.floor(Math.random() * 26)
+                    + 32 * (Math.floor(Math.random() * 10) % 2 == 0 ? 1 : 0));
+        }
+        return str;
     }
 
     public static generatePassword(password: string): Promise<string> {

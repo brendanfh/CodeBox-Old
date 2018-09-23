@@ -554,8 +554,8 @@ main {
 }
 
 .login-form {
-    min-width: 500px;
-    width: 30%;
+    min-width: 700px;
+    width: 40%;
     height: calc(100vh - #{$navbar-height});
     margin: 0 auto;
 
@@ -597,11 +597,17 @@ main {
             margin-top: 30px;
 
             border: none;
-            background-color: $primary-dark;
             padding: 8px;
             font-size: 1.5rem;
             box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.5);
             border-radius: 4px;
+
+            transition: background-color 200ms;
+            cursor: pointer;
+            background-color: $primary-dark;
+            &:hover {
+                background-color: lighten($primary-dark, 10);
+            }
         }
 
         .login-form-disclaimer {

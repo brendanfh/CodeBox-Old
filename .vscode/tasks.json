@@ -6,7 +6,7 @@
         {
             "label": "Sass Compile",
             "type": "shell",
-            "command": "yarn run sass -I ${workspaceFolder}/wev/static/scss/ ${workspaceFolder}/web/static/scss/core.scss ${workspaceFolder}/web/static/css/core.css",
+            "command": "yarn run sass -I ${workspaceFolder}/web/static/scss/ ${workspaceFolder}/web/static/scss/core.scss ${workspaceFolder}/web/static/css/core.css",
             "problemMatcher": [
                 "$node-sass"
             ],

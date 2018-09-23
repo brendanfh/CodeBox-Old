@@ -11,6 +11,9 @@ export let GLOBAL_CONFIG = {
     SSL_PORT: 0,
     SSL_CERTIFICATE_PATH: "",
     SSL_KEY_PATH: "",
+
+    FORGOT_PASSWORD_EMAIL: "",
+    FORGOT_PASSWORD_EMAIL_PASSWORD: "",
 }
 
 export async function loadConfig(scoring: ScoringSystem, web_server: WebServer) {
@@ -42,4 +45,8 @@ export async function loadConfig(scoring: ScoringSystem, web_server: WebServer) 
     GLOBAL_CONFIG.SSL_PORT = config.ssl_port || 8443;
     GLOBAL_CONFIG.SSL_CERTIFICATE_PATH = config.ssl_cert || "";
     GLOBAL_CONFIG.SSL_KEY_PATH = config.ssl_key || "";
+    GLOBAL_CONFIG.FORGOT_PASSWORD_EMAIL = config.forgot_password_email || "";
+    GLOBAL_CONFIG.FORGOT_PASSWORD_EMAIL_PASSWORD = config.forgot_password_email_password || "";
+
+    web_server.update_emailer();
 }

@@ -11,7 +11,7 @@ export class AccountView extends BaseView {
 
         let user_m = user.get();
 
-        res.render("account", {
+        res.render("account/account", {
             navbar: this.get_navbar(-1, username),
             status: status,
             user: {
