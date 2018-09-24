@@ -16,10 +16,10 @@ Before getting started, we must install some dependencies. Here is a list of all
 
 ### Getting started
 To get started, clone the repo:
-> git clone https://github.com/brendanfh/CodeBox
+	git clone https://github.com/brendanfh/CodeBox
 
 Then, from inside the new directory, install dependencies with yarn:
-> cd CodeBox && yarn
+	cd CodeBox && yarn
 
 ### Setting up a competition
 Everything about a competition is stored in a single folder, that has a structure like this:
