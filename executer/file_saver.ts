@@ -15,10 +15,10 @@ export class TempFile {
 	}
 
 	public get file_path(): string {
-		if (process.env.TEMP_DIR != undefined) {
-			return path.join(process.env.TEMP_DIR, this.file_name);
+		if (process.env.ROOT_DIR != undefined) {
+			return path.join(process.env.ROOT_DIR, "/temp", this.file_name);
 		} else {
-			throw new Error("TEMP_DIR NOT SET");
+			throw new Error("ROOT_DIR NOT SET");
 		}
 	}
 
