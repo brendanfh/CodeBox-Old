@@ -27,25 +27,25 @@ Then, from inside the new directory, install dependencies with yarn:
 ### Setting up a competition
 Everything about a competition is stored in a single folder, that has a structure like this:
 
-		competition/
-			problems/  --Stores all the problem information
-				problem_name1/
-					description.md --The description of the problem, as it will be displayed to competitors
-					problem.json --Problem configuration
-					test-1.in  --Input for test 1
-					test-1.out --Output for test 1
-					...
-					test-n.in  --Input for test n
-					test-n.out --Output for test n
-				problem_name2/
-				problem_name3/
+	competition/
+		problems/  --Stores all the problem information
+			problem_name1/
+				description.md --The description of the problem, as it will be displayed to competitors
+				problem.json --Problem configuration
+				test-1.in  --Input for test 1
+				test-1.out --Output for test 1
 				...
+				test-n.in  --Input for test n
+				test-n.out --Output for test n
+			problem_name2/
+			problem_name3/
+			...
 
-			temp/ --Empty folder that temporary files will be stored
+		temp/ --Empty folder that temporary files will be stored
 
-			cbdb.sqlite --Sqlite3 database
+		cbdb.sqlite --Sqlite3 database
 
-			config.json --Configuration for the competition (see below)
+		config.json --Configuration for the competition (see below)
 
 Most of the magic happens in the *config.json*. An exmaple *config.json* is something like this:
 
