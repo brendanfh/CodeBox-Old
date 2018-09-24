@@ -69,8 +69,10 @@ async function main() {
 	ipc_server.start();
 	let [http_server, https_server] = web_server.start();
 
-	socket_io_server.connect_to_http_server(http_server);
-	socket_io_server.connect_to_https_server(https_server);
+	if (http_server)
+		socket_io_server.connect_to_http_server(http_server);
+	if (https_server)
+		socket_io_server.connect_to_https_server(https_server);
 	socket_io_server.start_server();
 }
 

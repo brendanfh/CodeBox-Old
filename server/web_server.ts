@@ -546,23 +546,25 @@ export default class WebServer {
         });
     }
 
-    public start(): [http.Server, https.Server] {
-
-        let http_server = http.createServer(this.expressApp);
-
+    public start(): [http.Server | null, https.Server | null] {
         try {
-            let ssl_cert = fs.readFileSync(GLOBAL_CONFIG.SSL_CERTIFICATE_PATH, 'utf8');
-            let ssl_key = fs.readFileSync(GLOBAL_CONFIG.SSL_KEY_PATH, 'utf8');
+            let http_server = http.createServer(this.expressApp);
+            let https_server = null;
 
-            let creds = {
-                cert: ssl_cert,
-                key: ssl_key
-            };
+            if (GLOBAL_CONFIG.SSL_PORT != -1) {
+                let ssl_cert = fs.readFileSync(GLOBAL_CONFIG.SSL_CERTIFICATE_PATH, 'utf8');
+                let ssl_key = fs.readFileSync(GLOBAL_CONFIG.SSL_KEY_PATH, 'utf8');
 
-            let https_server = https.createServer(creds, this.expressApp);
+                let creds = {
+                    cert: ssl_cert,
+                    key: ssl_key
+                };
+
+                let https_server = https.createServer(creds, this.expressApp);
+                https_server.listen(GLOBAL_CONFIG.SSL_PORT, () => { console.log("HTTPS Listening on port", GLOBAL_CONFIG.SSL_PORT); });
+            }
 
             http_server.listen(GLOBAL_CONFIG.PORT, () => { console.log("HTTP Listening on port", GLOBAL_CONFIG.PORT); });
-            https_server.listen(GLOBAL_CONFIG.SSL_PORT, () => { console.log("HTTPS Listening on port", GLOBAL_CONFIG.SSL_PORT); });
 
             return [http_server, https_server];
         } catch (err) {
