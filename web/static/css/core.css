@@ -197,7 +197,7 @@
   background: rgba(0, 0, 0, 0.4);
   box-shadow: 0px 2px 8px 1px rgba(0, 0, 0, 0.7);
   font-size: 20px;
-  margin-right: 2%;
+  margin-right: 0;
   margin-bottom: 10px;
   border-radius: 4px;
   padding: 8px;
@@ -208,10 +208,10 @@
 .problem-description .example-test-cases .example-in-header {
   font-size: 32px;
   width: 48%;
-  margin-right: 2%;
+  margin-right: 0;
   margin-bottom: 8px;
   text-align: center;
-  display: inline-block;
+  float: left;
 }
 .problem-description .example-test-cases .example-out {
   width: 48%;
@@ -219,7 +219,7 @@
   background: rgba(0, 0, 0, 0.4);
   box-shadow: 0px 2px 8px 1px rgba(0, 0, 0, 0.7);
   font-size: 20px;
-  margin-right: 2%;
+  margin-right: 0;
   margin-bottom: 10px;
   border-radius: 4px;
   padding: 8px;
@@ -230,16 +230,10 @@
 .problem-description .example-test-cases .example-out-header {
   font-size: 32px;
   width: 48%;
-  margin-right: 2%;
+  margin-right: 0;
   margin-bottom: 8px;
   text-align: center;
-  display: inline-block;
-}
-.problem-description .example-test-cases .example-in-header {
   float: left;
-}
-.problem-description .example-test-cases .example-out-header {
-  float: right;
 }
 
 .help-page {

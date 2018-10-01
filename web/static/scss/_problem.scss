@@ -28,7 +28,7 @@
                 background: rgba(0, 0, 0, 0.4);
                 box-shadow: 0px 2px 8px 1px rgba(0, 0, 0, 0.7);
                 font-size: 20px;
-                margin-right: 2%;
+                margin-right: 0;
                 margin-bottom: 10px;
                 border-radius: 4px;
                 padding: 8px;
@@ -40,19 +40,11 @@
             .#{$ex}-header {
                 font-size: 32px;
                 width: 48%;
-                margin-right: 2%;
+                margin-right: 0;
                 margin-bottom: 8px;
                 text-align: center;
-                display: inline-block;
+                float: left;
             }
-        }
-
-        .example-in-header {
-            float: left;
-        }
-        
-        .example-out-header {
-            float: right;
         }
     }
 }
