@@ -282,6 +282,15 @@ export default class WebServer {
                 })
                 .post(async (req, res) => {
                     try {
+                        if (!req.body.username
+                            || !req.body.password
+                            || !req.body.confirm_password
+                            || !req.body.email
+                            || !req.body.nickname) {
+                                if (req.session) req.session.flash = "All fields are required."
+                                res.redirect("/signup")
+                            }
+
                         if (req.body.password != req.body.confirm_password) {
                             if (req.session) req.session.flash = "Passwords do not match.";
                             throw new Error("Passwords do not match");
