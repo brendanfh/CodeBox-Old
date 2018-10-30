@@ -10,7 +10,7 @@ build_server:
 build_executer:
 	pushd executer; \
 	tsc; \
-	popd;
+	popd; \
 
 executer: build_executer
 	node ./compiled/executer/main.js

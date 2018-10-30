@@ -15,6 +15,7 @@ export class CCompiler extends BaseCompiler {
 			sourceFile.file_path,
 			"./executer/compilers/secure/seccomp.c",
 			"-lseccomp",
+			"-std=c99",
 			"-o",
 			execFile.file_path
 		]);

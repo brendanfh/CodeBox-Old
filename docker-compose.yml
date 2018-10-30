@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+    codebox_web:
+        build:
+            context: .
+            dockerfile: ./server/Dockerfile
+        volumes:
+            - ~/Desktop/MOCKCOMP:/comp
+            - /tmp:/tmp
+        ports:
+            - 8080:80
+
+    codebox_executer:
+        build:
+            context: .
+            dockerfile: ./executer/Dockerfile
+        restart: always
+        volumes:
+            - ~/Desktop/MOCKCOMP:/comp
+            - /tmp:/tmp
+
