@@ -5,6 +5,7 @@ import express from "express";
 import http from "http";
 import https from "https";
 import body_parser from "body-parser";
+import csurf from "csurf";
 import IPCServer from "./ipc_server";
 import JobTracker from "./job_tracker";
 import { Database } from "./database";
@@ -225,6 +226,8 @@ export default class WebServer {
             next();
         };
 
+		let csrfProtected = csurf();
+
         app.engine('ejs', require('ejs-mate'));
         app.set('views', path.resolve(process.cwd(), "web/views"));
         app.set('view engine', 'ejs');
@@ -237,9 +240,10 @@ export default class WebServer {
 
         account: {
             app.route("/login")
-                .get(redirectToLeaderboard, (req, res) => {
+                .get(redirectToLeaderboard, csrfProtected, (req, res) => {
                     res.render("account/login", {
                         navbar: { selected_tab: -1 },
+						csrfToken: req.csrfToken(),
                     });
                 })
                 .post(async (req, res) => {
@@ -268,7 +272,7 @@ export default class WebServer {
                     }
                 });
 
-            app.get("/logout", (req, res) => {
+            app.post("/logout", (req, res) => {
                 if (req.session) {
                     req.session.user = null;
                 }
@@ -277,10 +281,13 @@ export default class WebServer {
             });
 
             app.route("/signup")
-                .get(redirectToLeaderboard, (req, res) => {
-                    res.render("account/signup", { navbar: { selected_tab: -1 } });
+                .get(redirectToLeaderboard, csrfProtected, (req, res) => {
+                    res.render("account/signup", {
+						navbar: { selected_tab: -1 },
+						csrfToken: req.csrfToken(),
+					});
                 })
-                .post(async (req, res) => {
+                .post(redirectToLeaderboard, csrfProtected, async (req, res) => {
                     try {
                         if (!req.body.username
                             || !req.body.password
@@ -329,7 +336,7 @@ export default class WebServer {
                     }
                 })
 
-            app.get("/account", requireLogin, (req, res) => {
+            app.get("/account", requireLogin, csrfProtected, (req, res) => {
                 if (req.session == null) return;
 
                 let renderer = this.get_view(AccountView);
@@ -338,7 +345,7 @@ export default class WebServer {
                 renderer.render(res, req.session.user.username, req.query.status);
             });
 
-            app.post("/account/change_info", requireLogin, async (req, res) => {
+            app.post("/account/change_info", requireLogin, csrfProtected, async (req, res) => {
                 if (req.session == null) return;
 
                 if (req.body.email) {
@@ -367,7 +374,7 @@ export default class WebServer {
                 }
             });
 
-            app.post("/account/change_password", requireLogin, async (req, res) => {
+            app.post("/account/change_password", requireLogin, csrfProtected, async (req, res) => {
                 if (req.session == null) return;
 
                 let user_model = this.database.getModel(UserModel);
@@ -392,13 +399,13 @@ export default class WebServer {
             });
 
             app.route("/forgot_password")
-                .get(redirectToLeaderboard, async (req, res) => {
+                .get(redirectToLeaderboard, csrfProtected, async (req, res) => {
                     let view = this.get_view(ForgotPasswordView);
                     if (view == null) return;
 
                     view.render(res);
                 })
-                .post(async (req, res) => {
+                .post(csrfProtected, async (req, res) => {
                     if (!req.session) {
                         res.redirect("/");
                         return;

@@ -6,17 +6,27 @@ services:
             context: .
             dockerfile: ./server/Dockerfile
         volumes:
-            - ~/Desktop/MOCKCOMP:/comp
+            - ~/Desktop/competition:/comp
             - /tmp:/tmp
         ports:
             - 8080:80
+        networks:
+            - internet
 
     codebox_executer:
         build:
             context: .
             dockerfile: ./executer/Dockerfile
         restart: always
+        networks:
+            - no-internet
         volumes:
-            - ~/Desktop/MOCKCOMP:/comp
+            - ~/Desktop/competition:/comp
             - /tmp:/tmp
 
+networks:
+    no-internet:
+        driver: overlay
+        internal: true
+    internet:
+        driver: bridge
