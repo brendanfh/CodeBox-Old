@@ -45,7 +45,6 @@ export default class WebServer {
     private database: Database;
     private scoringSystem: ScoringSystem;
 
-    private emailVerifyRegex: RegExp;
     private emailer: Emailer;
 
     private views: Map<string, BaseView>;
@@ -72,8 +71,6 @@ export default class WebServer {
         this.add_view(HelpView);
         this.add_view(ForgotPasswordView);
 
-        this.emailVerifyRegex = new RegExp("");
-
         this.emailer = new Emailer("");
     }
 
@@ -85,10 +82,6 @@ export default class WebServer {
 
     private get_view<T extends BaseView>(renderer: IView<T>): T | undefined {
         return this.views.get(renderer.RENDERER_NAME) as T;
-    }
-
-    public set_email_verify_regex(pattern: string) {
-        this.emailVerifyRegex = new RegExp(pattern);
     }
 
     public update_emailer() {
@@ -272,7 +265,13 @@ export default class WebServer {
                     }
                 });
 
-            app.post("/logout", (req, res) => {
+            app.get("/logout", (req, res) => {
+				console.log(req.get('host'));
+				if (req.get('host') != GLOBAL_CONFIG.DOMAIN_NAME) {
+					res.redirect('/');
+					return;
+				}
+
                 if (req.session) {
                     req.session.user = null;
                 }
@@ -304,7 +303,7 @@ export default class WebServer {
                         }
 
                         if (req.body.email) {
-                            let works = this.emailVerifyRegex.test(req.body.email);
+                            let works = GLOBAL_CONFIG.EMAIL_VERIFY_REGEX.test(req.body.email);
                             if (!works) {
                                 if (req.session) req.session.flash = "Invalid email.";
                                 throw new Error("Bad email");
@@ -349,7 +348,7 @@ export default class WebServer {
                 if (req.session == null) return;
 
                 if (req.body.email) {
-                    let works = this.emailVerifyRegex.test(req.body.email);
+                    let works = GLOBAL_CONFIG.EMAIL_VERIFY_REGEX.test(req.body.email);
                     if (!works) {
                         if (req.session) req.session.flash = "Invalid email.";
                         res.redirect("/account");

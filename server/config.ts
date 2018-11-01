@@ -14,6 +14,10 @@ export let GLOBAL_CONFIG = {
 
     FORGOT_PASSWORD_EMAIL: "",
     FORGOT_PASSWORD_EMAIL_PASSWORD: "",
+
+	EMAIL_VERIFY_REGEX: /.*/g,
+
+	DOMAIN_NAME: "",
 }
 
 export async function loadConfig(scoring: ScoringSystem, web_server: WebServer) {
@@ -38,8 +42,6 @@ export async function loadConfig(scoring: ScoringSystem, web_server: WebServer) 
         await scoring.load_problem(letter, problem_dir);
     }
 
-    web_server.set_email_verify_regex(config.email_verify_regex);
-
     GLOBAL_CONFIG.HOSTING_NAME = config.hosting_name;
     GLOBAL_CONFIG.PORT = config.port || 8000;
     GLOBAL_CONFIG.SSL_PORT = config.ssl_port || 8443;
@@ -47,6 +49,8 @@ export async function loadConfig(scoring: ScoringSystem, web_server: WebServer) 
     GLOBAL_CONFIG.SSL_KEY_PATH = config.ssl_key || "";
     GLOBAL_CONFIG.FORGOT_PASSWORD_EMAIL = config.forgot_password_email || "";
     GLOBAL_CONFIG.FORGOT_PASSWORD_EMAIL_PASSWORD = config.forgot_password_email_password || "";
+	GLOBAL_CONFIG.EMAIL_VERIFY_REGEX = new RegExp(config.email_verify_regex);
+	GLOBAL_CONFIG.DOMAIN_NAME = config.domain_name || "";
 
     web_server.update_emailer();
 }
