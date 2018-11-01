@@ -2,6 +2,8 @@
 
 <div class="content login-form">
     <form action="/signup" method="POST">
+		<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
         <div class="login-header">Sign up</div>
         <div>
             <label>Username</label>

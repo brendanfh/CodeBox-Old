@@ -23,6 +23,8 @@
 
     <div class="my-account-header">Account info</div>
     <form action="/account/change_info" method="POST">
+		<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
         <div>
             <label for="">Username</label>
             <input type="text" readonly name="username" value="<%= user.username %>" />
@@ -41,6 +43,8 @@
 
     <div class="my-account-header">Change password</div>
     <form action="/account/change_password" method="POST">
+		<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
         <div>
             <label for="current_password">Current password</label>
             <input type="password" name="current_password" value="" />

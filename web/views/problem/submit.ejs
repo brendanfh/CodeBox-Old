@@ -4,6 +4,8 @@
 
 <div class="submission-submit-form">
     <form action="/problems/<%=problem.dir_name%>/submit" method="POST" enctype="multipart/form-data">
+		<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
         <div>
             <label for="lang">Language</label><br>
             <select name="lang">

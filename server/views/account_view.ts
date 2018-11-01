@@ -5,7 +5,7 @@ import { UserModel } from "../models/user_model";
 export class AccountView extends BaseView {
     public static RENDERER_NAME: string = "AccountRenderer";
 
-    public async render(res: express.Response, username: string, status: string): Promise<void> {
+    public async render(res: express.Response, username: string, status: string, csrfToken: string): Promise<void> {
         let user = await this.database.getModel(UserModel).findByUsername(username);
         if (user == null) return;
 
@@ -18,7 +18,8 @@ export class AccountView extends BaseView {
                 username: user_m.username,
                 email: user_m.email,
                 nickname: user_m.nickname
-            }
+            },
+			csrfToken,
         });
     }
 }

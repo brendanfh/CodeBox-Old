@@ -239,7 +239,7 @@ export default class WebServer {
 						csrfToken: req.csrfToken(),
                     });
                 })
-                .post(async (req, res) => {
+                .post(csrfProtected, async (req, res) => {
                     let username = req.body.username,
                         password = req.body.password;
 
@@ -341,7 +341,7 @@ export default class WebServer {
                 let renderer = this.get_view(AccountView);
                 if (renderer == null) return;
 
-                renderer.render(res, req.session.user.username, req.query.status);
+                renderer.render(res, req.session.user.username, req.query.status, req.csrfToken());
             });
 
             app.post("/account/change_info", requireLogin, csrfProtected, async (req, res) => {
@@ -402,7 +402,7 @@ export default class WebServer {
                     let view = this.get_view(ForgotPasswordView);
                     if (view == null) return;
 
-                    view.render(res);
+                    view.render(res, req.csrfToken());
                 })
                 .post(csrfProtected, async (req, res) => {
                     if (!req.session) {
@@ -466,15 +466,15 @@ export default class WebServer {
             });
 
             app.route("/problems/:problem_name/submit")
-                .get(requireLogin, afterStart, beforeEnd, async (req, res) => {
+                .get(requireLogin, afterStart, beforeEnd, csrfProtected, async (req, res) => {
                     if (req.session == null) return;
 
                     let renderer = this.get_view(ProblemSubmitView);
                     if (renderer == null) return;
 
-                    renderer.render(res, req.params.problem_name, req.session.user.username, req.session.user.lang_choice);
+                    renderer.render(res, req.params.problem_name, req.session.user.username, req.csrfToken(), req.session.user.lang_choice);
                 })
-                .post(requireLogin, afterStart, beforeEnd, async (req, res) => {
+                .post(requireLogin, afterStart, beforeEnd, csrfProtected, async (req, res) => {
                     let code: string = "";
 
                     if (req.body.raw_code && req.body.raw_code.length > 4) {
