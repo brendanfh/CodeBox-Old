@@ -10,7 +10,6 @@ import IPCServer from "./ipc_server";
 import JobTracker from "./job_tracker";
 import { Database } from "./database";
 
-const genUUID = require("uuid/v4");
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import session from "express-session";
@@ -32,13 +31,14 @@ import { GLOBAL_CONFIG } from "./config";
 import { HelpView } from "./views/help_view";
 import { ForgotPasswordView } from "./views/forgot_password_view";
 import { Emailer } from "./emailer";
+import { IInjectable, Kernel } from "../shared/injection/injection";
 
 interface IView<T extends BaseView> {
     RENDERER_NAME: string;
     new(jt: JobTracker, ss: ScoringSystem, db: Database): T
 }
 
-export default class WebServer {
+export default class WebServer implements IInjectable {
     private expressApp: express.Application;
     private ipc_server: IPCServer;
     private job_tracker: JobTracker;
@@ -49,15 +49,16 @@ export default class WebServer {
 
     private views: Map<string, BaseView>;
 
-    public constructor(job_tracker: JobTracker, ipc_server: IPCServer, database: Database, scoringSystem: ScoringSystem) {
+    public constructor(kernel: Kernel) {
         this.expressApp = express();
         this.setupApiRoutes();
         this.setupWebRoutes();
 
-        this.job_tracker = job_tracker;
-        this.ipc_server = ipc_server;
-        this.database = database;
-        this.scoringSystem = scoringSystem;
+        this.job_tracker = kernel.get<JobTracker>("JobTracker");
+        this.ipc_server = kernel.get<IPCServer>("IPCServer");
+        this.database = kernel.get<Database>("Database");
+        this.scoringSystem = kernel.get<ScoringSystem>("ScoringSystem");
+        this.emailer = kernel.get<Emailer>("Emailer");
 
         this.views = new Map();
 
@@ -70,8 +71,6 @@ export default class WebServer {
         this.add_view(LeaderboardView);
         this.add_view(HelpView);
         this.add_view(ForgotPasswordView);
-
-        this.emailer = new Emailer("");
     }
 
     private add_view<T extends BaseView>(renderer: IView<T>) {
@@ -85,7 +84,7 @@ export default class WebServer {
     }
 
     public update_emailer() {
-        this.emailer = new Emailer(GLOBAL_CONFIG.FORGOT_PASSWORD_EMAIL);
+        this.emailer.setEmail(GLOBAL_CONFIG.FORGOT_PASSWORD_EMAIL);
         this.emailer.authenticate(GLOBAL_CONFIG.FORGOT_PASSWORD_EMAIL_PASSWORD);
     }
 
@@ -219,7 +218,7 @@ export default class WebServer {
             next();
         };
 
-		let csrfProtected = csurf();
+        let csrfProtected = csurf();
 
         app.engine('ejs', require('ejs-mate'));
         app.set('views', path.resolve(process.cwd(), "web/views"));
@@ -236,7 +235,7 @@ export default class WebServer {
                 .get(redirectToLeaderboard, csrfProtected, (req, res) => {
                     res.render("account/login", {
                         navbar: { selected_tab: -1 },
-						csrfToken: req.csrfToken(),
+                        csrfToken: req.csrfToken(),
                     });
                 })
                 .post(csrfProtected, async (req, res) => {
@@ -266,11 +265,11 @@ export default class WebServer {
                 });
 
             app.get("/logout", (req, res) => {
-				console.log(req.get('host'));
-				if (req.get('host') != GLOBAL_CONFIG.DOMAIN_NAME) {
-					res.redirect('/');
-					return;
-				}
+                console.log(req.get('host'));
+                if (req.get('host') != GLOBAL_CONFIG.DOMAIN_NAME) {
+                    res.redirect('/');
+                    return;
+                }
 
                 if (req.session) {
                     req.session.user = null;
@@ -282,9 +281,9 @@ export default class WebServer {
             app.route("/signup")
                 .get(redirectToLeaderboard, csrfProtected, (req, res) => {
                     res.render("account/signup", {
-						navbar: { selected_tab: -1 },
-						csrfToken: req.csrfToken(),
-					});
+                        navbar: { selected_tab: -1 },
+                        csrfToken: req.csrfToken(),
+                    });
                 })
                 .post(redirectToLeaderboard, csrfProtected, async (req, res) => {
                     try {
@@ -293,9 +292,9 @@ export default class WebServer {
                             || !req.body.confirm_password
                             || !req.body.email
                             || !req.body.nickname) {
-                                if (req.session) req.session.flash = "All fields are required."
-                                res.redirect("/signup")
-                            }
+                            if (req.session) req.session.flash = "All fields are required."
+                            res.redirect("/signup")
+                        }
 
                         if (req.body.password != req.body.confirm_password) {
                             if (req.session) req.session.flash = "Passwords do not match.";

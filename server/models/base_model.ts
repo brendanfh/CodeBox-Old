@@ -1,7 +1,8 @@
 import sequelize from "sequelize";
 import { Database } from "../database";
+import { IInjectable } from "../../shared/injection/injection";
 
-export abstract class BaseModel<T> {
+export abstract class BaseModel<T> implements IInjectable {
     protected sql_model: sequelize.Model<sequelize.Instance<T> & T, T> | null = null;
 
     public getSqlModel(): sequelize.Model<sequelize.Instance<T> & T, T> | null {

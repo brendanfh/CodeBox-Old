@@ -4,22 +4,23 @@ import path from "path";
 import { runInThisContext } from "vm";
 import { JobModel } from "./models/job_model";
 import { Database } from "./database";
+import { IInjectable, Kernel } from "../shared/injection/injection";
 
 export type UsersJobs = Map<string, Map<string, shared_types.Job[]>>;
 export type JobIDMap = Map<string, [string, string]>;
 
-export default class JobTracker {
+export default class JobTracker implements IInjectable {
     private static JOB_FOLDER_LOCATION: string = "/jobs";
 
     private jobs: UsersJobs;
     private job_ids: JobIDMap;
     private job_model: JobModel;
 
-    public constructor(db: Database) {
+    public constructor(kernel: Kernel) {
         this.jobs = new Map();
         this.job_ids = new Map();
 
-        this.job_model = db.getModel(JobModel);
+        this.job_model = kernel.get<Database>("Database").getModel(JobModel);
     }
 
     public async add_job(id: shared_types.JobID, time_started: number, username: string, sub: shared_types.IPCJobSubmission) {

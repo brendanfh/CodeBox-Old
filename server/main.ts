@@ -12,6 +12,9 @@ import { JobModel } from "./models/job_model";
 import { loadConfig } from "./config";
 setupAsyncIterators();
 
+import { Kernel } from "../shared/injection/injection";
+import { Emailer } from "./emailer";
+
 
 async function setupDatabase(database: Database) {
 	await database.initConnection();
@@ -22,15 +25,22 @@ async function setupDatabase(database: Database) {
 	await database.setupModels();
 }
 
-async function main() {
-	let database = new Database();
-	await setupDatabase(database);
+function bindStatics(kernel: Kernel) {
+	kernel.bindStatic<IPCServer>("IPCServer")(IPCServer);
+	kernel.bindStatic<JobTracker>("JobTracker")(JobTracker);
+	kernel.bindStatic<ScoringSystem>("ScoringSystem")(ScoringSystem);
+	kernel.bindStatic<SocketIOServer>("SockerIOServer")(SocketIOServer);
+	kernel.bindStatic<WebServer>("WebServer")(WebServer);
+	kernel.bindStatic<Emailer>("Emailer")(Emailer);
+}
 
-	let job_tracker = new JobTracker(database);
-	let scoring = new ScoringSystem(database, job_tracker);
-	let socket_io_server = new SocketIOServer(job_tracker, scoring, database.getModel(UserModel));
+async function setup(kernel: Kernel) {
+	let database = kernel.get<Database>("Database");
+	let job_tracker = kernel.get<JobTracker>("JobTracker");
+	let scoring = kernel.get<ScoringSystem>("ScoringSystem");
+	let socket_io_server = kernel.get<SocketIOServer>("SockerIOServer");
+	let ipc_server = kernel.get<IPCServer>("IPCServer");
 
-	let ipc_server = new IPCServer();
 	ipc_server.add_event_listener("cctester.job_status_update", async (data, socket) => {
 		if (data.job_id != undefined && data.status != undefined) {
 			//Tell the result screen of the changes
@@ -60,12 +70,21 @@ async function main() {
 		}
 	});
 
-	let web_server = new WebServer(job_tracker, ipc_server, database, scoring);
-	await loadConfig(scoring, web_server);
-
-	await scoring.score_all_users(await database.getModel(UserModel).getAllUsernames());
-
 	ipc_server.init();
+
+	kernel.get<WebServer>("WebServer");
+	await loadConfig(kernel);
+
+	let users = kernel.get<UserModel>("UserModel");
+	let usernames = await users.getAllUsernames();
+	await scoring.score_all_users(usernames);
+}
+
+async function start(kernel: Kernel) {
+	let socket_io_server = kernel.get<SocketIOServer>("SockerIOServer");
+	let ipc_server = kernel.get<IPCServer>("IPCServer");
+	let web_server = kernel.get<WebServer>("WebServer");
+
 	ipc_server.start();
 	let [http_server, https_server] = web_server.start();
 
@@ -73,7 +92,25 @@ async function main() {
 		socket_io_server.connect_to_http_server(http_server);
 	if (https_server)
 		socket_io_server.connect_to_https_server(https_server);
+
 	socket_io_server.start_server();
+}
+
+async function main() {
+	let kernel = new Kernel();
+
+	bindStatics(kernel);
+
+	let database = new Database();
+	await setupDatabase(database);
+
+	kernel.setStatic<Database>("Database")(database);
+	kernel.setStatic<JobModel>("JobModel")(database.getModel(JobModel));
+	kernel.setStatic<ProblemModel>("ProblemModel")(database.getModel(ProblemModel));
+	kernel.setStatic<UserModel>("UserModel")(database.getModel(UserModel));
+
+	await setup(kernel);
+	await start(kernel);
 }
 
 main();

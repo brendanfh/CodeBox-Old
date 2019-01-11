@@ -6,13 +6,14 @@ const genUUID = require("uuid/v4");
 
 import * as shared_types from "../shared/types";
 import JobTracker from "./job_tracker";
+import { IInjectable, Kernel } from "../shared/injection/injection";
 
 type IPCServerEvent
     = "cctester.set_job_id"
     | "cctester.job_status_update"
     | "cctester.job_completed";
 
-export default class IPCServer {
+export default class IPCServer implements IInjectable {
     protected cctester_socket: net.Socket | null = null;
     protected resolve_map: {
         [k: string]: {
@@ -25,7 +26,7 @@ export default class IPCServer {
 
     protected event_listeners: Map<IPCServerEvent, ((data: any, socket: any) => void)[]>;
 
-    public constructor() {
+    public constructor(kernel: Kernel) {
         this.event_listeners = new Map();
         this.event_listeners.set("cctester.set_job_id", []);
         this.event_listeners.set("cctester.job_status_update", []);

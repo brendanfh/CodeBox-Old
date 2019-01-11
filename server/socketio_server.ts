@@ -5,8 +5,9 @@ import JobTracker from "./job_tracker";
 import { JobStatus } from "../shared/types";
 import ScoringSystem from "./scoring_system";
 import { UserModel } from "./models/user_model";
+import { IInjectable, Kernel } from "../shared/injection/injection";
 
-export class SocketIOServer {
+export class SocketIOServer implements IInjectable {
 
     private io: socket_io.Server | null = null;
     private io_ssl: socket_io.Server | null = null;
@@ -18,11 +19,10 @@ export class SocketIOServer {
         "submission_updates": Map<string, socket_io.Socket | null>,
         "leaderboard_updates": Map<string, socket_io.Socket>,
     };
-
-    constructor(job_tracker: JobTracker, scoring_system: ScoringSystem, user_model: UserModel) {
-        this.job_tracker = job_tracker;
-        this.scoring_system = scoring_system;
-        this.user_model = user_model;
+    constructor(kernel: Kernel) {
+        this.job_tracker = kernel.get<JobTracker>("JobTracker");
+        this.scoring_system = kernel.get<ScoringSystem>("ScoringSystem");
+        this.user_model = kernel.get<UserModel>("UserModel");
 
         this.subscriptions = {
             "submission_updates": new Map(),

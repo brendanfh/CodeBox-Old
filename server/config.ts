@@ -3,6 +3,7 @@ import fs from "fs";
 import ScoringSystem from "./scoring_system";
 import JobTracker from "./job_tracker";
 import WebServer from "./web_server";
+import { Kernel } from "../shared/injection/injection";
 
 export let GLOBAL_CONFIG = {
     HOSTING_NAME: "ORGANIZATION NAME HERE",
@@ -15,12 +16,15 @@ export let GLOBAL_CONFIG = {
     FORGOT_PASSWORD_EMAIL: "",
     FORGOT_PASSWORD_EMAIL_PASSWORD: "",
 
-	EMAIL_VERIFY_REGEX: /.*/g,
+    EMAIL_VERIFY_REGEX: /.*/g,
 
-	DOMAIN_NAME: "",
+    DOMAIN_NAME: "",
 }
 
-export async function loadConfig(scoring: ScoringSystem, web_server: WebServer) {
+export async function loadConfig(kernel: Kernel) {
+    let web_server = kernel.get<WebServer>("WebServer");
+    let scoring = kernel.get<ScoringSystem>("ScoringSystem");
+
     if (process.env.ROOT_DIR == null) {
         throw new Error("ROOT_DIR not set");
     }
@@ -49,8 +53,8 @@ export async function loadConfig(scoring: ScoringSystem, web_server: WebServer) 
     GLOBAL_CONFIG.SSL_KEY_PATH = config.ssl_key || "";
     GLOBAL_CONFIG.FORGOT_PASSWORD_EMAIL = config.forgot_password_email || "";
     GLOBAL_CONFIG.FORGOT_PASSWORD_EMAIL_PASSWORD = config.forgot_password_email_password || "";
-	GLOBAL_CONFIG.EMAIL_VERIFY_REGEX = new RegExp(config.email_verify_regex);
-	GLOBAL_CONFIG.DOMAIN_NAME = config.domain_name || "";
+    GLOBAL_CONFIG.EMAIL_VERIFY_REGEX = new RegExp(config.email_verify_regex);
+    GLOBAL_CONFIG.DOMAIN_NAME = config.domain_name || "";
 
     web_server.update_emailer();
 }

@@ -1,13 +1,14 @@
 import path from "path";
 import Sequelize, { SequelizeLoDash } from "sequelize";
 import { BaseModel } from "./models/base_model";
+import { IInjectable, Kernel } from "../shared/injection/injection";
 
 export interface IBaseModel<R, T extends BaseModel<R>> {
     MODEL_NAME: string;
     new(): T;
 }
 
-export class Database {
+export class Database implements IInjectable {
     protected models: Map<string, BaseModel<any>>;
 
     protected sqlz: Sequelize.Sequelize | null = null;

@@ -1,13 +1,18 @@
 import nodemailer from "nodemailer";
 import Mail from "nodemailer/lib/mailer";
 import { GLOBAL_CONFIG } from "./config"
+import { Kernel, IInjectable } from "../shared/injection/injection";
 
-export class Emailer {
+export class Emailer implements IInjectable {
 
 	private transporter: Mail | null = null;
 	private email: string;
 
-	public constructor(email: string) {
+	public constructor(kernel: Kernel) {
+		this.email = "";
+	}
+
+	public setEmail(email: string) {
 		this.email = email;
 	}
 

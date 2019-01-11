@@ -5,6 +5,7 @@ import { Database } from "./database";
 import JobTracker from "./job_tracker";
 
 import * as shared_types from "../shared/types";
+import { IInjectable, Kernel } from "../shared/injection/injection";
 
 type LeaderboardProblemStatus
     = "NON_ATTEMPTED"
@@ -13,7 +14,7 @@ type LeaderboardProblemStatus
 
 type LPSMap = { [k: string]: [LeaderboardProblemStatus, number] };
 
-export default class ScoringSystem {
+export default class ScoringSystem implements IInjectable {
     //letter to problem
     private problems: Map<string, ProblemModel_T>;
     private database: Database;
@@ -25,10 +26,10 @@ export default class ScoringSystem {
     private start_time: Date;
     private end_time: Date;
 
-    constructor(database: Database, job_tracker: JobTracker) {
+    constructor(kernel: Kernel) {
         this.problems = new Map<string, ProblemModel_T>();
-        this.database = database;
-        this.job_tracker = job_tracker;
+        this.database = kernel.get<Database>("Database");
+        this.job_tracker = kernel.get<JobTracker>("JobTracker");
 
         this.user_scores = new Map();
 
