@@ -43,3 +43,8 @@ export type JobID = string
 
 export type CheckerUpdate
 	= { job_id: JobID, status: JobStatus }
+
+export type ProblemKind =
+	"program"
+	| "codegolf"
+	| "word";

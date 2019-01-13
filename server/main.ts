@@ -35,7 +35,6 @@ function bindStatics(kernel: Kernel) {
 }
 
 async function setup(kernel: Kernel) {
-	let database = kernel.get<Database>("Database");
 	let job_tracker = kernel.get<JobTracker>("JobTracker");
 	let scoring = kernel.get<ScoringSystem>("ScoringSystem");
 	let socket_io_server = kernel.get<SocketIOServer>("SockerIOServer");

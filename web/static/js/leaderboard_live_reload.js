@@ -17,7 +17,7 @@ window.addEventListener("load", function () {
         return output;
     }
 
-    function renderHeader(problem_num) {
+    function renderHeader(problem_num, problem_map) {
         let output = "";
 
         output += `<div class="leaderboard-header" style="grid-column: 1 / span 1;">Place</div>`;
@@ -25,8 +25,9 @@ window.addEventListener("load", function () {
 
         let a_char = 'A'.charCodeAt(0);
         for (let j = 0; j < problem_num; j++) {
+            let char = String.fromCharCode(a_char + j);
             output += `<div class="leaderboard-header" style="grid-column: ${j + 3} / span 1;">
-                ${String.fromCharCode(a_char + j)}
+                <a href="/problems/${problem_map[char]}">${char}</a>
             </div>`;
         }
         output += `<div class="leaderboard-header" style="grid-column: ${problem_num + 3} / span 1;">Total time</div>`;
@@ -117,6 +118,7 @@ window.addEventListener("load", function () {
 
     function renderLeaderboard(data) {
         let nickname_map = data.nickname_map;
+        let problem_map = data.problem_map;
         let mapData = data.scores;
 
         let problem_num = 0;
@@ -139,7 +141,7 @@ window.addEventListener("load", function () {
                     grid-template-rows: 64px repeat(auto-fill, 48px);
                 ">`;
 
-        output += renderHeader(problem_num);
+        output += renderHeader(problem_num, problem_map);
         output += renderUsernames(scoreData.keys(), nickname_map);
         output += renderPlaceNumbers(scoreData.keys());
         output += renderSubmissions(scoreData);

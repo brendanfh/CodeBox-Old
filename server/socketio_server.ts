@@ -46,7 +46,7 @@ export class SocketIOServer implements IInjectable {
         socket.on("request_leaderboard_updates", async (data) => {
             this.subscriptions["leaderboard_updates"].set(socket.id, socket);
 
-            this.push_single_leaderboard_update(socket, undefined);
+            this.push_single_leaderboard_update(socket, undefined, undefined);
         });
 
         socket.on("disconnect", () => {
@@ -61,7 +61,7 @@ export class SocketIOServer implements IInjectable {
         }
     }
 
-    private async push_single_leaderboard_update(socket: socket_io.Socket, nickname_map: { [k: string]: string } | undefined) {
+    private async push_single_leaderboard_update(socket: socket_io.Socket, nickname_map: { [k: string]: string } | undefined, problem_map: { [k: string]: string } | undefined) {
         let scores = this.scoring_system.current_scores;
 
         if (nickname_map == undefined) {
@@ -72,25 +72,36 @@ export class SocketIOServer implements IInjectable {
             }
         }
 
+        if (problem_map == undefined) {
+            problem_map = {};
+            for (let prob of this.scoring_system.get_problems()) {
+                problem_map[prob.letter] = prob.dir_name;
+            }
+        }
+
         socket.emit("leaderboard_update", {
             scores: [...scores],
             nickname_map,
+            problem_map,
             start_time: this.scoring_system.get_start_time(),
             end_time: this.scoring_system.get_end_time()
         });
     }
 
     public async push_leaderboard_update() {
-        let scores = this.scoring_system.current_scores;
-
         let nickname_map: { [k: string]: string } = {};
         let users = await this.user_model.findAll();
         for (let user of users) {
             nickname_map[user.username] = user.nickname;
         }
 
+        let problem_map: { [k: string]: string } = {};
+        for (let prob of this.scoring_system.get_problems()) {
+            problem_map[prob.letter] = prob.dir_name;
+        }
+
         for (let socket of this.subscriptions["leaderboard_updates"].values()) {
-            this.push_single_leaderboard_update(socket, nickname_map);
+            this.push_single_leaderboard_update(socket, nickname_map, problem_map);
         }
     }
 

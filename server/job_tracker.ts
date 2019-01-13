@@ -20,7 +20,7 @@ export default class JobTracker implements IInjectable {
         this.jobs = new Map();
         this.job_ids = new Map();
 
-        this.job_model = kernel.get<Database>("Database").getModel(JobModel);
+        this.job_model = kernel.get<JobModel>("JobModel");
     }
 
     public async add_job(id: shared_types.JobID, time_started: number, username: string, sub: shared_types.IPCJobSubmission) {

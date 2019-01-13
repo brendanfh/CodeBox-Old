@@ -6,6 +6,7 @@ import JobTracker from "./job_tracker";
 
 import * as shared_types from "../shared/types";
 import { IInjectable, Kernel } from "../shared/injection/injection";
+import { ProblemKind } from "../shared/types";
 
 type LeaderboardProblemStatus
     = "NON_ATTEMPTED"
@@ -49,6 +50,7 @@ export default class ScoringSystem implements IInjectable {
             {
                 dir_name,
                 name: "",
+                kind: "program",
                 description: "",
                 time_limit: 0,
                 attempts: 0,
@@ -70,6 +72,7 @@ export default class ScoringSystem implements IInjectable {
         let info_contents = fs.readFileSync(path.resolve(problem_dir, dir_name, info_file), { encoding: "utf8" });
         let time_limit: number = 0.0;
         let name: string = "";
+        let kind: ProblemKind = "program";
 
         try {
             let problem_info = JSON.parse(info_contents);
@@ -77,6 +80,7 @@ export default class ScoringSystem implements IInjectable {
             if (problem_info.time_limit && problem_info.name) {
                 time_limit = parseInt(problem_info.time_limit);
                 name = problem_info.name;
+                kind = problem_info.kind;
             } else {
                 throw new Error();
             }
@@ -93,6 +97,7 @@ export default class ScoringSystem implements IInjectable {
         p.description = description;
         p.name = name;
         p.time_limit = time_limit;
+        p.kind = kind;
         this.database.getModel(ProblemModel).update(p);
 
         this.problems.set(letter, p);

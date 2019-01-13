@@ -11,8 +11,8 @@
             <select name="lang">
                 <option value="c" <%= default_lang == "c" ? "selected" : ""%>>C (GCC)</option>
                 <option value="cpp" <%= default_lang == "cpp" ? "selected" : ""%>>C++ (G++)</option>
-                <option value="py" <%= default_lang == "py" ? "selected" : ""%>>Python 3</option>
-                <!--<option value="go" <%= default_lang == "go" ? "selected" : ""%>>Go 1.10</option>-->
+                <!-- <option value="py" <%= default_lang == "py" ? "selected" : ""%>>Python 3</option>-->
+                <!-- <option value="go" <%= default_lang == "go" ? "selected" : ""%>>Go 1.10</option>-->
             </select>
         </div>
 
@@ -21,7 +21,8 @@
 
             <div id="upload-file-btn" class="file-upload-wrapper" style="margin-bottom: 10px">
                 <span>Upload a file</span>
-                <input type="file" name="code_file" accept=".c, .cpp, .py, .go" />
+                <!-- <input type="file" name="code_file" accept=".c, .cpp, .py, .go" /> -->
+                <input type="file" name="code_file" accept=".c, .cpp" />
             </div>
 
             <div style="margin-bottom: 0">

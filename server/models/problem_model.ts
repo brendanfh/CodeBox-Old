@@ -1,9 +1,11 @@
 import { BaseModel } from "./base_model";
 import Sequelize from "sequelize";
+import { ProblemKind } from "../../shared/types";
 
 export type ProblemModel_T = {
     dir_name: string, //Name as stored on the file system
     name: string, //Name from problem.json
+    kind: ProblemKind,
     description: string, // Markdown string of problem description
     time_limit: number,
     attempts: number,
@@ -35,6 +37,10 @@ export class ProblemModel extends BaseModel<ProblemModel_T> {
             name: {
                 type: Sequelize.STRING,
                 allowNull: false
+            },
+            kind: {
+                type: Sequelize.STRING,
+                allowNull: false,
             },
             description: {
                 type: Sequelize.STRING,
@@ -88,6 +94,7 @@ export class ProblemModel extends BaseModel<ProblemModel_T> {
         let db_values: ProblemModel_T = {
             dir_name: values.dir_name,
             name: values.name,
+            kind: values.kind,
             description: "",
             time_limit: values.time_limit,
             correct_attempts: values.correct_attempts,
