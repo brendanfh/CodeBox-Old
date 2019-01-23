@@ -63,7 +63,7 @@ export default class ScoringSystem implements IInjectable {
 
         if (problem_model == null) return;
 
-        //We load the data about the problem that should be be entirely independent of the database (i.e. desciption)
+        //We load the data about the problem that should be be entirely independent of the database (i.e. description)
         let problem_files = fs.readdirSync(path.join(problem_dir, dir_name));
 
         let info_file = problem_files
@@ -77,7 +77,7 @@ export default class ScoringSystem implements IInjectable {
         try {
             let problem_info = JSON.parse(info_contents);
 
-            if (problem_info.time_limit && problem_info.name) {
+            if (problem_info.time_limit != null && problem_info.name != null && problem_info.kind != null) {
                 time_limit = parseInt(problem_info.time_limit);
                 name = problem_info.name;
                 kind = problem_info.kind;
@@ -191,7 +191,8 @@ export default class ScoringSystem implements IInjectable {
                 problem.attempts++;
         }
 
-        await this.database.getModel(ProblemModel).update(problem);
+        if (await this.database.getModel(ProblemModel).update(problem))
+            console.log("UPDATED PROBLEM STATS");
     }
 
     public get current_scores() {

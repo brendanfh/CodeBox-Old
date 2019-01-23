@@ -14,7 +14,9 @@
                     <div class="listed-problem-letter"><%= prob.letter %></div>
                     <div class="listed-problem-name"><%= prob.name %></div>
                     <div class="listed-problem-status"><%= prob.users_status %></div>
-                    <div class="listed-problem-time-limit"><%= (prob.time_limit / 1000).toString()%>s</div>
+                    <% if (prob.kind != "word") { %>
+                        <div class="listed-problem-time-limit"><%= (prob.time_limit / 1000).toString()%>s</div>
+                    <% } %>
                     <div class="problem-stats-container">
                         <div class="problem-stats correct-color"
                             style="

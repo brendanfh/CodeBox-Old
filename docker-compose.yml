@@ -6,7 +6,8 @@ services:
             context: .
             dockerfile: ./server/Dockerfile
         volumes:
-            - ~/Desktop/competition:/comp
+            - ~/Desktop/MOCKCOMP:/comp
+            - ./web/static:/app/web/static
             - /tmp:/tmp
         ports:
             - 8080:80
@@ -21,7 +22,7 @@ services:
         networks:
             - no-internet
         volumes:
-            - ~/Desktop/competition:/comp
+            - ~/Desktop/MOCKCOMP:/comp
             - /tmp:/tmp
 
 networks:

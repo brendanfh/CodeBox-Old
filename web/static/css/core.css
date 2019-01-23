@@ -114,7 +114,7 @@
   background-color: #001929;
   color: white;
   line-height: 64px;
-  font-size: 2rem;
+  font-size: 1.5rem;
 }
 .leaderboard .leaderboard-grid .leaderboard-place-number {
   grid-column: 1/span 1;

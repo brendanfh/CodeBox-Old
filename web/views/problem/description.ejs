@@ -16,22 +16,24 @@
             <div class="left">Problem ID:</div> <div class="right"><%= problem.dir_name %></div>
         </div>
 
-        <div class="problem-info-row">
-            <div class="left">Time Limit:</div> <div class="right"><%= problem.time_limit %></div>
-        </div>
+        <% if (problem.kind != "word") { %>
+            <div class="problem-info-row">
+                <div class="left">Time Limit:</div> <div class="right"><%= problem.time_limit %></div>
+            </div>
 
-        <div class="problem-info-row" style="color: #aaffaa">
-            <div class="left">Correct:</div> <div class="right"><%= problem.correct_attempts %></div>
-        </div>
-        <div class="problem-info-row" style="color: #ffaaaa">
-            <div class="left">Wrong answer:</div> <div class="right"><%= problem.wrong_answer_attempts %></div>
-        </div>
-        <div class="problem-info-row" style="color: #aaaaff">
-            <div class="left">Timed out:</div> <div class="right"><%= problem.timed_out_attempts %></div>
-        </div>
-        <div class="problem-info-row" style="color: #aaaaaa">
-            <div class="left">Other:</div> <div class="right"><%= problem.other_bad_attempts %></div>
-        </div>
+            <div class="problem-info-row" style="color: #aaffaa">
+                <div class="left">Correct:</div> <div class="right"><%= problem.correct_attempts %></div>
+            </div>
+            <div class="problem-info-row" style="color: #ffaaaa">
+                <div class="left">Wrong answer:</div> <div class="right"><%= problem.wrong_answer_attempts %></div>
+            </div>
+            <div class="problem-info-row" style="color: #aaaaff">
+                <div class="left">Timed out:</div> <div class="right"><%= problem.timed_out_attempts %></div>
+            </div>
+            <div class="problem-info-row" style="color: #aaaaaa">
+                <div class="left">Other:</div> <div class="right"><%= problem.other_bad_attempts %></div>
+            </div>
+        <% } %>
     </div>
     <div class="problem-description">
         <%- problem.description %>

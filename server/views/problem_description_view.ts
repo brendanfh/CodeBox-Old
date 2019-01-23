@@ -33,6 +33,7 @@ export class ProblemDescriptionView extends BaseView {
             problem: {
                 description: desc_html,
                 dir_name: problem.dir_name,
+                kind: problem.kind,
                 name: problem.name,
                 wrong_answer_attempts: problem.wrong_answer_attempts,
                 other_bad_attempts: problem.other_bad_attempts,

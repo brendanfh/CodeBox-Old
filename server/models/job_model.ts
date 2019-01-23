@@ -1,7 +1,5 @@
 import Sequelize from "sequelize";
 import { BaseModel } from "./base_model";
-import { UserModel } from "./user_model";
-import { Database } from "../database";
 import * as shared_types from "../../shared/types";
 
 export interface JobModel_T extends shared_types.Job {

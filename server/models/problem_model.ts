@@ -108,6 +108,7 @@ export class ProblemModel extends BaseModel<ProblemModel_T> {
             await this.sql_model.update(db_values, { where: { dir_name: values.dir_name } });
             return true;
         } catch (err) {
+            console.log(err);
             return false;
         }
     }
