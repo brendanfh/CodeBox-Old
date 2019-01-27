@@ -22,7 +22,7 @@ type ProblemTestCases = Array<{
 }>
 
 type CheckableProblem
-    = { kind: "program" | "golf", test_cases: ProblemTestCases }
+    = { kind: "program" | "codegolf", test_cases: ProblemTestCases }
     | { kind: "word", answer: OutputMatcher }
 
 
@@ -56,6 +56,74 @@ export class SolutionChecker {
         this.problems = new Map<string, CheckableProblem>();
     }
 
+    protected load_problem(prob: string, p_dir: string): CheckableProblem {
+        let problem_files = fs.readdirSync(path.join(p_dir, prob));
+
+        let problem: CheckableProblem;
+
+        if (problem_files.find(s => s == "answer")) {
+            let answer = fs.readFileSync(path.resolve(p_dir, prob, "answer"), { encoding: "utf8" });
+            let answer_matcher = create_matchers(clean_output(answer))[0];
+
+            problem = {
+                kind: "word",
+                answer: answer_matcher
+            }
+
+        } else {
+            let problem_test_cases: ProblemTestCases = [];
+
+            // 0 - file index
+            // 1 - test case number
+            // 2 - in or out
+            let test_cases = problem_files
+                .map(p => /test-([0-9]+)\.([a-z]+)/g.exec(p))
+                .filter(p => p != null);
+
+            if (test_cases.length == 0) {
+                throw new Error("Insufficient files for problem: " + prob);
+            }
+
+            test_cases.sort((a, b) =>
+                (a ? parseInt(a[1]) : 0) < (b ? parseInt(b[1]) : 0) ? -1 : 1
+            );
+
+            let inputs = test_cases.filter(p => (p ? p[2] : "") === "in");
+            let outputs = test_cases.filter(p => (p ? p[2] : "") === "out");
+
+            for (let i of inputs) {
+                if (i == undefined) continue;
+
+                let test_case = {
+                    input_file: path.resolve(p_dir, prob, i[0]),
+                    output: new Array<OutputMatcher>()
+                };
+
+                let output_file = outputs.filter(p => (p ? p[1] : "") == (i ? i[1] : "-1"))[0];
+                if (output_file == null) {
+                    continue;
+                }
+
+                let output_contents = fs.readFileSync(path.resolve(p_dir, prob, output_file[0]), { encoding: "utf8" });
+
+                let cleaned_output = clean_output(output_contents);
+                let matchers = create_matchers(cleaned_output);
+
+                test_case.output = matchers;
+
+                problem_test_cases.push(test_case);
+            }
+
+            problem = {
+                kind: "program",
+                test_cases: problem_test_cases
+            }
+        }
+
+        this.problems.set(prob, problem);
+        return problem;
+    }
+
     public load_problems(): void {
         if (process.env.ROOT_DIR == undefined || typeof process.env.ROOT_DIR != "string") {
             throw new Error("ROOT_DIR not set");
@@ -68,70 +136,8 @@ export class SolutionChecker {
         );
 
         for (let prob of problem_dirs) {
-            let problem_files = fs.readdirSync(path.join(p_dir, prob));
-
-            let problem: CheckableProblem;
-
-            if (problem_files.find(s => s == "answer")) {
-                let answer = fs.readFileSync(path.resolve(p_dir, prob, "answer"), { encoding: "utf8" });
-                let answer_matcher = create_matchers(clean_output(answer))[0];
-
-                problem = {
-                    kind: "word",
-                    answer: answer_matcher
-                }
-
-            } else {
-                let problem_test_cases: ProblemTestCases = [];
-
-                // 0 - file index
-                // 1 - test case number
-                // 2 - in or out
-                let test_cases = problem_files
-                    .map(p => /test-([0-9]+)\.([a-z]+)/g.exec(p))
-                    .filter(p => p != null);
-
-                if (test_cases.length == 0) {
-                    throw new Error("Insufficient files for problem: " + prob);
-                }
-
-                test_cases.sort((a, b) =>
-                    (a ? a[1] : "") < (b ? b[1] : "") ? 0 : 1
-                );
-
-                let inputs = test_cases.filter(p => (p ? p[2] : "") === "in");
-                let outputs = test_cases.filter(p => (p ? p[2] : "") === "out");
-
-                for (let i of inputs) {
-                    if (i == undefined) continue;
-
-                    let test_case = {
-                        input_file: path.resolve(p_dir, prob, i[0]),
-                        output: new Array<OutputMatcher>()
-                    };
-
-                    let output_file = outputs.filter(p => (p ? p[1] : "") == (i ? i[1] : "-1"))[0];
-                    if (output_file == null) {
-                        continue;
-                    }
-
-                    let output_contents = fs.readFileSync(path.resolve(p_dir, prob, output_file[0]), { encoding: "utf8" });
-
-                    let cleaned_output = clean_output(output_contents);
-                    let matchers = create_matchers(cleaned_output);
-
-                    test_case.output = matchers;
-
-                    problem_test_cases.push(test_case);
-                }
-
-                problem = {
-                    kind: "program",
-                    test_cases: problem_test_cases
-                }
-            }
-
-            this.problems.set(prob, problem);
+            let problem = this.load_problem(prob, p_dir);
+            console.log("Loaded problem: " + prob + " : " + problem.kind);
         }
     }
 

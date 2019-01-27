@@ -98,14 +98,22 @@ window.addEventListener("load", function () {
             }
 
             case "COMPLETED": {
-                $resultStatus.html(`Completed Successfully`);
+                if (status.total == 0) {
+                    $resultStatus.html(`Correct answer!`);
+                } else {
+                    $resultStatus.html(`Completed successfully`);
+                }
                 $resultProgressBar.css({ width: "100%" });
                 $resultProgressBarOutline.addClass("completed");
                 break;
             }
 
             case "WRONG_ANSWER": {
-                $resultStatus.html(`Wrong answer on test case ${status.completed + 1} out of ${status.total}\n` + renderResubmitButton());
+                if (status.total == 0) {
+                    $resultStatus.html(`Wrong answer`);
+                } else {
+                    $resultStatus.html(`Wrong answer on test case ${status.completed + 1} out of ${status.total}\n` + renderResubmitButton());
+                }
                 $resultProgressBar.css({ width: `${40 + 60 * (status.completed / status.total)}% ` });
                 $resultProgressBarOutline.addClass("error");
                 break;

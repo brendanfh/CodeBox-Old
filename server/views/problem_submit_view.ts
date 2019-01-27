@@ -16,6 +16,14 @@ export class ProblemSubmitView extends BaseView {
             return;
         }
 
+        if (problem.kind == "word") {
+            res.render("problem/description", {
+                navbar: { selected_tab: 1 },
+                problem_description: `<span>Problem "${problem_name}" cannot be submitted to in this way.</span>`
+            });
+            return;
+        }
+
         let sidebar_problems = await this.get_sidebar_problems(username);
 
         res.render("problem/submit", {

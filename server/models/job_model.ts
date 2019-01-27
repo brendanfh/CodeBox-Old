@@ -137,4 +137,8 @@ export class JobModel extends BaseModel<JobModel_T> {
             },
         });
     }
+
+    public static getByteCount(job: shared_types.Job): number {
+        return job.code.length;
+    }
 }

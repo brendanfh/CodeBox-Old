@@ -66,8 +66,11 @@ export class SubmissionListView extends BaseView {
                 switch (status.kind) {
                     case "RUNNING":
                     case "COMPLETED":
-                        let run_sum = status.run_times.reduce((a, b) => a + b);
-                        return `${(run_sum / 1_000_000).toFixed(3)}s`
+                        if (status.run_times.length > 0) {
+                            let run_sum = status.run_times.reduce((a, b) => a + b);
+                            return `${(run_sum / 1_000_000).toFixed(3)}s`
+                        }
+                        return "";
 
                     default:
                         return "-.---s";

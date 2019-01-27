@@ -417,6 +417,21 @@ main {
   box-shadow: 0px 1px 3px 0.25px rgba(0, 0, 0, 0.7);
   background: #3d3d3d;
 }
+.problem-info .answer-box {
+  width: 100%;
+  max-height: 100%;
+  font-size: 1.25rem;
+  line-height: 50px;
+  border: none;
+  background: #00588f;
+  color: white;
+  padding: 8px;
+  text-align: center;
+}
+.problem-info .answer-box::placeholder {
+  color: white;
+  opacity: 0.7;
+}
 .problem-info .submit-btn {
   width: 100%;
   max-height: 100%;
@@ -430,6 +445,9 @@ main {
   cursor: pointer;
   transition: 200ms all;
   background: #ffe766;
+}
+.problem-info input[type=submit].submit-btn {
+  border: none;
 }
 .problem-info .submissions-btn {
   width: 100%;
@@ -791,7 +809,7 @@ main {
 .problem-list .listed-problem {
   display: grid;
   grid-template-columns: 32px 64px minmax(200px, 3fr) minmax(200px, 1fr) minmax(100px, 1fr);
-  grid-template-rows: 60px 10px;
+  grid-template-rows: minmax(60px, 1fr) 10px;
   line-height: 60px;
   font-size: 2rem;
   cursor: pointer;

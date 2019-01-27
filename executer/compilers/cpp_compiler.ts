@@ -10,7 +10,7 @@ export class CPPCompiler extends BaseCompiler {
 		let execFile = new TempFile();
 
 		let compiler_process = spawn("g++", [
-			"-w",
+			"-Wall",
 			"-O2",
 			sourceFile.file_path,
 			"./executer/compilers/secure/seccomp.c",

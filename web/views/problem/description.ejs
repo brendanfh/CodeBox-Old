@@ -2,9 +2,18 @@
 
 <div class="content problem-description">
     <div class="problem-info">
-        <a href="/problems/<%=problem.dir_name%>/submit">
-            <div class="submit-btn">Submit</div>
-        </a>
+
+        <% if (problem.kind != "word") { %>
+            <a href="/problems/<%=problem.dir_name%>/submit">
+                <div class="submit-btn">Submit</div>
+            </a>
+        <% } else if (!problem.has_submissions) { %>
+            <form class="word-problem-submit" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input required type="text" name="answer" placeholder="Answer here" class="answer-box" />
+                <input type="submit" class="submit-btn" /> 
+            </form>
+        <% } %>
 
         <% if (problem.has_submissions) { %>
             <a href="/submissions?problem=<%=problem.dir_name%>">

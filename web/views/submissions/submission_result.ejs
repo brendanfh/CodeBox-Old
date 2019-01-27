@@ -18,21 +18,30 @@
     </div>
 
     <div class="result-progress-bar-outline">
-        <div class="result-progress-bar" style="width: 70%"></div>
+        <div class="result-progress-bar" style="width: 0%"></div>
     </div>
 
     <div class="result-test-case-list">
     </div>
 
     <div class="result-language-name">
-        <%=language_name%> source file
+        <% if (problem.kind == "word") { %>
+            Your answer    
+        <% } else { %>
+            <div><%=language_name%> source file</div>
+            <% if (problem.kind == "codegolf") { %>
+                <div><%=size%> bytes</div>
+            <% } %>
+        <% } %>
     </div>
 
-    <div class="result-compile-error">
-        <pre>
-            No errors or warnings.
-        </pre>
-    </div>
+    <% if (problem.kind != "word") { %>
+        <div class="result-compile-error">
+            <pre>
+                No errors or warnings.
+            </pre>
+        </div>
+    <% } %>
 
     <div class="result-source-code">
         <pre><code class"<%=job.lang%>"><%=job.code%></code></pre>

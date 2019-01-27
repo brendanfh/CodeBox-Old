@@ -7,7 +7,7 @@ services:
             dockerfile: ./server/Dockerfile
         volumes:
             - ~/Desktop/MOCKCOMP:/comp
-            - ./web/static:/app/web/static
+            - ./web:/app/web
             - /tmp:/tmp
         ports:
             - 8080:80

@@ -166,6 +166,26 @@ main {
     @include elevate(1px, rgba(0, 0, 0, 0.7));
     background: lighten($content-background, 10);
 
+    .answer-box {
+        width: 100%;
+        max-height: 100%;
+
+        font-size: 1.25rem;
+        line-height: 50px;
+
+        border: none;
+        background: darken($primary-dark, 10);
+        color: white;
+        padding: 8px;
+
+        text-align: center;
+
+        &::placeholder {
+            color: white;
+            opacity: 0.7;
+        }
+    }
+
     .submit-btn {
         width: 100%;
         max-height: 100%;
@@ -182,6 +202,11 @@ main {
             transition: 200ms all;
             background: $secondary-light;
         }
+
+    }
+
+    input[type="submit"].submit-btn {
+        border: none;
     }
 
     .submissions-btn {
@@ -631,7 +656,7 @@ main {
     .listed-problem {
         display: grid;
         grid-template-columns: 32px 64px minmax(200px, 3fr) minmax(200px, 1fr) minmax(100px, 1fr);
-        grid-template-rows: 60px 10px;
+        grid-template-rows: minmax(60px, 1fr) 10px;
 
         line-height: 60px;
         font-size: 2rem;

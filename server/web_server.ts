@@ -455,14 +455,47 @@ export default class WebServer implements IInjectable {
                 renderer.render(res, req.session.user.username);
             });
 
-            app.get("/problems/:problem_name", requireLogin, afterStart, async (req, res) => {
-                if (req.session == null) return;
+            app.route("/problems/:problem_name")
+                .get(requireLogin, afterStart, csrfProtected, async (req, res) => {
+                    if (req.session == null) return;
 
-                let renderer = this.get_view(ProblemDescriptionView);
-                if (renderer == null) return;
+                    let renderer = this.get_view(ProblemDescriptionView);
+                    if (renderer == null) return;
 
-                renderer.render(res, req.params.problem_name, req.session.user.username);
-            });
+                    renderer.render(res, req.params.problem_name, req.session.user.username, req.csrfToken());
+                })
+                .post(requireLogin, afterStart, beforeEnd, csrfProtected, async (req, res) => {
+                    let problem = this.scoringSystem.get_problem_by_dir_name(req.params.problem_name);
+
+                    if (problem == undefined || problem.kind != "word") {
+                        console.log("THIS IS NOT A WORD PROBLEM");
+                        res.redirect("/submit_error")
+                    } else {
+                        if (req.body.answer && req.session) {
+                            console.log("SUBMITTED WORD PROBLEM!!! " + req.body.answer);
+
+                            let problem = req.params.problem_name;
+
+                            let test = {
+                                code: req.body.answer,
+                                lang: "word",
+                                problem,
+                                time_limit: 0,
+                            };
+
+                            try {
+                                let [job_id, start_time] = await this.ipc_server.request_test(test);
+                                this.job_tracker.add_job(job_id, start_time, req.session.user.username, test);
+
+                                res.redirect("/submissions/result?" + querystring.stringify({ id: job_id }));
+                                return;
+                            } catch (e) {
+                                res.redirect("/submit_error");
+                            }
+                        }
+                        res.redirect("/submit_error")
+                    }
+                });
 
             app.route("/problems/:problem_name/submit")
                 .get(requireLogin, afterStart, beforeEnd, csrfProtected, async (req, res) => {

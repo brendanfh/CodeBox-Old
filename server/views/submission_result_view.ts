@@ -1,5 +1,6 @@
 import express from "express";
 import { BaseView } from "./base_view";
+import { JobModel } from "../models/job_model";
 
 export class SubmissionResultView extends BaseView {
     public static RENDERER_NAME: string = "SubmissionResultRenderer";
@@ -33,6 +34,7 @@ export class SubmissionResultView extends BaseView {
         res.render("submissions/submission_result", {
             navbar: this.get_navbar(this.navbar_tabs.submissions, username),
             problem: {
+                kind: problem ? problem.kind : "program",
                 dir_name: problem ? problem.dir_name : "",
                 name: problem ? problem.name : "From previous competition",
             },
@@ -41,6 +43,7 @@ export class SubmissionResultView extends BaseView {
                 return `/problems/${dir_name}/`
             },
             job,
+            size: JobModel.getByteCount(job),
             language_name
         });
     }

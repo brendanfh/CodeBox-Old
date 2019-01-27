@@ -6,7 +6,7 @@ import { BaseView } from "./base_view";
 export class ProblemDescriptionView extends BaseView {
     public static RENDERER_NAME: string = "ProblemDescriptionRenderer";
 
-    public async render(res: express.Response, problem_name: string, username: string): Promise<void> {
+    public async render(res: express.Response, problem_name: string, username: string, csrfToken: string): Promise<void> {
         let problem = this.scoring_system.get_problem_by_dir_name(problem_name);
 
         if (problem == undefined) {
@@ -43,6 +43,7 @@ export class ProblemDescriptionView extends BaseView {
                 time_limit: (problem.time_limit / 1000).toString() + " seconds",
                 has_submissions
             },
+            csrfToken,
             sidebar_problems,
             sidebar_href(dir_name: string) {
                 return `/problems/${dir_name}/`
