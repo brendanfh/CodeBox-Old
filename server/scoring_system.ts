@@ -3,13 +3,14 @@ import path from "path";
 import fs from "fs";
 import { Database } from "./database";
 import JobTracker from "./job_tracker";
+import { JobModel } from "./models/job_model";
 
 import * as shared_types from "../shared/types";
 import { IInjectable, Kernel } from "../shared/injection/injection";
 import { ProblemKind } from "../shared/types";
 
 type LeaderboardProblemStatus
-    = "NON_ATTEMPTED"
+    = "NOT_ATTEMPTED"
     | "WRONG"
     | "CORRECT";
 
@@ -21,8 +22,8 @@ export default class ScoringSystem implements IInjectable {
     private database: Database;
     private job_tracker: JobTracker;
 
-    //username to score, problem map, total time
-    private user_scores: Map<string, [number, LPSMap, number]>;
+    //username to score, problem map
+    private user_scores: Map<string, [number, LPSMap]>;
 
     private start_time: Date;
     private end_time: Date;
@@ -206,47 +207,57 @@ export default class ScoringSystem implements IInjectable {
     }
 
     public async score_user(username: string): Promise<void> {
-        let completed = 0;
-        let wrong = 0;
-        let times = new Array<number>();
-
+        let score: number = 0;
         let statuses: LPSMap = {};
-        let total_minutes = 0;
 
         for (let [letter, prob] of this.problems.entries()) {
-            let attempts = 0;
-            statuses[letter] = ["NON_ATTEMPTED", attempts];
-
-            let hasCorrect = false;
-            for await (let j of this.job_tracker.get_solved_problems_by_username_and_problem(username, prob.dir_name)) {
-                attempts++;
-                completed++;
-                times.push(j.time_initiated);
-
-                total_minutes += ((j.time_initiated - this.start_time.getTime()) / (1000 * 60));
-
-                statuses[letter][0] = "CORRECT";
-                hasCorrect = true;
-                break;
-            }
-            for await (let _ of this.job_tracker.get_failed_problems_by_username_and_problem(username, prob.dir_name)) {
-                if (!hasCorrect)
-                    statuses[letter][0] = "WRONG";
-
-                wrong++;
-                attempts++;
-            }
-
-            statuses[letter][1] = attempts;
+             let res = await this.score_problem(letter, prob, username);
+             statuses[letter] = [res[1], res[2]];
+             score += res[0];
         }
-
-
-        total_minutes += wrong * 15;
-
-        let score = this.calculate_score(completed, wrong, times);
-        this.user_scores.set(username, [score, statuses, total_minutes]);
+        
+        this.user_scores.set(username, [score, statuses]);
 
         this.sort_users_by_score();
+    }
+
+    private async score_problem(letter: string, problem: ProblemModel_T, username: string):
+        Promise<[number, LeaderboardProblemStatus, number]> {
+
+        let status: LeaderboardProblemStatus = "NOT_ATTEMPTED";
+
+        // Number of attempts / length of code for codegolf
+        let ret_val: number = 0;
+        for await (let _ of this.job_tracker.get_failed_problems_by_username_and_problem(username, problem.dir_name)) {
+            status = "WRONG";
+            ret_val++;
+        }
+
+        let worth = 0;
+        let deduction = 0;
+        for await (let j of this.job_tracker.get_solved_problems_by_username_and_problem(username, problem.dir_name)) {
+            if (problem.kind == "program") {
+                worth = 1000;
+                deduction = 10;
+            } else if (problem.kind == "word") {
+                worth = 500;
+                deduction = 5;
+            } else if (problem.kind == "codegolf") {
+                worth = 250;
+                deduction = 0;
+                ret_val = JobModel.getByteCount(j) - 1;
+            }
+
+            let time = Math.floor((j.time_initiated - this.start_time.getTime()) / 360000);
+            worth -= deduction * time;
+            worth -= ret_val * deduction * 2;
+
+            status = "CORRECT";
+            ret_val += 1;
+            break;
+        }
+
+        return [worth, status, ret_val];
     }
 
     private sort_users_by_score(): void {

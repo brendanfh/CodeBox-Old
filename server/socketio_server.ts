@@ -75,7 +75,8 @@ export class SocketIOServer implements IInjectable {
         if (problem_map == undefined) {
             problem_map = {};
             for (let prob of this.scoring_system.get_problems()) {
-                problem_map[prob.letter] = prob.dir_name;
+                if (prob.kind != "word")
+                    problem_map[prob.letter] = prob.dir_name;
             }
         }
 
@@ -97,7 +98,8 @@ export class SocketIOServer implements IInjectable {
 
         let problem_map: { [k: string]: string } = {};
         for (let prob of this.scoring_system.get_problems()) {
-            problem_map[prob.letter] = prob.dir_name;
+            if (prob.kind != "word")
+                problem_map[prob.letter] = prob.dir_name;
         }
 
         for (let socket of this.subscriptions["leaderboard_updates"].values()) {

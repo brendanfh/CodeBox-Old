@@ -1,5 +1,9 @@
 <% layout("partials/problem") %>
 
+<script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
 <div class="content problem-description">
     <div class="problem-info">
 
@@ -21,6 +25,9 @@
             </a>
         <% } %>
 
+        <div class="problem-info-row">
+            <div class="left">Problem Kind:</div> <div class="right"><%= problem.kind %></div>
+        </div>
         <div class="problem-info-row">
             <div class="left">Problem ID:</div> <div class="right"><%= problem.dir_name %></div>
         </div>

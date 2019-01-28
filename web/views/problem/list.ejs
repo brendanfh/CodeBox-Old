@@ -16,37 +16,37 @@
                     <div class="listed-problem-status"><%= prob.users_status %></div>
                     <% if (prob.kind != "word") { %>
                         <div class="listed-problem-time-limit"><%= (prob.time_limit / 1000).toString()%>s</div>
+                        <div class="problem-stats-container">
+                            <div class="problem-stats correct-color"
+                                style="
+                                    width: <%= Math.floor(prob.correct_attempts / prob.attempts * 100)%>%;
+                                    display: <%= (prob.correct_attempts == 0 ? 'none' : 'block') %>;
+                                ">
+                                <span class="problem-stats-tooltip">Correct (<%=prob.correct_attempts%>/<%=prob.attempts%>)</span>
+                            </div>
+                            <div class="problem-stats wrong-color"
+                                style="
+                                    width: <%= Math.floor(prob.wrong_answer_attempts / prob.attempts * 100)%>%;
+                                    display: <%= (prob.wrong_answer_attempts == 0 ? 'none' : 'block') %>;
+                                ">
+                                <span class="problem-stats-tooltip">Wrong (<%=prob.wrong_answer_attempts%>/<%=prob.attempts%>)</span>
+                            </div>
+                            <div class="problem-stats timed-out-color"
+                                style="
+                                    width: <%= Math.floor(prob.timed_out_attempts / prob.attempts * 100)%>%;
+                                    display: <%= (prob.timed_out_attempts == 0 ? 'none' : 'block') %>;
+                                ">
+                                <span class="problem-stats-tooltip">Timed out (<%=prob.timed_out_attempts%>/<%=prob.attempts%>)</span>
+                            </div>
+                            <div class="problem-stats other-color"
+                                style="
+                                    width: <%= Math.floor(prob.other_bad_attempts / prob.attempts * 100)%>%;
+                                    display: <%= (prob.other_bad_attempts == 0 ? 'none' : 'block') %>;
+                                ">
+                                <span class="problem-stats-tooltip">Other (<%=prob.other_bad_attempts%>/<%=prob.attempts%>)</span>
+                            </div>
+                        </div>
                     <% } %>
-                    <div class="problem-stats-container">
-                        <div class="problem-stats correct-color"
-                            style="
-                                width: <%= Math.floor(prob.correct_attempts / prob.attempts * 100)%>%;
-                                display: <%= (prob.correct_attempts == 0 ? 'none' : 'block') %>;
-                            ">
-                            <span class="problem-stats-tooltip">Correct (<%=prob.correct_attempts%>/<%=prob.attempts%>)</span>
-                        </div>
-                        <div class="problem-stats wrong-color"
-                            style="
-                                width: <%= Math.floor(prob.wrong_answer_attempts / prob.attempts * 100)%>%;
-                                display: <%= (prob.wrong_answer_attempts == 0 ? 'none' : 'block') %>;
-                            ">
-                            <span class="problem-stats-tooltip">Wrong (<%=prob.wrong_answer_attempts%>/<%=prob.attempts%>)</span>
-                        </div>
-                        <div class="problem-stats timed-out-color"
-                            style="
-                                width: <%= Math.floor(prob.timed_out_attempts / prob.attempts * 100)%>%;
-                                display: <%= (prob.timed_out_attempts == 0 ? 'none' : 'block') %>;
-                            ">
-                            <span class="problem-stats-tooltip">Timed out (<%=prob.timed_out_attempts%>/<%=prob.attempts%>)</span>
-                        </div>
-                        <div class="problem-stats other-color"
-                            style="
-                                width: <%= Math.floor(prob.other_bad_attempts / prob.attempts * 100)%>%;
-                                display: <%= (prob.other_bad_attempts == 0 ? 'none' : 'block') %>;
-                            ">
-                            <span class="problem-stats-tooltip">Other (<%=prob.other_bad_attempts%>/<%=prob.attempts%>)</span>
-                        </div>
-                    </div>
                 </div>
             </a>
             <% } %>

@@ -30,7 +30,7 @@ window.addEventListener("load", function () {
                 <a href="/problems/${problem_map[char]}">${char}</a>
             </div>`;
         }
-        output += `<div class="leaderboard-header" style="grid-column: ${problem_num + 3} / span 1;">Total time</div>`;
+        output += `<div class="leaderboard-header" style="grid-column: ${problem_num + 3} / span 1;">Score</div>`;
 
         return output;
     }
@@ -94,17 +94,17 @@ window.addEventListener("load", function () {
         return output;
     }
 
-    function renderTimes(scoreData, problem_num) {
+    function renderScores(scoreData, problem_num) {
         let output = "";
 
         let i = 2;
         for (let user of scoreData.values()) {
-            let time = Math.floor(user[2]);
+            let score = Math.floor(user[0]);
 
             output += `
                 <div class="leaderboard-time ${(i % 2 == 1 ? 'alternate-color' : '')} ${i - 2 == userindex ? 'highlighted' : ''}"
                     style="grid-column: ${problem_num + 3} / span 1; grid-row: ${i} / span 1;">
-                    ${time} minutes
+                    ${score}
                 </div>`;
 
             i++;
@@ -122,7 +122,7 @@ window.addEventListener("load", function () {
         let mapData = data.scores;
 
         let problem_num = 0;
-        for (let _ in mapData[0][1][1]) problem_num++;
+        for (let _ in problem_map) problem_num++;
 
         let scoreData = new Map(mapData);
 
@@ -145,7 +145,7 @@ window.addEventListener("load", function () {
         output += renderUsernames(scoreData.keys(), nickname_map);
         output += renderPlaceNumbers(scoreData.keys());
         output += renderSubmissions(scoreData);
-        output += renderTimes(scoreData, problem_num);
+        output += renderScores(scoreData, problem_num);
 
         output += "</div>";
 
