@@ -13,8 +13,8 @@ type LeaderboardProblemStatus
     = "NOT_ATTEMPTED"
     | "WRONG"
     | "CORRECT";
-
-type LPSMap = { [k: string]: [LeaderboardProblemStatus, number] };
+//                            Status,                   worth,  shown
+type LPSMap = { [k: string]: [LeaderboardProblemStatus, number, boolean] };
 
 export default class ScoringSystem implements IInjectable {
     //letter to problem
@@ -24,6 +24,8 @@ export default class ScoringSystem implements IInjectable {
 
     //username to score, problem map
     private user_scores: Map<string, [number, LPSMap]>;
+    private code_golf_scores: Map<string, number>;
+    private code_golf_leaders: Array<string>;
 
     private start_time: Date;
     private end_time: Date;
@@ -34,6 +36,8 @@ export default class ScoringSystem implements IInjectable {
         this.job_tracker = kernel.get<JobTracker>("JobTracker");
 
         this.user_scores = new Map();
+        this.code_golf_scores = new Map<string, number>();
+        this.code_golf_leaders = new Array<string>();
 
         this.start_time = new Date(0);
         this.end_time = new Date(0);
@@ -190,14 +194,21 @@ export default class ScoringSystem implements IInjectable {
             case "BAD_EXECUTION":
                 problem.other_bad_attempts++;
                 problem.attempts++;
-        }
+         }
 
         if (await this.database.getModel(ProblemModel).update(problem))
             console.log("UPDATED PROBLEM STATS");
     }
 
     public get current_scores() {
-        return this.user_scores;
+        let copy = new Map<string, [number, LPSMap]>();
+        for (let u of this.user_scores.entries()) {
+            copy.set(u[0], [u[1][0], u[1][1]]);
+        }
+        for (let u of copy.entries()) {
+            u[1][0] += this.get_codegolf_score(u[0]);
+        }
+        return copy;
     }
 
     public async score_all_users(usernames: string[]): Promise<void> {
@@ -212,7 +223,7 @@ export default class ScoringSystem implements IInjectable {
 
         for (let [letter, prob] of this.problems.entries()) {
              let res = await this.score_problem(letter, prob, username);
-             statuses[letter] = [res[1], res[2]];
+             statuses[letter] = [res[1], res[2], prob.kind != "word"];
              score += res[0];
         }
         
@@ -235,6 +246,7 @@ export default class ScoringSystem implements IInjectable {
 
         let worth = 0;
         let deduction = 0;
+        let isCodegolf = false;
         for await (let j of this.job_tracker.get_solved_problems_by_username_and_problem(username, problem.dir_name)) {
             if (problem.kind == "program") {
                 worth = 1000;
@@ -245,7 +257,17 @@ export default class ScoringSystem implements IInjectable {
             } else if (problem.kind == "codegolf") {
                 worth = 250;
                 deduction = 0;
-                ret_val = JobModel.getByteCount(j) - 1;
+                
+                if (!isCodegolf) {
+                    ret_val = 100000000;
+                }
+
+                isCodegolf = true;
+                let bytes = JobModel.getByteCount(j);
+                this.update_codegolf(username, bytes);
+
+                if (bytes <= ret_val + 1)
+                    ret_val = bytes - 1; //Because we add one later and this is easier
             }
 
             let time = Math.floor((j.time_initiated - this.start_time.getTime()) / 360000);
@@ -254,10 +276,52 @@ export default class ScoringSystem implements IInjectable {
 
             status = "CORRECT";
             ret_val += 1;
-            break;
+
+            if (problem.kind != "codegolf") //Keep looking for a shorter solution
+                break;
+        }
+
+        if (!isCodegolf) {
+            ret_val = worth;
         }
 
         return [worth, status, ret_val];
+    }
+
+    private update_codegolf(username: string, bytes: number) {
+        let curr_score = this.code_golf_scores.get(username);
+        if (curr_score == null) curr_score = 10000000;
+
+        if (bytes <= curr_score) {
+            this.code_golf_scores.set(username, bytes);
+            console.log("SCORE OF " + bytes + " FOR " + username);
+
+            let tmp = [];
+            for (let c of this.code_golf_scores) {
+                 tmp.push(c);
+            }
+
+            tmp.sort((a, b) => a[1] - b[1]);
+            this.code_golf_scores = new Map(tmp);
+
+            tmp = [];
+            for (let c of this.code_golf_scores.keys()) {
+                console.log("PUSHING");
+                tmp.push(c);
+            }
+
+            this.code_golf_leaders = tmp;
+            console.log("CODE GOLF LEADERS: " + this.code_golf_leaders);
+        }
+    }
+
+    private get_codegolf_score(username: string): number {
+        const leaders = this.code_golf_leaders;
+        if (leaders[0] == username) return 1000;
+        if (leaders[1] == username) return 750;
+        if (leaders[2] == username) return 500;
+        if (leaders[3] == username) return 250;
+        return 0;
     }
 
     private sort_users_by_score(): void {
@@ -266,9 +330,10 @@ export default class ScoringSystem implements IInjectable {
 
         for (let us of user_scores_gen) {
             user_scores.push(us);
-        }
+        }    
 
-        user_scores.sort((u1, u2) => u2[1][0] - u1[1][0]);
+        user_scores.sort((u1, u2) => (this.get_codegolf_score(u2[0]) + u2[1][0]) - (this.get_codegolf_score(u1[0]) + u1[1][0]));
+        console.log(user_scores);
 
         this.user_scores = new Map(user_scores);
     }

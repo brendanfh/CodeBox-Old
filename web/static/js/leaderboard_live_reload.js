@@ -74,6 +74,7 @@ window.addEventListener("load", function () {
             let j = 3;
             for (let letter in user[1]) {
                 let res = user[1][letter];
+                if (!res[2]) continue;
                 let end_state = res[0];
 
                 let color_class = "";

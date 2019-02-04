@@ -61,8 +61,10 @@ export class SocketIOServer implements IInjectable {
         }
     }
 
-    private async push_single_leaderboard_update(socket: socket_io.Socket, nickname_map: { [k: string]: string } | undefined, problem_map: { [k: string]: string } | undefined) {
-        let scores = this.scoring_system.current_scores;
+    private async push_single_leaderboard_update(socket: socket_io.Socket, scores: Map, nickname_map: { [k: string]: string } | undefined, problem_map: { [k: string]: string } | undefined) {
+        if (scores == null) {
+            scores = this.scoring_system.current_scores;
+        }
 
         if (nickname_map == undefined) {
             nickname_map = {};
@@ -90,6 +92,8 @@ export class SocketIOServer implements IInjectable {
     }
 
     public async push_leaderboard_update() {
+        let scores = this.scoring_system.current_scores;
+
         let nickname_map: { [k: string]: string } = {};
         let users = await this.user_model.findAll();
         for (let user of users) {
@@ -103,7 +107,7 @@ export class SocketIOServer implements IInjectable {
         }
 
         for (let socket of this.subscriptions["leaderboard_updates"].values()) {
-            this.push_single_leaderboard_update(socket, nickname_map, problem_map);
+            this.push_single_leaderboard_update(socket, scores, nickname_map, problem_map);
         }
     }
 
