@@ -30,6 +30,7 @@ function main() {
 	ipc.connectTo("ccmaster", () => {
 		ipc.of.ccmaster.on("connect", () => {
 			ipc.of.ccmaster.emit("cctester.connect", {});
+			console.log("SHOULD BE CONNECTED!!!");
 		});
 
 		ipc.of.ccmaster.on("cctester.create_job", async (vals: { ret_id: string, sub: shared_types.IPCJobSubmission }) => {

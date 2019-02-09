@@ -14,7 +14,7 @@ type LeaderboardProblemStatus
     | "WRONG"
     | "CORRECT";
 //                            Status,                   worth,  shown
-type LPSMap = { [k: string]: [LeaderboardProblemStatus, number, boolean] };
+export type LPSMap = { [k: string]: [LeaderboardProblemStatus, number, boolean] };
 
 export default class ScoringSystem implements IInjectable {
     //letter to problem
@@ -194,7 +194,7 @@ export default class ScoringSystem implements IInjectable {
             case "BAD_EXECUTION":
                 problem.other_bad_attempts++;
                 problem.attempts++;
-         }
+        }
 
         if (await this.database.getModel(ProblemModel).update(problem))
             console.log("UPDATED PROBLEM STATS");
@@ -222,11 +222,11 @@ export default class ScoringSystem implements IInjectable {
         let statuses: LPSMap = {};
 
         for (let [letter, prob] of this.problems.entries()) {
-             let res = await this.score_problem(letter, prob, username);
-             statuses[letter] = [res[1], res[2], prob.kind != "word"];
-             score += res[0];
+            let res = await this.score_problem(letter, prob, username);
+            statuses[letter] = [res[1], res[2], prob.kind != "word"];
+            score += res[0];
         }
-        
+
         this.user_scores.set(username, [score, statuses]);
 
         this.sort_users_by_score();
@@ -257,7 +257,7 @@ export default class ScoringSystem implements IInjectable {
             } else if (problem.kind == "codegolf") {
                 worth = 250;
                 deduction = 0;
-                
+
                 if (!isCodegolf) {
                     ret_val = 100000000;
                 }
@@ -294,11 +294,10 @@ export default class ScoringSystem implements IInjectable {
 
         if (bytes <= curr_score) {
             this.code_golf_scores.set(username, bytes);
-            console.log("SCORE OF " + bytes + " FOR " + username);
 
             let tmp = [];
             for (let c of this.code_golf_scores) {
-                 tmp.push(c);
+                tmp.push(c);
             }
 
             tmp.sort((a, b) => a[1] - b[1]);
@@ -311,7 +310,6 @@ export default class ScoringSystem implements IInjectable {
             }
 
             this.code_golf_leaders = tmp;
-            console.log("CODE GOLF LEADERS: " + this.code_golf_leaders);
         }
     }
 
@@ -330,25 +328,24 @@ export default class ScoringSystem implements IInjectable {
 
         for (let us of user_scores_gen) {
             user_scores.push(us);
-        }    
+        }
 
         user_scores.sort((u1, u2) => (this.get_codegolf_score(u2[0]) + u2[1][0]) - (this.get_codegolf_score(u1[0]) + u1[1][0]));
-        console.log(user_scores);
 
         this.user_scores = new Map(user_scores);
     }
 
-    private calculate_score(num_completed: number, num_wrong: number, times: number[]): number {
-        if (num_completed == 0 && num_wrong == 0) return 0;
+    // private calculate_score(num_completed: number, num_wrong: number, times: number[]): number {
+    //     if (num_completed == 0 && num_wrong == 0) return 0;
 
-        let time_diffs_sum =
-            times
-                .map(t => t - this.start_time.getTime())
-                .reduce((a, b) => a + b, 0);
+    //     let time_diffs_sum =
+    //         times
+    //             .map(t => t - this.start_time.getTime())
+    //             .reduce((a, b) => a + b, 0);
 
-        let duration = this.end_time.getTime() - this.start_time.getTime();
-        let num_problems = this.problems.size;
+    //     let duration = this.end_time.getTime() - this.start_time.getTime();
+    //     let num_problems = this.problems.size;
 
-        return 20000 * num_problems * duration * (num_completed + 1) - time_diffs_sum - 900000 * num_wrong;
-    }
+    //     return 20000 * num_problems * duration * (num_completed + 1) - time_diffs_sum - 900000 * num_wrong;
+    // }
 }

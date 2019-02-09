@@ -78,7 +78,7 @@ export class SubmissionListView extends BaseView {
             },
 
             format_time(time: number) {
-                let d = new Date(time);
+                let d = new Date(time - self.scoring_system.get_start_time());
 
                 return d.toLocaleTimeString();
             }

@@ -3,6 +3,7 @@ import http from "http";
 import https from "https";
 import JobTracker from "./job_tracker";
 import { JobStatus } from "../shared/types";
+import { LPSMap } from "./scoring_system";
 import ScoringSystem from "./scoring_system";
 import { UserModel } from "./models/user_model";
 import { IInjectable, Kernel } from "../shared/injection/injection";
@@ -46,7 +47,7 @@ export class SocketIOServer implements IInjectable {
         socket.on("request_leaderboard_updates", async (data) => {
             this.subscriptions["leaderboard_updates"].set(socket.id, socket);
 
-            this.push_single_leaderboard_update(socket, undefined, undefined);
+            this.push_single_leaderboard_update(socket, undefined, undefined, undefined);
         });
 
         socket.on("disconnect", () => {
@@ -61,7 +62,7 @@ export class SocketIOServer implements IInjectable {
         }
     }
 
-    private async push_single_leaderboard_update(socket: socket_io.Socket, scores: Map, nickname_map: { [k: string]: string } | undefined, problem_map: { [k: string]: string } | undefined) {
+    private async push_single_leaderboard_update(socket: socket_io.Socket, scores: Map<string, [number, LPSMap]> | undefined, nickname_map: { [k: string]: string } | undefined, problem_map: { [k: string]: string } | undefined) {
         if (scores == null) {
             scores = this.scoring_system.current_scores;
         }

@@ -582,15 +582,24 @@ export default class WebServer implements IInjectable {
             view.render(res, username);
         });
 
-        app.get("/help", async (req, res) => {
-            let username = "";
-            if (req.session && req.session.user)
-                username = req.session.user.username;
+        app.get("/rescore_users", async (req, res) => {
+            let usernames = await this.database.getModel(UserModel).getAllUsernames();
 
-            let view = this.get_view(HelpView);
-            if (view == null) return;
-            view.render(res, username);
-        });
+            await this.scoringSystem.score_all_users(usernames);
+
+            res.write("Rescored all users");
+            res.end();
+        });      
+
+        // app.get("/help", async (req, res) => {
+        //     let username = "";
+        //     if (req.session && req.session.user)
+        //         username = req.session.user.username;
+
+        //     let view = this.get_view(HelpView);
+        //     if (view == null) return;
+        //     view.render(res, username);
+        // });
     }
 
     public start(): [http.Server | null, https.Server | null] {

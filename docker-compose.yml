@@ -6,7 +6,7 @@ services:
             context: .
             dockerfile: ./server/Dockerfile
         volumes:
-            - ~/Desktop/MOCKCOMP:/comp
+            - ~/Dropbox/MOCKCOMP:/comp
             - ./web:/app/web
             - /tmp:/tmp
         ports:
@@ -22,7 +22,7 @@ services:
         networks:
             - no-internet
         volumes:
-            - ~/Desktop/MOCKCOMP:/comp
+            - ~/Dropbox/MOCKCOMP:/comp
             - /tmp:/tmp
 
 networks:
